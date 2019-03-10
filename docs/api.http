@@ -1,0 +1,50 @@
+
+
+POST {{host}}:8080/api/item/RGB Strip/state/color
+
+{
+"!type": "Color",
+"data": [255,255,255]
+}
+###
+
+POST {{host}}:8080/api/item/RFAdapter/action/send_code
+
+{
+"code": "3575"
+}
+
+###
+
+POST {{host}}:8080/api/item/RGB Strip/state
+
+{
+"on": false
+}
+
+###
+
+POST {{host}}:8080/api/item/Relay/state
+
+{
+"on": true
+}
+
+###
+
+POST {{host}}:8080/api/item/LCD/state
+
+{
+"backlight": true
+}
+
+###
+
+POST {{host}}:8080/api/item/LCD/state
+
+{
+"line1": "Hello",
+"line2": "NSA!"
+}
+
+###

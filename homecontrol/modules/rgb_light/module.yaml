@@ -1,0 +1,33 @@
+meta:
+  name: RGB Light
+  description: Enables RGB light over a pigpio adapter
+
+items:
+  RGBLight:
+    config_fields:
+      pin_r:
+        type: Integer
+        default: 22
+      pin_g:
+        type: Integer
+        default: 27
+      pin_b:
+        type: Integer
+        default: 17
+      pigpio_adapter:
+        type: pigpio_adapter.PiGPIOAdapter
+
+    state:
+      mode:
+        setter: set_mode
+        default: static
+      color:
+        setter: set_color
+        type: Color
+        default: [50, 0, 0]
+      "on":
+        setter: set_on
+        default: False
+
+    actions:
+      toggle: toggle_on

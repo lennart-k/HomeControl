@@ -1,0 +1,12 @@
+docs
+.pytest_cache
+.idea
+.vscode
+README.md
+homecontrol.sh
+entities.yaml
+config.yaml
+.gitignore
+webapp
+scripts
+config

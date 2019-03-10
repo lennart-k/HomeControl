@@ -1,0 +1,15 @@
+meta:
+  name: Tasmota RF Adapter
+  description: An adapter to transceive 433MHz signals using an MQTT device with Tasmota
+
+items:
+  TasmotaRFAdapter:
+    config_fields:
+      mqtt_adapter:
+        type: mqtt_adapter.MQTTAdapter
+
+      topic:
+        type: String
+
+    actions:
+      send_code: send_code

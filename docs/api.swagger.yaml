@@ -1,0 +1,44 @@
+swagger: "2.0"
+info:
+  description: ""
+  version: "0.0.1"
+  title: "HomeControl REST API"
+host: "localhost"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /item:
+    post:
+      summary: "Creates an item"
+      description: ""
+      operationId: "createItem"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "id"
+        name: "id"
+        description: "Every item needs a unique ID"
+        required: true
+        schema: "Item"
+
+      responses:
+        200:
+          description: "Item successfully created"
+          schema:
+            $ref: "#/definitions/Item"
+        405:
+          description: "Invalid input"
+  
+definitions:
+  Item:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      state:
+        type: "State"
+    

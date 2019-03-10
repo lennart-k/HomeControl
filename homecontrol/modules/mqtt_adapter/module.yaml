@@ -1,0 +1,13 @@
+meta:
+  name: MQTT Adapter
+  description: Adds an adapter to subscribe to MQTT messages
+
+items:
+  MQTTAdapter:
+    config_fields:
+      host:
+        type: String
+        default: "localhost"
+      port:
+        type: Integer
+        default: 1883

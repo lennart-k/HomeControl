@@ -1,0 +1,23 @@
+meta:
+  name: 433MHz Adapter
+  description: Provides an adapter to send and receive codes on 433MHz
+
+items:
+  RFRXAdapter:
+    config_fields:
+      pin:
+        type: Integer
+        default: 20
+      pigpio_adapter:
+        type: pigpio_adapter.PiGPIOAdapter
+
+  RFTXAdapter:
+    config_fields:
+      pin:
+        type: Integer
+        default: 21
+      pigpio_adapter:
+        type: pigpio_adapter.PiGPIOAdapter
+      bits:
+        type: Integer
+        default: 12

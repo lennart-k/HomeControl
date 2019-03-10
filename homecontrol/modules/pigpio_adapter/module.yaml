@@ -1,0 +1,86 @@
+meta:
+  name: PiGPIO
+  description: Contains an adapter for PiGPIO
+  author: Lennart K
+
+requirements:
+  - "pigpio"
+
+items:
+  PiGPIOAdapter:
+    config_fields:
+      host:
+        type: String
+        default: "localhost"
+
+      port:
+        type: Integer
+        default: 8888
+
+  BinarySwitch:
+    config_fields:
+      pin:
+        type: Integer
+        default: 8
+
+      on_state:
+        type: Boolean
+        default: True
+
+      pigpio_adapter:
+        default: None
+
+    state:
+      "on":
+        setter: set_on
+        default: False
+
+    actions:
+      toggle: toggle_on
+
+  Button:
+    config_fields:
+      pin:
+        type: Integer
+        default: 8
+
+      pigpio_adapter:
+        default: None
+
+      pull_up:
+        type: Boolean
+        default: True
+
+      toggle:
+        type: Boolean
+        default: False
+
+    state:
+      value:
+        default: 0
+
+  I2CLCD:
+    config_fields:
+      bus:
+        type: Integer
+        default: 0
+
+      address:
+        type: Integer
+        default: 0x27
+
+    state:
+      backlight:
+        type: Boolean
+        default: True
+        setter: set_backlight
+
+      line1:
+        type: String
+        default: HomeControl
+        setter: set_line1
+
+      line2:
+        type: String
+        default: HomeControl
+        setter: set_line2

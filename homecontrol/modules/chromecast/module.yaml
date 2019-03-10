@@ -1,0 +1,59 @@
+meta:
+  name: Chromecast
+  description: Adds support for Chromecast
+
+items:
+  Chromecast:
+    config_fields:
+      host:
+        type: String
+
+      port:
+        type: Integer
+        default: 8009
+
+    state:
+      volume:
+        default: 100
+        setter: set_volume
+
+      muted:
+        default: false
+        setter: set_muted
+
+      playing:
+        default: false
+        getter: get_playing
+        setter: set_playing
+
+      active:
+        default: false
+        getter: get_active
+
+      cast_state:
+        default: None
+        getter: get_state
+
+      metadata:
+        default: {}
+
+      content_type:
+        default: None
+
+      playtime:
+        default: 0
+        getter: get_playtime
+        setter: set_playtime
+
+      duration:
+        default: 0
+
+    actions:
+      pause: pause
+      play: play
+      rewind: rewind
+      skip: skip
+      stop: stop
+      toggle_muted: toggle_muted
+      play_url: play_url
+      quit: quit

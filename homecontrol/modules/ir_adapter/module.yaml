@@ -1,0 +1,12 @@
+meta:
+  name: IR Adapter
+  description: Transceive IR codes
+
+items:
+  NECIRReceiver:
+    config_fields:
+      pin:
+        type: Number
+        default: 16
+      pigpio_adapter:
+        type: pigpio_adapter.PiGPIOAdapter

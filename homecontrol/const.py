@@ -1,0 +1,9 @@
+
+MINIMUM_PYTHON_VERSION = (3, 6, 5)
+
+EXIT_SHUTDOWN = 0
+EXIT_RESTART = 1
+
+WORKING = "working"
+NOT_WORKING = "not_working"
+STOPPED = "stopped"

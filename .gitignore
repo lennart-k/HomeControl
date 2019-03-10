@@ -1,0 +1,12 @@
+docs/build
+venv_linux
+venv_win
+.idea/*
+__pycache__/
+.pytest_cache
+homecontrol.sh
+.vscode
+config
+scripts
+webapp
+entities.yaml

@@ -1,0 +1,15 @@
+debug: true
+
+module-manager:
+  folders:
+    - homecontrol/modules
+
+entity-discovery:
+  active: true
+  interval: 30
+
+api-server:
+  host: null
+  port: 8080
+
+items: []

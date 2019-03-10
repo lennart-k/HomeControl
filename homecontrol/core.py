@@ -56,30 +56,6 @@ class Core:
         for item in self.cfg["items"]:
             await self.entity_manager.create_item(item["id"], item["type"], item["cfg"])
 
-        @self.event_engine.register("state_change")
-        async def on_state_change(item, changes):
-            if item.identifier == "Button":
-                print(changes["value"])
-                await self.entity_manager.items["Relay"].states.set("on", changes["value"])
-
-            if item.identifier == "RGB Strip" and "on" in changes:
-                await self.entity_manager.items["LCD"].states.set("line2", f"RGB Strip: {changes['on']}")
-
-            if item.identifier == "Relay":
-                await self.entity_manager.items["LCD"].states.set("line1", f"Relay: {changes['on']}")
-
-        @self.event_engine.register("ir_nec_code")
-        async def on_code(address, data, edges):
-            print(address, data)
-            if (address, data) == (32, 64):
-                await self.entity_manager.items["Relay"].states.set("on", True)
-
-            elif (address, data) == (32, 192):
-                await self.entity_manager.items["Relay"].states.set("on", False)
-
-            elif (address, data) == (32, 16):
-                self.blocking_task.cancel()
-
     async def block_until_stop(self) -> int:
         try:
             await self.block_event.wait()

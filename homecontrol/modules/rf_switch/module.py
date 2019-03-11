@@ -4,11 +4,11 @@ from dependencies.intertechno_codes import from_code, to_code
 class Module:
     async def init(self):
         @event("rf_code_received")
-        async def on_rf_code(code, length):
+        async def on_rf_code(event, code, length):
             if length == 12:
                 it_code = from_code(code)
                 if it_code:
-                    self.core.event_engine.broadcast("intertechno_code_received", *it_code)
+                    self.core.event_engine.broadcast("intertechno_code_received", **dict(zip(("house", "id", "state"), *it_code)))
 
 
 class IntertechnoSwitch:
@@ -19,7 +19,7 @@ class IntertechnoSwitch:
         self.on = await self.states.get("on")
 
         @event("intertechno_code_received")
-        async def on_it_code(house, id, state):
+        async def on_it_code(event, house, id, state):
             if (self.cfg["house"].lower(), self.cfg["id"]) == (house, id):
                 await self.states.update("on", state)
 

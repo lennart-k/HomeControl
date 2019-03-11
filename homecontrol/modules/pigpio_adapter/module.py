@@ -27,7 +27,7 @@ class PiGPIOAdapter:
         self.pigpio = pigpio.pi(self.cfg["host"], self.cfg["port"])
 
     async def stop(self):
-        await asyncio.gather(*self.core.event_engine.broadcast("pigpio_closing", self.pigpio))
+        await asyncio.gather(*self.core.event_engine.broadcast("pigpio_closing", pigpio=self.pigpio))
         self.pigpio.stop()
 
 

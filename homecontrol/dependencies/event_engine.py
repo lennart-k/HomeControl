@@ -1,5 +1,20 @@
 from typing import List, Callable
 import asyncio
+import time
+
+
+class Event:
+    __slots__ = ["event_type", "data", "time", "kwargs"]
+
+    def __init__(self, event_type: str, data: dict = None, time: int = None, kwargs: dict = None):
+        
+        self.event_type = event_type
+        self.data = data or {}
+        self.time = time
+        self.kwargs = kwargs or {}
+
+    def __repr__(self) -> str:
+        return f"<Event {self.event_type} kwargs={self.kwargs}>  {self.data}"
 
 
 class EventEngine:
@@ -7,23 +22,33 @@ class EventEngine:
         self.core = core
         self.handlers = {}
 
-    def broadcast(self, event, *args, **kwargs) -> List[asyncio.Future]:
+    def broadcast(self, event_type: str, data: dict = None, **kwargs) -> List[asyncio.Future]:
         """
-        Broadcast an event
-        Every listener is a coroutine that will simply receive *args and **kwargs
-        """
-        if self.core.start_args.get("verbose"):
-            print(f"EVENT: {event}, {args}, {kwargs}")
-        return [asyncio.ensure_future(coro(*args, **kwargs), loop=self.core.loop) for coro in
-                self.handlers.get(event, set())]
+        Broadcast an event and return the futures
+        Every listener is a coroutine that will simply receive event and **kwargs
+        Example:
 
-    async def gather(self, event, *args, **kwargs):
+        async def on_event(event: Event, *args, **kwargs):
+            return
+        """
+
+        data = data or {}
+        data.update(kwargs)
+        event = Event(event_type, data=data, time=int(time.time()))
+
+        if self.core.start_args.get("verbose"):
+            print(f"EVENT: {event}")
+
+        
+        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+
+        return [asyncio.ensure_future(handler(event, **kwargs)) for handler in handlers]
+
+    async def gather(self, event_type: str, data: dict = None, **kwargs):
         """
         Broadcast an event and return the results
         """
-        return await asyncio.gather(
-            *[asyncio.ensure_future(coro(*args, **kwargs), loop=self.core.loop) for coro in
-              self.handlers.get(event, set())], loop=self.core.loop)
+        return await asyncio.gather(*self.broadcast(event_type, data, **kwargs))
 
     def trigger(self, trigger, dest, *args, **kwargs) -> asyncio.Future:
         """

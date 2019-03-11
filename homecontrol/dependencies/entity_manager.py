@@ -72,5 +72,5 @@ class EntityManager:
 
         self.items[identifier] = item
         spec["module"].items[identifier] = item
-        self.core.event_engine.broadcast("item_created", item)
+        self.core.event_engine.broadcast("item_created", item=item)
         return item

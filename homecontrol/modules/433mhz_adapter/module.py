@@ -12,7 +12,7 @@ class RFRXAdapter:
         self.rx = rf.RX(self.cfg["pigpio_adapter"].pigpio, gpio=self.cfg["pin"], callback=self.callback_helper, max_bits=12)
 
     def callback_helper(self, code, length, gap, t0, t1):
-        self.core.event_engine.broadcast("rf_code_received", code, length)
+        self.core.event_engine.broadcast("rf_code_received", code=code, length=length)
 
     async def stop(self):
         self.rx.cancel()

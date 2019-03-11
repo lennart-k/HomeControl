@@ -15,7 +15,7 @@ class MQTTAdapter:
         self.client.loop_stop(True)
 
     def on_connect(self, _, userdata, flags, result):
-        self.core.event_engine.broadcast("mqtt_connected", self)
+        self.core.event_engine.broadcast("mqtt_connected", mqtt_adapter=self)
 
     def on_message(self, _, userdata, msg):
-        self.core.event_engine.broadcast("mqtt_message_received", self, msg)
+        self.core.event_engine.broadcast("mqtt_message_received", mqtt_adapter=self, message=msg)

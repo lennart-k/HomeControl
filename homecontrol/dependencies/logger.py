@@ -5,19 +5,15 @@ class Logger:
         event = self.core.event_engine.register
 
         @event("state_change")
-        async def on_state_change(item, changes):
+        async def on_state_change(event, item, changes):
             print(f"STATE CHANGE:\t\t{item.identifier}\t{changes}")
 
         @event("item_created")
-        async def on_item_created(item):
+        async def on_item_created(event, item):
             print(f"ITEM CREATED:\t\t{item.type}\t{item.identifier}")
 
-        # @event("adapter_created")
-        async def on_adapter_created(adapter):
-            print(f"ADAPTER CREATED:\t{adapter.type}\t{adapter.identifier}")
-
         # @event("entity_discovered")
-        async def on_entity_discovered(d_type, d_info):
+        async def on_entity_discovered(event, d_type, d_info):
             print(f"ENTITY DISCOVERED:\t{d_type}\t\t{d_info}")
 
     def info(self, *args: str):

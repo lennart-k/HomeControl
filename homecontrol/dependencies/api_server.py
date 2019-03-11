@@ -58,25 +58,31 @@ class APIServer:
         :type core: core.Core
         """
         self.core = core
+
+        self.main_app = web.Application(loop=self.core.loop)
+        self.middlewares = []
+        self.add_middlewares()
+        self.api_app = web.Application(loop=self.core.loop, middlewares=self.middlewares)
+
+        self.event_sockets = set()
+
+    async def start(self):
         self.route_table_def = web.RouteTableDef()
         self.routes()
-        self.main_app = web.Application(loop=self.core.loop)
-        self.api_app = web.Application(loop=self.core.loop, middlewares=[self.auth_check])
-        self.event_sockets = set()
+        await self.core.event_engine.gather("add_api_routes", router=self.route_table_def)
+
         self.api_app.add_routes(self.route_table_def)
         self.main_app.add_subapp("/api", self.api_app)
         self.handler = self.main_app.make_handler(loop=self.core.loop)
 
         # Windows doesn't support reuse_port
-        self.future = core.loop.create_server(self.handler, self.core.cfg["api-server"]["host"],
+        self.future = self.core.loop.create_server(self.handler, self.core.cfg["api-server"]["host"],
                                               self.core.cfg["api-server"]["port"],
                                               reuse_address=True, reuse_port=os.name != "nt")
         # asyncio.ensure_future(self.future, loop=self.core.loop)
         asyncio.run_coroutine_threadsafe(self.future, loop=self.core.loop)
 
-    def routes(self):
-        r = self.route_table_def
-
+    def add_middlewares(self):
         @middleware
         async def auth_check(request, handler):
             response = await handler(request)
@@ -87,8 +93,10 @@ class APIServer:
                 response.headers[header] = value
             return response
 
-        self.auth_check = auth_check
+        self.middlewares.append(auth_check)
 
+    def routes(self):
+        r = self.route_table_def
 
         @r.route("OPTIONS", "/{tail:.*}")
         async def get_options(request):
@@ -307,7 +315,7 @@ class APIServer:
             return ws
 
         @self.core.event_engine.register("state_change")
-        async def on_state_change(item, changes):
+        async def on_state_change(event, item, changes):
             for ws in self.event_sockets:
                 asyncio.ensure_future(
                     ws.send_str(json.dumps({"event_type": "state_change", "item": item.identifier, "changes": changes},
@@ -315,7 +323,7 @@ class APIServer:
                     loop=self.core.loop)
 
         @self.core.event_engine.register("item_created")
-        async def on_item_created(item):
+        async def on_item_created(event, item):
             for ws in self.event_sockets:
                 asyncio.ensure_future(
                     ws.send_str(json.dumps({"event_type": "item_created", "item": item},
@@ -323,5 +331,6 @@ class APIServer:
                     loop=self.core.loop)
 
     async def stop(self):
-        await self.main_app.cleanup()
-        self.future.close()
+        if self.main_app.frozen:
+            await self.main_app.cleanup()
+            self.future.close()

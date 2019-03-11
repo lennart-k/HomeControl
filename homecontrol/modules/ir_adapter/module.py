@@ -7,7 +7,7 @@ class NECIRReceiver:  # TODO More protocols:
 
     def on_code(self, address, data, bits):
         if address and data:
-            self.core.event_engine.broadcast("ir_nec_code", address, data, bits)
+            self.core.event_engine.broadcast("ir_nec_code", address=address, data={"data": data}, bits=bits)
 
     async def stop(self):
         self.ir_receiver.stop()

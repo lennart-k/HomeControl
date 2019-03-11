@@ -10,3 +10,4 @@ config
 scripts
 webapp
 entities.yaml
+homecontrol.lock

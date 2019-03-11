@@ -4,7 +4,6 @@ venv_win
 .idea/*
 __pycache__/
 .pytest_cache
-homecontrol.sh
 .vscode
 config
 scripts

@@ -54,7 +54,7 @@ class EventEngine:
         Triggers are similar to events but they are just there to call a method of a module, item or adapter
         """
         if hasattr(dest, trigger):
-            return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
+            return asyncio.run_coroutine_threadsafe(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
 
     def _register(self, event: str, coro) -> Callable:
         """

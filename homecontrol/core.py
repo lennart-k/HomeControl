@@ -41,9 +41,8 @@ class Core:
         self.api_server = APIServer(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
-        # signal.signal(signal.SIGTERM, lambda signum, frame: print("Yeee"))
-        # signal.signal(signal.SIGINT, lambda signum, frame: self.loop.create_task(self.stop()))
         self.loop.add_signal_handler(signal.SIGINT, lambda: self.loop.create_task(self.stop()))
+        self.loop.add_signal_handler(signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
 
     async def bootstrap(self) -> None:
         """
@@ -87,6 +86,7 @@ class Core:
     async def shutdown(self) -> None:
         self.exit_return = EXIT_SHUTDOWN
         await self.stop()
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

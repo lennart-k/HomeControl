@@ -9,4 +9,9 @@ action "GitHub Action for pylint" {
 
 workflow "New workflow 1" {
   on = "push"
+  resolves = ["new-action"]
+}
+
+action "new-action" {
+  uses = "owner/repo/path@ref"
 }

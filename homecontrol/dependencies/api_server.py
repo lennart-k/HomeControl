@@ -31,9 +31,9 @@ class JSONEncoder(json.JSONEncoder):  # TODO Plan out custom types
 class JSONDecoder(json.JSONDecoder):
     def __init__(self, core, *args, **kwargs):
         self.core = core
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, object_hook=self._object_hook, *args, **kwargs)
 
-    def object_hook(self, obj):
+    def _object_hook(self, obj):
         if "!type" in obj:
             if obj["!type"] == "Item":
                 return self.core.entity_manager.items.get(obj.get("id", ""), None)

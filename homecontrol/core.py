@@ -39,8 +39,6 @@ class Core:
         self.module_manager = ModuleManager(core=self)
         self.entity_manager = EntityManager(core=self)
         self.api_server = APIServer(core=self)
-        self.automation_engine = AutomationEngine(core=self)
-        self.automation_engine.init_rules()
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
         # signal.signal(signal.SIGTERM, lambda signum, frame: print("Yeee"))

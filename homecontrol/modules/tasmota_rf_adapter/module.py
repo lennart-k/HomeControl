@@ -5,15 +5,15 @@ from functools import reduce
 class TasmotaRFAdapter:
     async def init(self):
         @event("mqtt_connected")
-        async def on_mqtt_connected(event, adapter):
-            if adapter == self.cfg["mqtt_adapter"]:
+        async def on_mqtt_connected(event, mqtt_adapter):
+            if mqtt_adapter == self.cfg["mqtt_adapter"]:
                 self.cfg["mqtt_adapter"].client.subscribe(self.cfg["topic"]+"/tele/RESULT")
 
         @event("mqtt_message_received")
-        async def on_mqtt_message_received(event, adapter, msg):
-            if adapter == self.cfg["mqtt_adapter"]:
+        async def on_mqtt_message_received(event, mqtt_adapter, message):
+            if mqtt_adapter == self.cfg["mqtt_adapter"]:
                 try:
-                    data = json.loads(msg.payload)
+                    data = json.loads(message.payload)
                     if data.get("RfReceived"):
                         code = data["RfReceived"].get("Data", 0)
                         bits = bin(int(code, 16))[2:][::2]

@@ -41,7 +41,25 @@ class EventEngine:
 
         handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
 
+        return [asyncio.ensure_future(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
+
+    def broadcast_threaded(self, event_type: str, data: dict = None, **kwargs) -> List:
+        """
+        Same as broadcast BUT
+        - It returns Futures and not Tasks
+        - It uses threads
+        """
+        data = data or {}
+        data.update(kwargs)
+        event = Event(event_type, data=data, time=int(time.time()))
+
+        if self.core.start_args.get("verbose"):
+            print(f"EVENT: {event}")
+
+        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+
         return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
+
 
     async def gather(self, event_type: str, data: dict = None, **kwargs):
         """
@@ -54,7 +72,7 @@ class EventEngine:
         Triggers are similar to events but they are just there to call a method of a module, item or adapter
         """
         if hasattr(dest, trigger):
-            return asyncio.run_coroutine_threadsafe(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
+            return asyncio.ensure_future(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
 
     def _register(self, event: str, coro) -> Callable:
         """

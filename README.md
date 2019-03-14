@@ -1,27 +1,28 @@
 # HomeControl
 [![](https://readthedocs.org/projects/homecontrol/badge/?version=latest&style=flat)](https://homecontrol.readthedocs.io/en/latest/)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/lennart-k/HomeControl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lennart-k/HomeControl/alerts/)
 
 --- 
+
+
+# Installation
+
+
+## Docker
 
 docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk01/homecontrol:latest
 
 
-# Automation
+## Python
 
-## Types of Triggers
+The minimum Python version for HomeControl is Python 3.6
+You can install it the following:
+```bash
+git clone https://github.com/lennart-k/HomeControl
+cd HomeControl
 
-- Event
-  - parameters
-- State change
-  - parameters
+pip install -r requirements.txt
 
-## Types of Conditions
+python homecontrol --help
+```
 
-- State
-  - Equal to...
-- Trigger parameter
-
-## Types of Actions
-
-- State
-- Item action

@@ -1,8 +1,0 @@
-meta:
-  name: EntityDiscovery
-  description: Provider for entity discovery
-  author: Lennart K
-
-
-items:
-  EntityDiscoveryProvider: {}

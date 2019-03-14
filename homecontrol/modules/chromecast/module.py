@@ -1,23 +1,6 @@
 import pychromecast
 
 
-class Module:
-    async def init(self):
-        @event("entity_discovered")
-        async def on_entity_discovered(event, protocol, info):
-            """if protocol == "google_cast":
-                for entity in info:
-                    self.core.event_engine.broadcast("entity_template", "chromecast.Chromecast", {
-                        "host": entity["host"],
-                        "port": entity["port"]
-                    }, entity)"""
-            return True
-
-        @event("entity_template")
-        async def on_entity_template(event, entity_type, config, info):
-            print("NEW TEMPLATE:", entity_type, " - ", config, " - ", info)
-
-
 class Chromecast:
     last_time_jump = 0
 
@@ -30,8 +13,7 @@ class Chromecast:
         await self.states.update("content_type", self.media_controller.status.content_type)
         await self.states.update("metadata", self.media_controller.status.media_metadata)
         await self.states.update("volume", int(self.media_controller.status.volume_level * 100))
-        self.listener = ChromecastEventListener(self)
-        self.media_controller.register_status_listener(self.listener)
+        self.media_controller.register_status_listener(self)
 
         @event("chromecast_media_status")
         async def on_status(event, data):
@@ -129,13 +111,8 @@ class Chromecast:
     async def quit(self):
         self.cc.quit_app()
 
-
-class ChromecastEventListener:
-    def __init__(self, chromecast: Chromecast):
-        self.chromecast = chromecast
-
     def new_cast_status(self, status):
-        self.chromecast.core.event_engine.broadcast("chromecast_cast_status", status=status)
+        self.core.event_engine.broadcast("chromecast_cast_status", status=status)
 
     def new_media_status(self, status):
-        self.chromecast.core.event_engine.broadcast("chromecast_media_status", status=status)
+        self.core.event_engine.broadcast("chromecast_media_status", status=status)

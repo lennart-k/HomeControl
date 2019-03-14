@@ -41,7 +41,7 @@ class EventEngine:
 
         handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
 
-        return [asyncio.ensure_future(handler(event, **kwargs)) for handler in handlers]
+        return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
 
     async def gather(self, event_type: str, data: dict = None, **kwargs):
         """
@@ -54,7 +54,7 @@ class EventEngine:
         Triggers are similar to events but they are just there to call a method of a module, item or adapter
         """
         if hasattr(dest, trigger):
-            return asyncio.ensure_future(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
+            return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
 
     def _register(self, event: str, coro) -> Callable:
         """

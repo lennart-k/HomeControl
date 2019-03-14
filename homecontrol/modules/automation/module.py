@@ -38,6 +38,19 @@ class StateActionProvider:
         for state, value in changes.items():
             await target.states.set(state, value)
 
+class ItemActionProvider:
+    def __init__(self, rule, engine):
+        self.engine = engine
+        self.rule = rule
+        self.core = engine.core
+
+        self.data = rule.data["action"]
+
+    async def on_trigger(self, data):
+        target = self.core.entity_manager.items.get(self.data["target"])
+        params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-date", {}).items()}}
+
+        await target.actions.execute(self.data["action"], **params)
 
 class Module:
     core: Core
@@ -50,7 +63,8 @@ class Module:
             
         }
         self.action_providers = {
-            "state": StateActionProvider
+            "state": StateActionProvider,
+            "action": ItemActionProvider
         }
         self.rules = set()
 

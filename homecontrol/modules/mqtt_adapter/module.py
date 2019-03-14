@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import paho.mqtt.client as mqtt
 
@@ -5,6 +6,7 @@ import paho.mqtt.client as mqtt
 class MQTTAdapter:
     async def init(self):
         self.client = mqtt.Client()
+        self.client.loop
         self.client.connect_async(self.cfg["host"], self.cfg["port"])
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -14,13 +16,7 @@ class MQTTAdapter:
         self.client.loop_stop(True)
 
     def on_connect(self, _, userdata, flags, result):
-        # Workaround: Without create_task paho-mqtt would cause a RuntimeWarning and interpret it as an exception
-        async def do():
-            self.core.event_engine.broadcast("mqtt_connected", mqtt_adapter=self)
-        self.core.loop.create_task(do())
+        self.core.event_engine.broadcast("mqtt_connected", mqtt_adapter=self)
 
     def on_message(self, _, userdata, msg):
-        # Workaround: Without create_task paho-mqtt would cause a RuntimeWarning and interpret it as an exception
-        async def do():
-            self.core.event_engine.broadcast("mqtt_message_received", mqtt_adapter=self, message=msg)
-        self.core.loop.create_task(do())
+        self.core.event_engine.broadcast("mqtt_message_received", mqtt_adapter=self, message=msg)

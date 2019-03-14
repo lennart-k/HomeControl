@@ -54,8 +54,18 @@ class Module:
         }
         self.rules = set()
 
+        event("core_bootstrap_complete")(self.start)
+
+    async def start(self, event) -> None:
+        await self.core.event_engine.gather("gather_automation_providers", engine=self, callback=self.register_automation_providers)
+
         for rule in self.core.cfg.get("automation", []):
             self.rules.add(AutomationRule(rule, self))
+
+    def register_automation_providers(self, trigger: dict = None, condition: dict = None, action: dict = None) -> None:
+        self.trigger_providers.update(trigger or {})
+        self.condition_providers.update(condition or {})
+        self.action_providers.update(action or {})
 
 class AutomationRule:
     def __init__(self, data, engine: Module):

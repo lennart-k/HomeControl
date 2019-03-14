@@ -3,7 +3,6 @@ import aiomonitor
 from functools import partial
 import asyncio
 import yaml
-from dependencies.entity_discovery import EntityDiscoveryProvider
 from dependencies.event_engine import EventEngine
 from dependencies.module_manager import ModuleManager
 from dependencies.entity_manager import EntityManager
@@ -34,7 +33,6 @@ class Core:
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
         self.logger = Logger(core=self)
-        self.entity_disco = EntityDiscoveryProvider(core=self)
         self.module_manager = ModuleManager(core=self)
         self.entity_manager = EntityManager(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN

@@ -14,7 +14,13 @@ class MQTTAdapter:
         self.client.loop_stop(True)
 
     def on_connect(self, _, userdata, flags, result):
-        self.core.event_engine.broadcast("mqtt_connected", mqtt_adapter=self)
+        # Workaround: Without create_task paho-mqtt would cause a RuntimeWarning and interpret it as an exception
+        async def do():
+            self.core.event_engine.broadcast("mqtt_connected", mqtt_adapter=self)
+        self.core.loop.create_task(do())
 
     def on_message(self, _, userdata, msg):
-        self.core.event_engine.broadcast("mqtt_message_received", mqtt_adapter=self, message=msg)
+        # Workaround: Without create_task paho-mqtt would cause a RuntimeWarning and interpret it as an exception
+        async def do():
+            self.core.event_engine.broadcast("mqtt_message_received", mqtt_adapter=self, message=msg)
+        self.core.loop.create_task(do())

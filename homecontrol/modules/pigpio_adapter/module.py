@@ -1,10 +1,8 @@
 from dependencies.lcd import LCD
-from functools import partial
 import asyncio
 from dependencies.throttle_function import throttle
 from core import Core
 import pigpio
-import asyncio
 
 
 class Module:

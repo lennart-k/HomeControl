@@ -1,6 +1,4 @@
-import asyncio
 from netdisco.discovery import NetworkDiscovery
-from concurrent.futures import ThreadPoolExecutor
 
 
 class EntityDiscoveryProvider:

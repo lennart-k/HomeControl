@@ -200,7 +200,6 @@ class TX:
 
 if __name__ == "__main__":
     import time
-    import pigpio
 
     RX_PIN = 20
     TX_PIN = 21
@@ -211,7 +210,7 @@ if __name__ == "__main__":
               format(code, bits, gap, t0, t1))
 
 
-    pi = pigpio.pi("192.168.20.141")  # Connect to local Pi.
+    pi = pigpio.pi()  # Connect to local Pi.
 
     rx = RX(pi, gpio=RX_PIN, callback=rx_callback)
 

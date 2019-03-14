@@ -39,7 +39,6 @@ class EventEngine:
         if self.core.start_args.get("verbose"):
             print(f"EVENT: {event}")
 
-        
         handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
 
         return [asyncio.ensure_future(handler(event, **kwargs)) for handler in handlers]
@@ -75,7 +74,6 @@ class EventEngine:
         :return:
         """
         def _register(coro):
-            print(coro, event)
             if event not in self.handlers:
                 self.handlers[event] = set()
             self.handlers[event].add(coro)

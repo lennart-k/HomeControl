@@ -9,8 +9,7 @@ import os
 import subprocess
 from const import (
     MINIMUM_PYTHON_VERSION,
-    EXIT_RESTART,
-    EXIT_SHUTDOWN
+    EXIT_RESTART
 )
 
 def get_arguments() -> argparse.Namespace:
@@ -63,7 +62,7 @@ def run_homecontrol(config: dict, start_args: dict):
     elif start_args["pid_file"]:
         try:
             os.remove(start_args["pid_file"])
-        except:
+        except FileNotFoundError:
             pass
 
 def start_command():

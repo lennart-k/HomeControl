@@ -3,7 +3,6 @@ import yaml
 import importlib
 import importlib.util
 import os
-import asyncio
 from dependencies.entity_types import Module
 
 

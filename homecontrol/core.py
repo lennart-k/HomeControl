@@ -10,8 +10,7 @@ from dependencies.entity_manager import EntityManager
 from dependencies.api_server import APIServer
 from dependencies.logger import Logger
 from dependencies.tick_engine import TickEngine
-from dependencies.automation import AutomationEngine
-import sys
+
 from const import (
     EXIT_SHUTDOWN,
     EXIT_RESTART

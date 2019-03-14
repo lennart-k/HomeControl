@@ -12,7 +12,7 @@ class Logger:
         async def on_item_created(event, item):
             print(f"ITEM CREATED:\t\t{item.type}\t{item.identifier}")
 
-        # @event("entity_discovered")
+        @event("entity_discovered")
         async def on_entity_discovered(event, d_type, d_info):
             print(f"ENTITY DISCOVERED:\t{d_type}\t\t{d_info}")
 

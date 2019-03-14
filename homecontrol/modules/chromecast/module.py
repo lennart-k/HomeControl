@@ -1,5 +1,4 @@
 import pychromecast
-import time
 
 
 class Module:

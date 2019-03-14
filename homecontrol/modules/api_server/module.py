@@ -1,3 +1,4 @@
+from functools import partial
 import json
 import asyncio
 from aiohttp import web, WSMsgType
@@ -43,21 +44,20 @@ class JSONDecoder(json.JSONDecoder):
         return obj
 
 
-class APIServer:
+class Module:
     auth_check: None
 
     """
     APIServer exposes HTTP endpoints for interaction from outside
     """
 
-    def __init__(self, core):
+    async def init(self):
         """
         Sets up an APIServer
 
         :param core: The HomeControl core
         :type core: core.Core
         """
-        self.core = core
 
         self.main_app = web.Application(loop=self.core.loop)
         self.middlewares = []
@@ -65,8 +65,10 @@ class APIServer:
         self.api_app = web.Application(loop=self.core.loop, middlewares=self.middlewares)
 
         self.event_sockets = set()
+        
+        event("core_bootstrap_complete")(self.start)
 
-    async def start(self):
+    async def start(self, *args):
         self.route_table_def = web.RouteTableDef()
         self.routes()
         await self.core.event_engine.gather("add_api_routes", router=self.route_table_def)

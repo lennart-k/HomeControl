@@ -7,7 +7,6 @@ from dependencies.entity_discovery import EntityDiscoveryProvider
 from dependencies.event_engine import EventEngine
 from dependencies.module_manager import ModuleManager
 from dependencies.entity_manager import EntityManager
-from dependencies.api_server import APIServer
 from dependencies.logger import Logger
 from dependencies.tick_engine import TickEngine
 
@@ -38,7 +37,6 @@ class Core:
         self.entity_disco = EntityDiscoveryProvider(core=self)
         self.module_manager = ModuleManager(core=self)
         self.entity_manager = EntityManager(core=self)
-        self.api_server = APIServer(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
         self.loop.add_signal_handler(signal.SIGINT, lambda: self.loop.create_task(self.stop()))
@@ -55,18 +53,16 @@ class Core:
         for item in self.cfg["items"]:
             await self.entity_manager.create_item(item["id"], item["type"], item["cfg"])
 
-        await self.api_server.start()
+        self.event_engine.broadcast("core_bootstrap_complete")
 
     async def block_until_stop(self) -> int:
         try:
             await self.block_event.wait()
-            # await asyncio.gather(self.blocking_task, loop=self.loop)
         except asyncio.CancelledError:
             pass
         return self.exit_return
 
     async def stop(self) -> None:
-        await self.api_server.stop()
         await self.tick_engine.stop()
         print("SHUTTING DOWN!")
         

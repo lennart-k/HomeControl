@@ -1,6 +1,11 @@
 import json
 from aiohttp import web
 
+SPEC = """
+meta:
+  name: WebHook
+"""
+
 class Module:
     async def init(self):
 

@@ -1,3 +1,9 @@
+SPEC = """
+meta:
+  name: Szenes
+  description: Provides szene functionality
+"""
+
 class Module:
     async def init(self):
         data = self.core.cfg.get("szenes", [])

@@ -12,12 +12,13 @@ class RGBLight:
         await self.apply_color()
 
     async def set_color(self, color: Color) -> dict:
-        await self.states.update("color", color)
-        await self.apply_color()
+        await self.apply_color(color)
+        if not await self.states.get("on"):
+            return {"color": color, "on": True}
         return {"color": color}
 
-    async def apply_color(self) -> Color:
-        color = await self.states.get("color")
+    async def apply_color(self, color: Color = None) -> Color:
+        color = color or await self.states.get("color")
         color_tup = color.to_tuple()
         for pin, val in ((self.cfg["pin_r"], color_tup[0]), (self.cfg["pin_g"], color_tup[1]), (self.cfg["pin_b"], color_tup[2])):
             self.gpio.set_PWM_dutycycle(pin, val)
@@ -30,11 +31,10 @@ class RGBLight:
 
     async def set_on(self, value: bool) -> dict:
         if value:
-            return {"on": True, "color": await self.apply_color()} if await self.states.update("on", value) else {}
+            return {"on": True, "color": await self.apply_color()} if not await self.states.get("on") else {}
         else:
-            for pin in (self.cfg["pin_r"], self.cfg["pin_g"], self.cfg["pin_b"]):
-                self.gpio.set_PWM_dutycycle(pin, 0)
-            return {"on": False} if await self.states.update("on", value) else {}
+            await self.apply_color(Color.from_data((0, 0, 0)))
+            return {"on": False}
 
     async def toggle_on(self):
         await self.set_on(not await self.states.get("on"))

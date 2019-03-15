@@ -204,7 +204,6 @@ class Module:
             Wrap the states to change into the body as JSON encoded data
             It will return every states that changed as a result
             """
-            print("POST STATE")
             item = self.core.entity_manager.items.get(request.match_info["id"])
             if item:
                 try:

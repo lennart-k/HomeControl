@@ -12,4 +12,8 @@ api-server:
   host: null
   port: 8080
 
+szenes: []
+
+automation: []
+
 items: []

@@ -18,11 +18,6 @@ action "HTTP client" {
   secrets = ["LGTM_TOKEN"]
 }
 
-workflow "New workflow" {
-  on = "push"
-  resolves = ["GitHub Action for Docker on ARM"]
-}
-
 action "GitHub Action for Docker on ARM" {
   uses = "lennart-k/docker-arm-build@master"
   runs = "docker build ."

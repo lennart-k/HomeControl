@@ -1,4 +1,3 @@
-from functools import partial
 import json
 import asyncio
 from aiohttp import web, WSMsgType

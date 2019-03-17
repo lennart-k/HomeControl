@@ -1,5 +1,4 @@
 import requests
-import asyncio
 
 
 SPEC = """
@@ -38,7 +37,7 @@ items:
 """
 
 EXCLUDE = ["minutely", "hourly"]
-URL = "https://api.darksky.net/forecast/{token}/{location}?lang={lang}&units={units}"
+URL = "https://api.darksky.net/forecast/{token}/{location}?lang={lang}&units={units}&exclude={exclude}"
 
 class WeatherProvider:
     async def init(self):

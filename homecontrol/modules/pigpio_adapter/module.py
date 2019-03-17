@@ -57,15 +57,17 @@ class Button:
         self.cb = self.pigpio.callback(self.cfg["pin"], pigpio.EITHER_EDGE, self.callback)
 
     @throttle(s=0.05)
-    def callback(self, pin, reading, timestamp):
-        async def _async_callback():
+    def callback(self, pin, reading, timestamp) -> None:
+        async def _async_callback() -> bool:
             if not self.cfg["toggle"]:
                 value = not self.cfg["pull_up"]^reading
                 if not value == await self.states.get("value"):
                     await self.states.update("value", value)
+                    return True
             else:
                 if not self.cfg["pull_up"]^reading:
                     await self.states.update("value", not await self.states.get("value"))
+                    return True
 
         asyncio.run_coroutine_threadsafe(_async_callback(), loop=self.core.loop)
 

@@ -1,5 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
-import asyncio
 import paho.mqtt.client as mqtt
 
 

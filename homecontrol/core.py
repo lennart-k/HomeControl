@@ -85,7 +85,7 @@ class Core:
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     with aiomonitor.Monitor(loop=loop):
-        cfg = yaml.load(open("config.yaml"))
+        cfg = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
         core = Core(cfg, loop=loop)
         loop.call_soon(partial(loop.create_task, core.bootstrap()))
         loop.run_forever()

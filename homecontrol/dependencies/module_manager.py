@@ -45,7 +45,7 @@ class ModuleManager:
         if not hasattr(mod, "Module"):
             mod.Module = Module
 
-        cfg = (mod.SPEC if type(mod.SPEC) == dict else yaml.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
+        cfg = (mod.SPEC if type(mod.SPEC) == dict else yaml.load(mod.SPEC, Loader=yaml.SafeLoader)) if hasattr(mod, "SPEC") else {}
 
         mod_obj = mod.Module.__new__(mod.Module)
         mod_obj.core = self.core
@@ -79,7 +79,7 @@ class ModuleManager:
             self.core.event_engine.broadcast("module_not_loaded", exception=e)
             return e
 
-        cfg = yaml.load(open(cfg_path))
+        cfg = yaml.load(open(cfg_path), Loader=yaml.SafeLoader)
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
         mod.event = self.core.event_engine.register

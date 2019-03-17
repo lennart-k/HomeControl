@@ -30,7 +30,7 @@ def get_config(path: str) -> dict:
         print("Config file does not exist!")
         sys.exit(1)
     try:
-     cfg = yaml.load(open(path))
+     cfg = yaml.load(open(path), Loader=yaml.FullLoader)
     except yaml.YAMLError:
         print("Error in config file")
         sys.exit(1)

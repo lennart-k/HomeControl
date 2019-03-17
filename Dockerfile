@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.7.2-stretch
 LABEL MAINTAINER="Lennart K"
 
 VOLUME /config

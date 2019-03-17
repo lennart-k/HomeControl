@@ -72,6 +72,7 @@ class Module:
         self.route_table_def = web.RouteTableDef()
         self.routes()
         await self.core.event_engine.gather("add_api_routes", router=self.route_table_def)
+        await self.core.event_engine.gather("add_api_subapps", main_app=self.api_app)
 
         self.api_app.add_routes(self.route_table_def)
         self.main_app.add_subapp("/api", self.api_app)

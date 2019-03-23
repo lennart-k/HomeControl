@@ -46,8 +46,15 @@ class EntityManager:
         item.dependant_items = set()  # Items that will depend on this one
         item.depends_on = set()  # Items this new item depends on
         config = {}
-        for name, info in spec.get("config_fields", {}).items():
-            config[name] = info.get("default", None)
+        
+        if spec.get("config_schema"):
+            import voluptuous as vol
+            # Validate cfg to "config_schema"
+            cfg = vol.Schema(spec["config_schema"])(cfg)
+        else:
+            # config_fields will soon be deprecated
+            for name, info in spec.get("config_fields", {}).items():
+                config[name] = info.get("default", None)
 
         for key, value in list(cfg.items()):
             if type(value) == str:

@@ -2,7 +2,6 @@ import signal
 import aiomonitor
 from functools import partial
 import asyncio
-import yaml
 from dependencies.event_engine import EventEngine
 from dependencies.module_manager import ModuleManager
 from dependencies.entity_manager import EntityManager

@@ -17,3 +17,18 @@ action "HTTP client" {
   args = ["POST", "https://lgtm.com/api/v1.0/analyses/1507985346060?commit=latest", "Authorization: Bearer $LGTM_TOKEN"]
   secrets = ["LGTM_TOKEN"]
 }
+
+action "GitHub Action for Docker on ARM" {
+  uses = "lennart-k/docker-arm-build@master"
+  runs = "docker build ."
+}
+
+workflow "Docker ARM" {
+  on = "push"
+  resolves = ["lennart-k/docker-arm-build@master"]
+}
+
+action "lennart-k/docker-arm-build@master" {
+  uses = "lennart-k/docker-arm-build@master"
+  runs = "docker build -t lennartk01/homecontrol:arm ."
+}

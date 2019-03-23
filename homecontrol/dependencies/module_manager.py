@@ -45,7 +45,7 @@ class ModuleManager:
         if not hasattr(mod, "Module"):
             mod.Module = Module
 
-        cfg = (mod.SPEC if type(mod.SPEC) == dict else yaml.load(mod.SPEC, Loader=yaml.SafeLoader)) if hasattr(mod, "SPEC") else {}
+        cfg = (mod.SPEC if type(mod.SPEC) == dict else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
         mod_obj = mod.Module.__new__(mod.Module)
         mod_obj.core = self.core

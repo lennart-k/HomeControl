@@ -12,6 +12,13 @@ items:
         type: Integer
         default: 8009
 
+    config_schema:
+      !vol/Required {schema: host, default: None}:
+        !vol/Coerce { type: !type/str }
+
+      !vol/Required {schema: port, default: 8009}:
+        !vol/Coerce { type: !type/int }
+
     state:
       volume:
         default: 100

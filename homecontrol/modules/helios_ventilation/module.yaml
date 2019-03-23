@@ -17,6 +17,18 @@ items:
         type: Integer
         default: 3
 
+    config_schema:
+      !vol/Required {schema: host}:
+        !vol/Coerce { type: !type/str }
+
+      !vol/Required {schema: default_party_duration, default: 5}:
+        !vol/Coerce { type: !type/int }
+
+      !vol/Required {schema: default_party_level, default: 4}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range {min: 1, max: 4}
+
     state:
       mode:
         type: String

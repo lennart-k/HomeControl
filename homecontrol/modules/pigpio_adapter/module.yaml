@@ -17,6 +17,13 @@ items:
         type: Integer
         default: 8888
 
+    config_schema:
+      !vol/Required {schema: host, default: localhost}:
+        !type/str
+
+      !vol/Required {schema: port, default: 8888}:
+        !vol/Coerce { type: !type/int }
+
   BinarySwitch:
     config_fields:
       pin:
@@ -29,6 +36,21 @@ items:
 
       pigpio_adapter:
         default: None
+
+    config_schema:
+      !vol/Required {schema: pin, default: 16}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range { min: 2, max: 40 }
+
+      !vol/Required {schema: on_state, default: True}:
+        !vol/All
+          - !vol/Any [ !type/bool , !type/int ]
+          - !vol/Coerce { type: !type/bool }
+
+      !vol/Required {schema: pigpio_adapter}:
+        !type/str
+
 
     state:
       "on":
@@ -55,12 +77,34 @@ items:
         type: Boolean
         default: False
 
+    config_schema:
+      !vol/Required {schema: pin, default: 16}:
+          !vol/All
+            - !vol/Coerce { type: !type/int }
+            - !vol/Range { min: 2, max: 40 }
+
+      !vol/Required {schema: pigpio_adapter}:
+        !type/str
+
+      !vol/Required {schema: pull_up, default: True}:
+        !vol/All
+          - !vol/Any [ !type/bool , !type/int ]
+          - !vol/Coerce { type: !type/bool }
+
+      !vol/Required {schema: toggle, default: False}:
+        !vol/All
+          - !vol/Any [ !type/bool , !type/int ]
+          - !vol/Coerce { type: !type/bool }
+
     state:
       value:
         default: 0
 
   I2CLCD:
     config_fields:
+      pigpio_adapter:
+          default: None
+
       bus:
         type: Integer
         default: 0
@@ -68,6 +112,16 @@ items:
       address:
         type: Integer
         default: 0x27
+
+    config_schema:
+      !vol/Required {schema: pigpio_adapter}:
+        !type/str
+      
+      !vol/Required {schema: bus, default: 0}:
+        !vol/Coerce { type: !type/int }
+      
+      !vol/Required {schema: address, default: 0x27}:
+        !vol/Coerce { type: !type/int }
 
     state:
       backlight:

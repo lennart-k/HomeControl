@@ -11,5 +11,12 @@ items:
       topic:
         type: String
 
+    config_schema:
+      !vol/Required {schema: mqtt_adapter}:
+        !type/str
+
+      !vol/Required {schema: topic}:
+        !type/str
+
     actions:
       send_code: send_code

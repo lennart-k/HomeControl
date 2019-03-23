@@ -17,6 +17,25 @@ items:
       pigpio_adapter:
         type: pigpio_adapter.PiGPIOAdapter
 
+    config_schema:
+      !vol/Required {schema: pin_r, default: 22}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range { min: 2, max: 40 }
+
+      !vol/Required {schema: pin_g, default: 27}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range { min: 2, max: 40 }
+
+      !vol/Required {schema: pin_b, default: 17}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range { min: 2, max: 40 }
+
+      !vol/Required {schema: pigpio_adapter}:
+        !type/str
+
     state:
       mode:
         setter: set_mode

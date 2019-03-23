@@ -11,3 +11,10 @@ items:
       port:
         type: Integer
         default: 1883
+
+    config_schema:
+      !vol/Required {schema: host, default: "localhost"}:
+        !type/str
+
+      !vol/Required {schema: port, default: 1883}:
+        !vol/Coerce { type: !type/int }

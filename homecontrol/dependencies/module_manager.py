@@ -17,6 +17,8 @@ class ModuleManager:
         """
         out = []
         for node in os.listdir(path):
+            if node == "__pycache__":
+                continue
             mod_path = os.path.join(path, node)
 
             if os.path.isdir(mod_path):

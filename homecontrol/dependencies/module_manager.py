@@ -1,8 +1,8 @@
 import sys
-import yaml
 import importlib
 import importlib.util
 import os
+from dependencies.yaml_loader import YAMLLoader
 from dependencies.entity_types import Module
 
 
@@ -79,7 +79,8 @@ class ModuleManager:
             self.core.event_engine.broadcast("module_not_loaded", exception=e)
             return e
 
-        cfg = yaml.load(open(cfg_path), Loader=yaml.SafeLoader)
+        cfg = YAMLLoader.load(open(cfg_path))
+        
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
         mod.event = self.core.event_engine.register

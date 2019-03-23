@@ -4,19 +4,6 @@ meta:
 
 items:
   RGBLight:
-    config_fields:
-      pin_r:
-        type: Integer
-        default: 22
-      pin_g:
-        type: Integer
-        default: 27
-      pin_b:
-        type: Integer
-        default: 17
-      pigpio_adapter:
-        type: pigpio_adapter.PiGPIOAdapter
-
     config_schema:
       !vol/Required {schema: pin_r, default: 22}:
         !vol/All

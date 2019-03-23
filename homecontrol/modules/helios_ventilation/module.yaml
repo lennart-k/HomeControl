@@ -4,19 +4,6 @@ meta:
 
 items:
   HeliosVentilation:
-    config_fields:
-      host:
-        type: NetworkAddress
-        default: "localhost"
-
-      default_party_duration:
-        type: Integer
-        default: 5
-
-      default_party_level:
-        type: Integer
-        default: 3
-
     config_schema:
       !vol/Required {schema: host}:
         !vol/Coerce { type: !type/str }

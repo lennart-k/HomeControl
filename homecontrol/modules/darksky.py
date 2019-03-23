@@ -8,26 +8,26 @@ meta:
 
 items:
   WeatherProvider:
-    config_fields:
-      token:
-        required: True
-        type: String
+    config_schema:
+      !vol/Required {schema: token}:
+        !type/str
+      
+      !vol/Required {schema: location}:
+        !type/str
+      
+      !vol/Required {schema: language}:
+        !vol/All
+          - !type/str
+          - !vol/Any [ar, az, be, bg, bs, ca, cs, da, de, el, en, es, et, fi, fr, he, hr, hu, id, is, it, ja, ka, ko, kw, lv, nb, nl, no, pl, pt, ro, ru, sk, sl, sr, sv, tet, tr, uk, x-pig-latin, zh, zh-tw]
 
-      location:
-        required: True
-        type: String
+      !vol/Required {schema: units, default: auto}:
+        !vol/All
+          - !type/str
+          - !vol/Any [auto, ca, uk2, us, si]
 
-      language:
-        type: String
-        default: en
-
-      units:
-        type: String
-        default: auto
-
-      update_interval:
-        type: Integer
-        default: 300
+      !vol/Required {schema: update_interval, default: 300}:
+        !type/int
+      
 
     state:
       weather_data:

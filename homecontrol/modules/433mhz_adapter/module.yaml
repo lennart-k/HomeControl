@@ -21,16 +21,6 @@ items:
         !type/str
 
   RFTXAdapter:
-    config_fields:
-      pin:
-        type: Integer
-        default: 21
-      pigpio_adapter:
-        type: pigpio_adapter.PiGPIOAdapter
-      bits:
-        type: Integer
-        default: 12
-
     config_schema:
       !vol/Required {schema: pin, default: 20}:
         !vol/All

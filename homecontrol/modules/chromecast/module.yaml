@@ -4,14 +4,6 @@ meta:
 
 items:
   Chromecast:
-    config_fields:
-      host:
-        type: String
-
-      port:
-        type: Integer
-        default: 8009
-
     config_schema:
       !vol/Required {schema: host, default: None}:
         !vol/Coerce { type: !type/str }

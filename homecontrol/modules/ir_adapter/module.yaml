@@ -4,13 +4,6 @@ meta:
 
 items:
   NECIRReceiver:
-    config_fields:
-      pin:
-        type: Number
-        default: 16
-      pigpio_adapter:
-        type: pigpio_adapter.PiGPIOAdapter
-
     config_schema:
       !vol/Required {schema: pin, default: 16}:
         !vol/All

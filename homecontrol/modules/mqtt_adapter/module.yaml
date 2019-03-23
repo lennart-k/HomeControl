@@ -4,14 +4,6 @@ meta:
 
 items:
   MQTTAdapter:
-    config_fields:
-      host:
-        type: String
-        default: "localhost"
-      port:
-        type: Integer
-        default: 1883
-
     config_schema:
       !vol/Required {schema: host, default: "localhost"}:
         !type/str

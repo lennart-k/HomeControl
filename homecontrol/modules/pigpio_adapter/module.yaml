@@ -8,15 +8,6 @@ requirements:
 
 items:
   PiGPIOAdapter:
-    config_fields:
-      host:
-        type: String
-        default: "localhost"
-
-      port:
-        type: Integer
-        default: 8888
-
     config_schema:
       !vol/Required {schema: host, default: localhost}:
         !type/str
@@ -25,18 +16,6 @@ items:
         !vol/Coerce { type: !type/int }
 
   BinarySwitch:
-    config_fields:
-      pin:
-        type: Integer
-        default: 8
-
-      on_state:
-        type: Boolean
-        default: True
-
-      pigpio_adapter:
-        default: None
-
     config_schema:
       !vol/Required {schema: pin, default: 16}:
         !vol/All
@@ -61,22 +40,6 @@ items:
       toggle: toggle_on
 
   Button:
-    config_fields:
-      pin:
-        type: Integer
-        default: 8
-
-      pigpio_adapter:
-        default: None
-
-      pull_up:
-        type: Boolean
-        default: True
-
-      toggle:
-        type: Boolean
-        default: False
-
     config_schema:
       !vol/Required {schema: pin, default: 16}:
           !vol/All
@@ -101,18 +64,6 @@ items:
         default: 0
 
   I2CLCD:
-    config_fields:
-      pigpio_adapter:
-          default: None
-
-      bus:
-        type: Integer
-        default: 0
-
-      address:
-        type: Integer
-        default: 0x27
-
     config_schema:
       !vol/Required {schema: pigpio_adapter}:
         !type/str

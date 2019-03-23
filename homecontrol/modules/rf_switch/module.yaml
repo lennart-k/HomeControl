@@ -4,18 +4,6 @@ meta:
 
 items:
   IntertechnoSwitch:
-    config_fields:
-      house:
-        type: String
-        default: A
-
-      id:
-        type: Integer
-        default: 1
-
-      433mhz_tx_adapter:
-        type: 433mhz_adapter.RFTXAdapter
-
     config_schema:
       !vol/Required {schema: house, default: A}:
         !vol/All

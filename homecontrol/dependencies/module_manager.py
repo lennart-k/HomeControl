@@ -78,7 +78,7 @@ class ModuleManager:
             assert os.path.isfile(mod_path)
             assert os.path.isfile(cfg_path)
         except AssertionError as e:
-            self.core.event_engine.broadcast("module_not_loaded", exception=e)
+            self.core.event_engine.broadcast("module_not_loaded", exception=e, name=name)
             return e
 
         cfg = YAMLLoader.load(open(cfg_path))
@@ -107,6 +107,7 @@ class ModuleManager:
         await self.core.entity_manager.add_from_module(mod_obj)
         if hasattr(mod_obj, "init"):
             await mod_obj.init()
+        self.core.event_engine.broadcast("module_loaded", module=mod_obj)
         return mod_obj
 
     async def unload_module(self, name) -> None:

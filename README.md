@@ -50,6 +50,22 @@ optional arguments:
   ```
 
 
+## Features
+
+- [x] Automation
+- [x] Szenes
+- [x] API
+  - [x] Webhooks 
+- [ ] API v2
+  - [ ] web interface
+- [ ] Tests
+- [x] Docker builds
+  - [ ] Automated ARM builds
+- [ ] Data validation
+  - [x] item config  
+  - [ ] configuration.yaml
+
+
 ## Compatible Modules
 
 - Chromecast

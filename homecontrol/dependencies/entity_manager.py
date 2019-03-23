@@ -2,6 +2,7 @@ import asyncio
 from dependencies.state_engine import StateEngine
 from dependencies.action_engine import ActionEngine
 from dependencies.entity_types import Item
+import voluptuous as vol
 from const import (
     WORKING,
     NOT_WORKING,
@@ -48,19 +49,13 @@ class EntityManager:
         config = {}
         
         if spec.get("config_schema"):
-            import voluptuous as vol
-            # Validate cfg to "config_schema"
-            cfg = vol.Schema(spec["config_schema"])(cfg)
-        else:
-            # config_fields will soon be deprecated
-            for name, info in spec.get("config_fields", {}).items():
-                config[name] = info.get("default", None)
+            config = vol.Schema(spec["config_schema"])(cfg)
 
-        for key, value in list(cfg.items()):
+        for key, value in list(config.items()):
             if type(value) == str:
                 if value.startswith("i!"):
                     i = self.items.get(value[2:], None)
-                    cfg[key] = i
+                    config[key] = i
                     # The new item being created depends on the other item:
                     # These dependencies matter to remove the items in the correct order
                     if i:
@@ -69,7 +64,6 @@ class EntityManager:
                     else:
                         item.status = NOT_WORKING
 
-        config.update(cfg)
         item.cfg = config
         item.states = StateEngine(item, self.core)
         item.actions = ActionEngine(item, self.core)

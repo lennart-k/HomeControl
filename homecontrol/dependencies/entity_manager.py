@@ -1,3 +1,4 @@
+import traceback
 import asyncio
 from dependencies.state_engine import StateEngine
 from dependencies.action_engine import ActionEngine
@@ -28,7 +29,11 @@ class EntityManager:
 
     async def remove_item(self, identifier: str):
         item = self.items[identifier]
-        await asyncio.gather(*[self.core.loop.create_task(dependant_item.stop()) for dependant_item in item.dependant_items if hasattr(dependant_item, "stop")])
+        try:
+            await asyncio.gather(*[self.core.loop.create_task(dependant_item.stop()) for dependant_item in list(item.dependant_items)+[item] if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
+        except:
+            print(traceback.print_exc())
+
         for dependant_item in item.dependant_items:
             dependant_item.status = STOPPED
         for dependency in item.depends_on:
@@ -68,8 +73,11 @@ class EntityManager:
         item.states = StateEngine(item, self.core)
         item.actions = ActionEngine(item, self.core)
         item.__init__()
-        if hasattr(item, "init"):
-            await item.init()
+        
+        init_result = await item.init() if hasattr(item, "init") else None
+
+        if init_result == False:
+            item.status = NOT_WORKING
 
         self.items[identifier] = item
         spec["module"].items[identifier] = item

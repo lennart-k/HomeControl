@@ -18,6 +18,22 @@ class EventTriggerProvider:
 
         if self.event_data.items() <= kwargs.items():
             await self.rule.on_trigger(kwargs)
+
+class StateTriggerProvider:
+    def __init__(self, rule, engine):
+        self.rule = rule
+        self.engine = engine
+        self.core = engine.core
+
+        self.data = rule.data["trigger"]
+
+        # Subscribe to state changes
+        event("state_change")(self.on_state)
+
+    async def on_state(self, event, item, changes):
+        if item.identifier == self.data["target"] and self.data["state"] in changes:
+            await self.rule.on_trigger({self.data["state"]: changes[self.data["state"]]})
+
         
 
 class StateActionProvider:
@@ -48,7 +64,7 @@ class ItemActionProvider:
 
     async def on_trigger(self, data):
         target = self.core.entity_manager.items.get(self.data["target"])
-        params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-date", {}).items()}}
+        params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
         await target.actions.execute(self.data["action"], **params)
 
@@ -57,7 +73,8 @@ class Module:
 
     async def init(self):
         self.trigger_providers = {
-            "event": EventTriggerProvider
+            "event": EventTriggerProvider,
+            "state": StateTriggerProvider
         }
         self.condition_providers = {
             

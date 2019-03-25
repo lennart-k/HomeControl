@@ -166,9 +166,10 @@ class LCD:
         """
         Close the LCD (clearing the screen) and release used resources.
         """
-        self._inst(0x01)
-
-        self.pi.i2c_close(self._h)
+        try:
+            self._inst(0x01)
+        finally:
+            self.pi.i2c_close(self._h)
 
 
 if __name__ == "__main__":

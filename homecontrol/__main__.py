@@ -1,7 +1,9 @@
+import traceback
 from core import Core
 import asyncio
 import aiomonitor
 from functools import partial
+from dependencies.yaml_loader import YAMLLoader
 import yaml
 import sys
 import argparse
@@ -20,7 +22,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
     if os.name == "posix":
-        parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process")
+        parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
     
 
     return vars(parser.parse_args())
@@ -30,9 +32,10 @@ def get_config(path: str) -> dict:
         print("Config file does not exist!")
         sys.exit(1)
     try:
-     cfg = yaml.load(open(path), Loader=yaml.FullLoader)
-    except yaml.YAMLError:
+     cfg = YAMLLoader.load(open(path))
+    except yaml.YAMLError as e:
         print("Error in config file")
+        traceback.print_exc()
         sys.exit(1)
     return cfg
 

@@ -1,3 +1,4 @@
+import os
 from functools import partial
 import voluptuous as vol
 import yaml
@@ -18,11 +19,12 @@ from exceptions import (
     NoCoreException
 )
 
-
 class Constructor(SafeConstructor):
     def __init__(self):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
+        self.add_constructor("!import", self.__class__.file_import_constructor)
+        
         SafeConstructor.__init__(self)
 
     def _obj(self, cls, node) -> object:
@@ -39,6 +41,13 @@ class Constructor(SafeConstructor):
             return cls(*value)
         else:
             return cls(value)
+
+    def file_import_constructor(self, node: yaml.Node = None) -> object:
+        path = self.construct_scalar(node)
+        if os.path.isfile(path):
+            return self.__class__.load(open(path, "r"))
+        else:
+            return {}
 
     def vol_constructor(self, suffix: str, node: yaml.Node = None) -> vol.Schema:
         return self._obj(getattr(vol, suffix), node)

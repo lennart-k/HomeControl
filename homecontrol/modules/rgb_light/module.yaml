@@ -37,4 +37,6 @@ items:
 
     actions:
       toggle: toggle_on
+      set_hue: set_hue
+      set_saturation: set_saturation
       set_brightness: set_brightness

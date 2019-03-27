@@ -3,4 +3,5 @@ class Item:
 
 
 class Module:
-    pass
+    def __repr__(self) -> str:
+        return f"<Module {self.name}>"

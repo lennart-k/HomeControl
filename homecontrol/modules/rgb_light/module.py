@@ -1,5 +1,6 @@
 from pigpio import pi
 from dependencies.data_types import Color
+import colorsys
 
 
 class RGBLight:
@@ -38,3 +39,8 @@ class RGBLight:
 
     async def toggle_on(self):
         await self.set_on(not await self.states.get("on"))
+
+    async def set_brightness(self, value):
+        h, _, s = colorsys.rgb_to_hls(*(float(val)/255 for val in (await self.states.get("color")).to_tuple()))
+        l = float(value)/255
+        await self.set_color(Color(*(round(val*255) for val in colorsys.hls_to_rgb(h, l, s))))

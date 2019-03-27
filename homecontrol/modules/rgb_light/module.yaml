@@ -37,3 +37,4 @@ items:
 
     actions:
       toggle: toggle_on
+      set_brightness: set_brightness

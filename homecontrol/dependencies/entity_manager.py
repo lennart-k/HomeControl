@@ -66,6 +66,9 @@ class EntityManager:
                     if i:
                         item.depends_on.add(i)
                         i.dependant_items.add(item)
+
+                        if i.status == NOT_WORKING:
+                            item.status = NOT_WORKING
                     else:
                         item.status = NOT_WORKING
 
@@ -74,12 +77,15 @@ class EntityManager:
         item.actions = ActionEngine(item, self.core)
         item.__init__()
         
-        init_result = await item.init() if hasattr(item, "init") else None
+        if not item.status == NOT_WORKING:
+            init_result = await item.init() if hasattr(item, "init") else None
 
-        if init_result == False:
-            item.status = NOT_WORKING
+            if init_result == False:
+                item.status = NOT_WORKING
 
         self.items[identifier] = item
         spec["module"].items[identifier] = item
         self.core.event_engine.broadcast("item_created", item=item)
+        if item.status == NOT_WORKING:
+            self.core.event_engine.broadcast("item_not_working", item=item)
         return item

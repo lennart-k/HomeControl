@@ -1,3 +1,4 @@
+import colorsys
 from datetime import datetime
 
 types = {}
@@ -15,28 +16,65 @@ def data_type(cls: object) -> object:
 
 @data_type
 class Color:
-    r: int
-    g: int
-    b: int
+    hsl: (int, int, int)
 
-    def __init__(self, r, g, b):
-        self.r, self.g, self.b = r, g, b
+    def __init__(self, h, s, l):
+        self.hsl = (h, s, l)
 
     @staticmethod
-    def from_data(data):
-        return Color(*data)
-
-    def dump(self):
-        return self.r, self.g, self.b
+    def from_hsl(hsl):
+        return Color(*hsl)
 
     @staticmethod
-    def validate(*args, rule_spec=None):
-        if len(args) == 3 and all(type(i) == int for i in args):
-            return max(*args) <= 255 and min(*args) >= 0
-        return False
+    def from_rgb(rgb):
+        hls = colorsys.rgb_to_hls(*(i/255 for i in rgb))
+        return Color(int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
 
-    def to_tuple(self):
-        return self.r, self.g, self.b
+    @staticmethod
+    def from_data(rgb):
+        return Color.from_rgb(rgb)
+
+    @property
+    def rgb(self) -> (int, int, int):
+        return tuple(int(i*255) for i in colorsys.hls_to_rgb(self.hsl[0]/255, self.hsl[2]/255, self.hsl[1]/255))
+
+    @rgb.setter
+    def rgb(self, rgb):
+        hls = colorsys.rgb_to_hls(*(i/255 for i in rgb))
+        self.hsl = (int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
+
+    @property
+    def h(self) -> int:
+        return self.hsl[0]
+
+    @h.setter
+    def h(self, h):
+        hsl = list(self.hsl)
+        hsl[0] = h
+        self.hsl = hsl
+
+    @property
+    def s(self) -> int:
+        return self.hsl[1]
+
+    @s.setter
+    def s(self, s):
+        hsl = list(self.hsl)
+        hsl[1] = s
+        self.hsl = hsl
+
+    @property
+    def l(self) -> int:
+        return self.hsl[2]
+
+    @l.setter
+    def l(self, l):
+        hsl = list(self.hsl)
+        hsl[2] = l
+        self.hsl = hsl
+
+    
+        
 
 
 @data_type

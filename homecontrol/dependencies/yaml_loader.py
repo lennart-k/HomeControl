@@ -1,5 +1,4 @@
 import os
-from functools import partial
 import voluptuous as vol
 import yaml
 
@@ -7,17 +6,14 @@ from yaml.reader import Reader
 from yaml.scanner import Scanner
 from yaml.parser import Parser
 from yaml.composer import Composer
-from yaml.constructor import SafeConstructor, BaseConstructor
+from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
 
 from dependencies.entity_types import (
     Item,
     Module
 )
-from exceptions import (
-    ItemNotFoundException,
-    NoCoreException
-)
+
 
 class Constructor(SafeConstructor):
     def __init__(self):

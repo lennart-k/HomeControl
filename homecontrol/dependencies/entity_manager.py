@@ -31,7 +31,7 @@ class EntityManager:
         item = self.items[identifier]
         try:
             await asyncio.gather(*[self.core.loop.create_task(dependant_item.stop()) for dependant_item in list(item.dependant_items)+[item] if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
-        except:
+        except Exception as e:
             print(traceback.print_exc())
 
         for dependant_item in item.dependant_items:

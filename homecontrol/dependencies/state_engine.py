@@ -9,9 +9,12 @@ class StateEngine:
         self.states = {}
         for state_name, details in item.spec.get("state", {}).items():
             self.states[state_name] = State(self, details.get("default", None),
-                                            getter=getattr(item, details.get("getter", ""), None),
-                                            setter=getattr(item, details.get("setter", ""), None),
-                                            state_type=types.get(details.get("type", ""), None),
+                                            getter=getattr(
+                                                item, details.get("getter", ""), None),
+                                            setter=getattr(
+                                                item, details.get("setter", ""), None),
+                                            state_type=types.get(
+                                                details.get("type", ""), None),
                                             name=state_name,
                                             )
 
@@ -53,7 +56,8 @@ class State:
         self.state_engine = state_engine
 
     async def get(self):
-        if self.getter: return await self.getter()
+        if self.getter:
+            return await self.getter()
         return self.value
 
     async def set(self, value) -> dict:
@@ -61,7 +65,8 @@ class State:
             result: dict = await self.setter(value)
             for state, value in result.items():
                 self.state_engine.states[state].value = value
-            self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes=result)
+            self.state_engine.core.event_engine.broadcast(
+                "state_change", item=self.state_engine.item, changes=result)
             return result
         return {}
 

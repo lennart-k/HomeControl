@@ -4,6 +4,7 @@ meta:
   description: Provides szene functionality
 """
 
+
 class Module:
     async def init(self):
         data = self.core.cfg.get("szenes", [])
@@ -22,7 +23,7 @@ class Szene:
     def __init__(self, module, data):
         self.core = module.core
         self.data = data
-    
+
     async def invoke(self):
         for item_id, data in self.data.get("items", {}).items():
             item = self.core.entity_manager.items[item_id]
@@ -35,6 +36,7 @@ class Szene:
 
     async def on_trigger(self, data):
         return await self.invoke()
+
 
 class SzeneActionProvider:
     def __init__(self, module, rule, engine):

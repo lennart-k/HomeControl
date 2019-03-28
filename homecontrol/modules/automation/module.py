@@ -10,7 +10,6 @@ class EventTriggerProvider:
         self.data = rule.data["trigger"]
         self.event_data = self.data.get("data", {})
 
-
         # Subscribe to trigger event
         event(self.data["type"])(self.on_event)
 
@@ -18,6 +17,7 @@ class EventTriggerProvider:
 
         if self.event_data.items() <= kwargs.items():
             await self.rule.on_trigger(kwargs)
+
 
 class StateTriggerProvider:
     def __init__(self, rule, engine):
@@ -34,7 +34,6 @@ class StateTriggerProvider:
         if item.identifier == self.data["target"] and self.data["state"] in changes:
             await self.rule.on_trigger({self.data["state"]: changes[self.data["state"]]})
 
-        
 
 class StateActionProvider:
     def __init__(self, rule, engine):
@@ -46,13 +45,15 @@ class StateActionProvider:
 
     async def on_trigger(self, data):
         target = self.core.entity_manager.items.get(self.data["target"])
-        changes = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
+        changes = {**self.data.get("data", {}), **{key: data.get(ref)
+                                                   for key, ref in self.data.get("var-data", {}).items()}}
 
         if self.core.start_args.get("verbose"):
             print("STATE ACTION by automation", changes, target)
 
         for state, value in changes.items():
             await target.states.set(state, value)
+
 
 class ItemActionProvider:
     def __init__(self, rule, engine):
@@ -64,9 +65,11 @@ class ItemActionProvider:
 
     async def on_trigger(self, data):
         target = self.core.entity_manager.items.get(self.data["target"])
-        params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
+        params = {**self.data.get("data", {}), **{key: data.get(ref)
+                                                  for key, ref in self.data.get("var-data", {}).items()}}
 
         await target.actions.execute(self.data["action"], **params)
+
 
 class Module:
     core: Core
@@ -77,7 +80,7 @@ class Module:
             "state": StateTriggerProvider
         }
         self.condition_providers = {
-            
+
         }
         self.action_providers = {
             "state": StateActionProvider,
@@ -98,6 +101,7 @@ class Module:
         self.condition_providers.update(condition or {})
         self.action_providers.update(action or {})
 
+
 class AutomationRule:
     def __init__(self, data, engine: Module):
         self.data = data
@@ -105,8 +109,10 @@ class AutomationRule:
         self.core = engine.core
         self.alias = data.get("alias", "Unnamed")
 
-        self.trigger = self.engine.trigger_providers[data["trigger"]["provider"]](self, self.engine)
-        self.action = self.engine.action_providers[data["action"]["provider"]](self, self.engine)
+        self.trigger = self.engine.trigger_providers[data["trigger"]["provider"]](
+            self, self.engine)
+        self.action = self.engine.action_providers[data["action"]["provider"]](
+            self, self.engine)
 
     async def on_trigger(self, data):
         await self.action.on_trigger(data)

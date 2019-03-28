@@ -2,7 +2,8 @@ from functools import reduce
 import math
 import pigpio
 
-PULSE_LENGTH = 562.5  # https://techdocs.altium.com/display/FPGA/NEC+Infrared+Transmission+Protocol
+# https://techdocs.altium.com/display/FPGA/NEC+Infrared+Transmission+Protocol
+PULSE_LENGTH = 562.5
 HALF_PULSE_LENGTH = PULSE_LENGTH/2
 
 LEADING_BURST = 16
@@ -46,7 +47,8 @@ class NECIRReceiver:  # TODO Repeat codes
         return out
 
     def on_packet(self, edges):
-        pulse_edges = list(map(lambda x: math.floor((x + HALF_PULSE_LENGTH) / PULSE_LENGTH), edges))
+        pulse_edges = list(map(lambda x: math.floor(
+            (x + HALF_PULSE_LENGTH) / PULSE_LENGTH), edges))
         if pulse_edges.pop(0) == 16:  # Leading pulse
             if pulse_edges.pop(0) == 8:  # 8 unit space
                 if reduce(lambda x, y: 1 if x == y else 0, pulse_edges[::2]):
@@ -72,7 +74,6 @@ if __name__ == "__main__":
 
     def callback(address, data, bits):
         print(address, " - ", data, " - ", bits)
-
 
     pi = pigpio.pi()
 

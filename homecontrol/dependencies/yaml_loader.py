@@ -20,7 +20,7 @@ class Constructor(SafeConstructor):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
         self.add_constructor("!import", self.__class__.file_import_constructor)
-        
+
         SafeConstructor.__init__(self)
 
     def _obj(self, cls, node) -> object:
@@ -28,7 +28,7 @@ class Constructor(SafeConstructor):
             return cls
 
         value = getattr(self, "construct_"+node.id)(node)
-        
+
         if node.value == "":
             return cls
         elif type(value) == dict:
@@ -67,7 +67,7 @@ class Constructor(SafeConstructor):
         }
         if suffix in TYPES:
             return self._obj(TYPES.get(suffix), node)
-        
+
 
 class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
     def __init__(self, stream):

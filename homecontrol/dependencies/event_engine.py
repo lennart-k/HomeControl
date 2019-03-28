@@ -7,7 +7,7 @@ class Event:
     __slots__ = ["event_type", "data", "time", "kwargs"]
 
     def __init__(self, event_type: str, data: dict = None, time: int = None, kwargs: dict = None):
-        
+
         self.event_type = event_type
         self.data = data or {}
         self.time = time
@@ -39,7 +39,8 @@ class EventEngine:
         if self.core.start_args.get("verbose"):
             print(f"EVENT: {event}")
 
-        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+        handlers = list(self.handlers.get("*", list())) + \
+            list(self.handlers.get(event_type, list()))
 
         return [asyncio.ensure_future(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
 
@@ -56,10 +57,10 @@ class EventEngine:
         if self.core.start_args.get("verbose"):
             print(f"EVENT: {event}")
 
-        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+        handlers = list(self.handlers.get("*", list())) + \
+            list(self.handlers.get(event_type, list()))
 
         return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
-
 
     async def gather(self, event_type: str, data: dict = None, **kwargs):
         """

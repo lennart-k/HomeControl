@@ -52,7 +52,7 @@ class EntityManager:
         item.dependant_items = set()  # Items that will depend on this one
         item.depends_on = set()  # Items this new item depends on
         config = {}
-        
+
         if spec.get("config_schema"):
             config = vol.Schema(spec["config_schema"])(cfg)
 
@@ -76,7 +76,7 @@ class EntityManager:
         item.states = StateEngine(item, self.core)
         item.actions = ActionEngine(item, self.core)
         item.__init__()
-        
+
         if not item.status == NOT_WORKING:
             init_result = await item.init() if hasattr(item, "init") else None
 

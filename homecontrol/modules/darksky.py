@@ -39,15 +39,18 @@ items:
 EXCLUDE = ["minutely", "hourly"]
 URL = "https://api.darksky.net/forecast/{token}/{location}?lang={lang}&units={units}&exclude={exclude}"
 
+
 class WeatherProvider:
     async def init(self):
         tick(self.cfg["update_interval"])(self.fetch_weather)
 
     async def fetch_weather(self):
-        request = requests.get(URL.format(token=self.cfg["token"], lang=self.cfg["language"], units=self.cfg["units"], exclude=",".join(EXCLUDE), location=self.cfg["location"]))
+        request = requests.get(URL.format(token=self.cfg["token"], lang=self.cfg["language"],
+                                          units=self.cfg["units"], exclude=",".join(EXCLUDE), location=self.cfg["location"]))
         data = request.json()
         if not data.get("flags", {}).get("darksky-unavailable"):
             await self.states.update("weather_data", WeatherData(data, "DarkSky", self.cfg["location"]))
+
 
 class WeatherData:
     def __init__(self, data, provider, location):

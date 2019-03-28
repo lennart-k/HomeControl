@@ -12,9 +12,9 @@ class MCP3008ADC:
         )
 
     def get_value(self, channel: int) -> int:
-        adc = self.cfg["pigpio_adapter"].pigpio.spi_xfer(self.handle, [1, (8 + channel) << 4, 0])[1]
+        adc = self.cfg["pigpio_adapter"].pigpio.spi_xfer(
+            self.handle, [1, (8 + channel) << 4, 0])[1]
         return ((adc[1] & 3) << 8) + adc[2]
-
 
     async def stop(self):
         if not self.handle == None:

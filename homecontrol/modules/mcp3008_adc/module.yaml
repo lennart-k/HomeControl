@@ -1,0 +1,50 @@
+meta:
+  name: MCP3008 ADC
+  description: Support for the MCP3008 ADC which enables the Raspberry Pi to get analog input
+
+items:
+
+  MCP3008ADC:
+    config_schema:
+      !vol/Required {schema: pigpio_adapter}:
+        !type/str
+
+      !vol/Required {schema: spi_channel, default: 0}:
+        !vol/All  
+          - !type/int
+          - !vol/Range {min: 0, max: 2}
+
+      !vol/Required {schema: baud_rate}:
+        !type/int
+
+      !vol/Required {schema: spi_flags, default: 0}:
+        !type/int
+
+  AnalogInput:
+    config_schema:
+      !vol/Required {schema: adc}:
+        !type/str
+
+      !vol/Required {schema: channel, default: 0}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range {min: 0, max: 7}
+
+      !vol/Required {schema: min, default: 0}:
+        !vol/Coerce { type: !type/int }
+
+      !vol/Required {schema: max, default: 1023}:
+        !vol/Coerce { type: !type/int }
+
+      !vol/Required {schema: update_interval, default: 1}:
+        !vol/Coerce { type: !type/float }
+
+      !vol/Required {schema: change_threshold, default: 0}:
+        !vol/All
+        - !vol/Coerce { type: !type/int }
+        - !vol/Range {min: 0}
+
+    state:
+      value:
+        default: 0
+        getter: get_value

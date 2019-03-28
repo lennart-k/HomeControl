@@ -30,7 +30,7 @@ items:
       color:
         setter: set_color
         type: Color
-        default: [50, 0, 0]
+        default: [100, 100, 100]
       "on":
         setter: set_on
         default: False

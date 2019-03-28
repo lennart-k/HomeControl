@@ -10,6 +10,7 @@ class RGBLight:
 
     async def init(self):
         self.gpio = self.cfg["pigpio_adapter"].pigpio
+        await self.states.set("color", Color.from_rgb((self.gpio.get_PWM_dutycycle(pin) for pin in (self.cfg["pin_r"], self.cfg["pin_g"], self.cfg["pin_b"]))))
         await self.apply_color()
 
     async def set_color(self, color: Color) -> dict:

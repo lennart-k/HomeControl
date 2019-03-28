@@ -14,36 +14,30 @@ from const import (
     EXIT_RESTART
 )
 
-
 def get_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="HomeControl")
 
-    parser.add_argument("-cfgfile", "-cf", default="config.yaml",
-                        help="File storing the HomeControl configuration")
-    parser.add_argument("-pid-file", default=None,
-                        help="Location of the PID file when running as a daemon. Ensures that only one session is running")
-    parser.add_argument("-clearport", action="store_true", default=None,
-                        help="Frees the port for the API server using fuser. Therefore only available on Linux")
+    parser.add_argument("-cfgfile", "-cf", default="config.yaml", help="File storing the HomeControl configuration")
+    parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
+    parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
     if os.name == "posix":
-        parser.add_argument("-daemon", "-d", action="store_true", default=None,
-                            help="Start HomeControl as a daemon process [posix only]")
+        parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
+    
 
     return vars(parser.parse_args())
-
 
 def get_config(path: str) -> dict:
     if not os.path.isfile(path):
         print("Config file does not exist!")
         sys.exit(1)
     try:
-        cfg = YAMLLoader.load(open(path))
+     cfg = YAMLLoader.load(open(path))
     except yaml.YAMLError as e:
         print("Error in config file")
         traceback.print_exc()
         sys.exit(1)
     return cfg
-
 
 def clear_port(port: int):
     if os.name == "posix":
@@ -52,8 +46,7 @@ def clear_port(port: int):
 
 def validate_python_version():
     if sys.version_info[:3] < MINIMUM_PYTHON_VERSION:
-        print("The minimum Python version for HomeControl to work is {}.{}.{}".format(
-            *MINIMUM_PYTHON_VERSION))
+        print("The minimum Python version for HomeControl to work is {}.{}.{}".format(*MINIMUM_PYTHON_VERSION))
         sys.exit(1)
 
 
@@ -75,14 +68,12 @@ def run_homecontrol(config: dict, start_args: dict):
         except FileNotFoundError:
             pass
 
-
 def start_command():
     """
     Returns a command to re-execute HomeControl with the same parameters except the daemon parameter
     """
     if os.path.basename(sys.argv[0]) == "__main__.py" or (os.path.split(sys.argv[0])[-1] == "homecontrol" and os.path.isdir(sys.argv[0])):
-        os.environ["PYTHONPATH"] = os.path.dirname(
-            os.path.dirname(sys.argv[0]))
+        os.environ["PYTHONPATH"] = os.path.dirname(os.path.dirname(sys.argv[0]))
         return [sys.executable] + [arg for arg in sys.argv if not arg in ("-d", "-daemon")]
 
     return [arg for arg in sys.argv if not arg in ("-d", "-daemon")]
@@ -106,7 +97,6 @@ def daemonize() -> None:
     os.dup2(infd.fileno(), sys.stdin.fileno())
     os.dup2(outfd.fileno(), sys.stdout.fileno())
     os.dup2(outfd.fileno(), sys.stderr.fileno())
-
 
 def check_pid_file(pid_file: str) -> None:
     if not os.path.isfile(pid_file):
@@ -158,7 +148,6 @@ def main():
         clear_port(cfg["api-server"]["port"])
 
     run_homecontrol(config=cfg, start_args=args)
-
 
 start_command()
 

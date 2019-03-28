@@ -6,7 +6,6 @@ meta:
   name: WebHook
 """
 
-
 class Module:
     async def init(self):
 
@@ -15,10 +14,9 @@ class Module:
 
             @router.get("/webhook/{target}")
             async def gassist(request):
-                self.core.event_engine.broadcast(
-                    "webhook_event", target=request.match_info["target"], params={})
+                self.core.event_engine.broadcast("webhook_event", target=request.match_info["target"], params={})
                 return web.Response(body=json.dumps({"msg": "Webhook triggered"}, indent=4, sort_keys=True),
-                                    content_type="application/json")
+                content_type="application/json")
 
         @event("gather_automation_providers")
         async def on_gather_automation_providers(event, engine, callback):

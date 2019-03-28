@@ -47,8 +47,7 @@ class ModuleManager:
         if not hasattr(mod, "Module"):
             mod.Module = Module
 
-        cfg = (mod.SPEC if type(mod.SPEC) == dict else YAMLLoader.load(
-            mod.SPEC)) if hasattr(mod, "SPEC") else {}
+        cfg = (mod.SPEC if type(mod.SPEC) == dict else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
         mod_obj = mod.Module.__new__(mod.Module)
         mod_obj.core = self.core
@@ -67,6 +66,7 @@ class ModuleManager:
             await mod_obj.init()
         return mod_obj
 
+
     async def load_module(self, path, name) -> (Module, Exception):
         """
         Loads a module from a folder and send an init trigger
@@ -78,12 +78,11 @@ class ModuleManager:
             assert os.path.isfile(mod_path)
             assert os.path.isfile(cfg_path)
         except AssertionError as e:
-            self.core.event_engine.broadcast(
-                "module_not_loaded", exception=e, name=name)
+            self.core.event_engine.broadcast("module_not_loaded", exception=e, name=name)
             return e
 
         cfg = YAMLLoader.load(open(cfg_path))
-
+        
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
         mod.event = self.core.event_engine.register

@@ -122,8 +122,7 @@ class RX:
     def cancel(self):
         if self._cb is not None:
             if self.pi.sl.s:
-                # Remove glitch filter.
-                self.pi.set_glitch_filter(self.gpio, 0)
+                self.pi.set_glitch_filter(self.gpio, 0)  # Remove glitch filter.
                 self._cb.cancel()
                 self._cb = None
 
@@ -143,18 +142,15 @@ class TX:
         pi.set_mode(gpio, pigpio.OUTPUT)
 
     def _make_waves(self):
-        wf = [pigpio.pulse(1 << self.gpio, 0, self.t0),
-              pigpio.pulse(0, 1 << self.gpio, self.gap)]
+        wf = [pigpio.pulse(1 << self.gpio, 0, self.t0), pigpio.pulse(0, 1 << self.gpio, self.gap)]
         self.pi.wave_add_generic(wf)
         self._amble = self.pi.wave_create()
 
-        wf = [pigpio.pulse(1 << self.gpio, 0, self.t0),
-              pigpio.pulse(0, 1 << self.gpio, self.t1)]
+        wf = [pigpio.pulse(1 << self.gpio, 0, self.t0), pigpio.pulse(0, 1 << self.gpio, self.t1)]
         self.pi.wave_add_generic(wf)
         self._wid0 = self.pi.wave_create()
 
-        wf = [pigpio.pulse(1 << self.gpio, 0, self.t1),
-              pigpio.pulse(0, 1 << self.gpio, self.t0)]
+        wf = [pigpio.pulse(1 << self.gpio, 0, self.t1), pigpio.pulse(0, 1 << self.gpio, self.t0)]
         self.pi.wave_add_generic(wf)
         self._wid1 = self.pi.wave_create()
 
@@ -208,9 +204,11 @@ if __name__ == "__main__":
     RX_PIN = 20
     TX_PIN = 21
 
+
     def rx_callback(code, bits, gap, t0, t1):
         print("code={} bits={} (gap={} t0={} t1={})".
               format(code, bits, gap, t0, t1))
+
 
     pi = pigpio.pi()  # Connect to local Pi.
 

@@ -12,8 +12,7 @@ class HeliosVentilation:
 
             :return:
             """
-            requests.post(
-                f"http://{self.cfg['host']}/info.htm", data={'v00402': 'helios'})
+            requests.post(f"http://{self.cfg['host']}/info.htm", data={'v00402': 'helios'})
 
     async def start_party(self, duration=None, party_level=None):
         duration = duration or self.cfg["default_party_duration"]

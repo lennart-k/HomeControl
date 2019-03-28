@@ -25,6 +25,7 @@ class PiGPIOAdapter:
         done, pending = await asyncio.wait({self.core.loop.run_in_executor(None, self.init_pigpio)}, timeout=3)
         if pending:
             return False
+        
 
     def init_pigpio(self):
         self.pigpio = pigpio.pi(self.cfg["host"], self.cfg["port"])
@@ -44,7 +45,7 @@ class BinarySwitch:
         self.pigpio.write(self.cfg["pin"], not (await self.states.get("on")) ^ self.cfg["on_state"])
 
     async def set_on(self, value: bool) -> dict:
-        self.pigpio.write(self.cfg["pin"], not value ^ self.cfg["on_state"])
+        self.pigpio.write(self.cfg["pin"], not value^self.cfg["on_state"])
 
         return {"on": value}
 
@@ -59,24 +60,22 @@ class Button:
     async def init(self):
         self.pigpio: pigpio.pi = self.cfg["pigpio_adapter"].pigpio
         self.pigpio.set_mode(self.cfg["pin"], pigpio.INPUT)
-        self.cb = self.pigpio.callback(
-            self.cfg["pin"], pigpio.EITHER_EDGE, self.callback)
+        self.cb = self.pigpio.callback(self.cfg["pin"], pigpio.EITHER_EDGE, self.callback)
 
     @throttle(s=0.05)
     def callback(self, pin, reading, timestamp) -> None:
         async def _async_callback() -> bool:
             if not self.cfg["toggle"]:
-                value = not self.cfg["pull_up"] ^ reading
+                value = not self.cfg["pull_up"]^reading
                 if not value == await self.states.get("value"):
                     await self.states.update("value", value)
                     return True
             else:
-                if not self.cfg["pull_up"] ^ reading:
+                if not self.cfg["pull_up"]^reading:
                     await self.states.update("value", not await self.states.get("value"))
                     return True
 
-        asyncio.run_coroutine_threadsafe(
-            _async_callback(), loop=self.core.loop)
+        asyncio.run_coroutine_threadsafe(_async_callback(), loop=self.core.loop)
 
     async def stop(self):
         try:

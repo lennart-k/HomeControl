@@ -31,8 +31,7 @@ class JSONEncoder(json.JSONEncoder):  # TODO Plan out custom types
 class JSONDecoder(json.JSONDecoder):
     def __init__(self, core, *args, **kwargs):
         self.core = core
-        json.JSONDecoder.__init__(
-            self, object_hook=self._object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, object_hook=self._object_hook, *args, **kwargs)
 
     def _object_hook(self, obj):
         if "!type" in obj:
@@ -59,11 +58,10 @@ class Module:
         self.main_app = web.Application(loop=self.core.loop)
         self.middlewares = []
         self.add_middlewares()
-        self.api_app = web.Application(
-            loop=self.core.loop, middlewares=self.middlewares)
+        self.api_app = web.Application(loop=self.core.loop, middlewares=self.middlewares)
 
         self.event_sockets = set()
-
+        
         event("core_bootstrap_complete")(self.start)
 
     async def start(self, *args):
@@ -79,8 +77,8 @@ class Module:
 
         # Windows doesn't support reuse_port
         self.future = self.core.loop.create_server(self.handler, self.core.cfg["api-server"]["host"],
-                                                   self.core.cfg["api-server"]["port"],
-                                                   reuse_address=True, reuse_port=os.name != "nt")
+                                              self.core.cfg["api-server"]["port"],
+                                              reuse_address=True, reuse_port=os.name != "nt")
         # asyncio.ensure_future(self.future, loop=self.core.loop)
         asyncio.run_coroutine_threadsafe(self.future, loop=self.core.loop)
 
@@ -103,9 +101,9 @@ class Module:
         @r.route("OPTIONS", "/{tail:.*}")
         async def get_options(request):
             return web.Response(headers={"Allow": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
-                                         "Access-Control-Request-Method": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
-                                         "Access-Control-Allow-Origin": "*",
-                                         "Access-Control-Allow-Headers": "X-PINGOTHER, Content-Type"})
+                                        "Access-Control-Request-Method": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
+                                        "Access-Control-Allow-Origin": "*",
+                                        "Access-Control-Allow-Headers": "X-PINGOTHER, Content-Type"})
 
         @r.get("/item/{id}")
         async def get_item(request):
@@ -120,15 +118,15 @@ class Module:
                     "config": item.cfg,
                     "success": True
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=200)
+                                    content_type="application/json",
+                                    status=200)
             else:
                 return web.Response(body=json.dumps({
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.post("/item/{id}/action/{name}")
         @r.get("/item/{id}/action/{name}")
@@ -140,8 +138,7 @@ class Module:
             item = self.core.entity_manager.items.get(request.match_info["id"])
             if item:
                 content = (await request.content.read()).decode()
-                kwargs = json.loads(content, cls=JSONDecoder,
-                                    core=self.core) if content else {}
+                kwargs = json.loads(content, cls=JSONDecoder, core=self.core) if content else {}
 
                 result = await item.actions.execute(request.match_info["name"], **kwargs)
                 return web.Response(body=json.dumps({
@@ -153,8 +150,8 @@ class Module:
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.get("/item/{id}/state")
         async def get_item_state(request):
@@ -167,8 +164,8 @@ class Module:
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.get("/item/{id}/state/{state}")
         async def get_specific_item_state(request):
@@ -187,16 +184,16 @@ class Module:
                         "message": "State doesn't exist",
                         "success": False
                     }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                        content_type="application/json",
-                        status=402)
+                                        content_type="application/json",
+                                        status=402)
 
             else:
                 return web.Response(body=json.dumps({
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.post("/item/{id}/state")
         async def set_item_state(request: web.Request):  # TODO NEW Decoder
@@ -218,22 +215,22 @@ class Module:
                         "results": results,
                         "success": True
                     }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                        content_type="application/json",
-                        status=200)
+                                        content_type="application/json",
+                                        status=200)
                 except json.decoder.JSONDecodeError:
                     return web.Response(body=json.dumps({
                         "message": "Invalid JSON payload",
                         "success": False,
                     }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                        content_type="application/json",
-                        status=402)
+                                        content_type="application/json",
+                                        status=402)
             else:
                 return web.Response(body=json.dumps({
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.post("/item/{id}/state/{state}")
         async def set_specific_item_state(request: web.Request):
@@ -254,29 +251,29 @@ class Module:
                             "results": result,
                             "success": True
                         }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                            content_type="application/json",
-                            status=200)
+                                            content_type="application/json",
+                                            status=200)
                     else:
                         return web.Response(body=json.dumps({
                             "message": "State doesn't exist",
                             "success": False,
                         }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                            content_type="application/json",
-                            status=402)
+                                            content_type="application/json",
+                                            status=402)
                 except json.decoder.JSONDecodeError:
                     return web.Response(body=json.dumps({
                         "message": "Invalid state value",
                         "success": False,
                     }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                        content_type="application/json",
-                        status=402)
+                                        content_type="application/json",
+                                        status=402)
             else:
                 return web.Response(body=json.dumps({
                     "message": "Item doesn't exist",
                     "success": False
                 }, sort_keys=True, indent=4, cls=JSONEncoder).encode(),
-                    content_type="application/json",
-                    status=402)
+                                    content_type="application/json",
+                                    status=402)
 
         @r.post("/item/create")  # TODO Implementation
         async def create_item(request):

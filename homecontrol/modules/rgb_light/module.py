@@ -55,3 +55,4 @@ class RGBLight:
         color = await self.states.get("color")
         color.l = value
         await self.set_color(color)
+

@@ -5,11 +5,9 @@ class Chromecast:
     last_time_jump = 0
 
     async def init(self):
-        self.cc = pychromecast.Chromecast(
-            host=self.cfg["host"], port=self.cfg["port"])
+        self.cc = pychromecast.Chromecast(host=self.cfg["host"], port=self.cfg["port"])
         self.media_controller = self.cc.media_controller
-        self.last_time_jump = self.media_controller.__dict__.get(
-            "current_time", 0)
+        self.last_time_jump = self.media_controller.__dict__.get("current_time", 0)
         await self.states.update("playing", self.media_controller.__dict__.get("player_state") == "PLAYING")
         await self.states.update("cast_state", self.media_controller.status)
         await self.states.update("content_type", self.media_controller.status.content_type)
@@ -21,7 +19,7 @@ class Chromecast:
         async def on_status(event, data):
             if data.current_time != self.last_time_jump:
                 self.core.event_engine.broadcast("state_change", item=self,
-                                                 changes={"playtime": data.current_time})
+                                                       changes={"playtime": data.current_time})
             self.last_time_jump = data.current_time
             await self.states.update("playing", data.__dict__.get("player_state") == "PLAYING")
             await self.states.update("metadata", data.media_metadata)
@@ -73,10 +71,8 @@ class Chromecast:
         return self.cc.media_controller.is_playing
 
     async def set_playing(self, value):
-        if value:
-            self.media_controller.play()
-        else:
-            self.media_controller.pause()
+        if value: self.media_controller.play()
+        else: self.media_controller.pause()
         await self.states.update("playing", value)
         return {"playing": value}
 
@@ -116,9 +112,7 @@ class Chromecast:
         self.cc.quit_app()
 
     def new_cast_status(self, status):
-        self.core.event_engine.broadcast(
-            "chromecast_cast_status", status=status)
+        self.core.event_engine.broadcast("chromecast_cast_status", status=status)
 
     def new_media_status(self, status):
-        self.core.event_engine.broadcast(
-            "chromecast_media_status", status=status)
+        self.core.event_engine.broadcast("chromecast_media_status", status=status)

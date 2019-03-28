@@ -34,10 +34,8 @@ class Core:
         self.entity_manager = EntityManager(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
-        self.loop.add_signal_handler(
-            signal.SIGINT, lambda: self.loop.create_task(self.stop()))
-        self.loop.add_signal_handler(
-            signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
+        self.loop.add_signal_handler(signal.SIGINT, lambda: self.loop.create_task(self.stop()))
+        self.loop.add_signal_handler(signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
 
     async def bootstrap(self) -> None:
         """
@@ -62,16 +60,16 @@ class Core:
     async def stop(self) -> None:
         await self.tick_engine.stop()
         print("SHUTTING DOWN!")
-
+        
         for module in list(self.module_manager.loaded_modules.keys()):
             await self.module_manager.unload_module(module)
         pending = asyncio.Task.all_tasks(loop=self.loop)
-
+        
         print("Waiting for pending tasks (1s)")
         await asyncio.wait(pending, loop=self.loop, timeout=1)
         print("Closing the loop soon")
         self.block_event.set()
-
+    
     async def restart(self) -> None:
         self.exit_return = EXIT_RESTART
         await self.stop()

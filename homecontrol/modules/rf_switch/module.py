@@ -8,8 +8,7 @@ class Module:
             if length == 12:
                 it_code = from_code(code)
                 if it_code:
-                    self.core.event_engine.broadcast(
-                        "intertechno_code_received", **dict(zip(("house", "id", "state"), it_code)))
+                    self.core.event_engine.broadcast("intertechno_code_received", **dict(zip(("house", "id", "state"), it_code)))
 
 
 class IntertechnoSwitch:

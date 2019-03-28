@@ -76,6 +76,9 @@ class Color:
     def dump(self):
         return self.rgb
 
+    
+        
+
 
 @data_type
 class DateTime(datetime):
@@ -85,3 +88,4 @@ class DateTime(datetime):
 
     def dump(self):
         return self.isoformat()
+

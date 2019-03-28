@@ -30,7 +30,10 @@ class EntityManager:
     async def remove_item(self, identifier: str):
         item = self.items[identifier]
         try:
-            await asyncio.gather(*[self.core.loop.create_task(dependant_item.stop()) for dependant_item in list(item.dependant_items)+[item] if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
+            await asyncio.gather(*[
+                self.core.loop.create_task(dependant_item.stop()) for dependant_item
+                in list(item.dependant_items)+[item] 
+                if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
         except Exception as e:
             print(traceback.print_exc())
 

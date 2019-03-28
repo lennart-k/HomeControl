@@ -1,6 +1,5 @@
 from pigpio import pi
 from dependencies.data_types import Color
-import colorsys
 
 
 class RGBLight:
@@ -35,7 +34,7 @@ class RGBLight:
         if value:
             return {"on": True, "color": await self.apply_color()} if not await self.states.get("on") else {}
         else:
-            await self.apply_color(Color((0, 0, 0)))
+            await self.apply_color(Color(0, 0, 0))
             return {"on": False}
 
     async def toggle_on(self):

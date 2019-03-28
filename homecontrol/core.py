@@ -17,14 +17,14 @@ class Core:
     Represents the root object for HomeControl
     """
 
-    def __init__(self, cfg: dict, loop: asyncio.AbstractEventLoop = None, start_args: dict = {}, exit_return: int = None) -> None:
+    def __init__(self, cfg: dict, loop: asyncio.AbstractEventLoop = None, start_args: dict = None, exit_return: int = None) -> None:
         """
 
         :param cfg: Config dictionary
         :param loop: asyncio EventLoop
         """
         self.cfg = cfg
-        self.start_args = start_args
+        self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
         self.block_event = asyncio.Event()
         self.tick_engine = TickEngine(core=self)

@@ -73,6 +73,9 @@ class Color:
         hsl[2] = l
         self.hsl = hsl
 
+    def dump(self):
+        return self.rgb
+
     
         
 

@@ -37,7 +37,7 @@ class Module:
 
         # Windows doesn't support reuse_port
         self.future = self.core.loop.create_server(self.handler, self.core.cfg["http-server"]["host"],
-                                              self.core.cfg["api-server"]["port"],
+                                              self.core.cfg["http-server"]["port"],
                                               reuse_address=True, reuse_port=os.name != "nt")
         asyncio.run_coroutine_threadsafe(self.future, loop=self.core.loop)
 

@@ -17,7 +17,7 @@ class EntityManager:
         self.items = {}
         self.item_specs = {}
 
-    async def add_from_module(self, mod_obj):
+    async def add_from_module(self, mod_obj) -> None:
         """
         Adds the adapter and item specs of a module to the dict of available ones
         """
@@ -27,7 +27,7 @@ class EntityManager:
             self.item_specs[f"{mod_obj.name}.{name}"] = spec
             mod_obj.item_specs[name] = spec
 
-    async def remove_item(self, identifier: str):
+    async def remove_item(self, identifier: str) -> None:
         item = self.items[identifier]
         try:
             await asyncio.gather(*[

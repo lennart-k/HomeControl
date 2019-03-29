@@ -22,7 +22,7 @@ class PiGPIOAdapter:
     core: Core
 
     async def init(self):
-        done, pending = await asyncio.wait({self.core.loop.run_in_executor(None, self.init_pigpio)}, timeout=3)
+        done, pending = await asyncio.wait({self.core.loop.run_in_executor(None, self.init_pigpio)}, timeout=2)
         if pending:
             return False
         

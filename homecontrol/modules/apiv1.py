@@ -5,7 +5,6 @@ from aiohttp.web import middleware
 from dependencies.entity_types import Item
 from dependencies.data_types import type_set, types
 from datetime import datetime
-import os
 
 
 SPEC = """

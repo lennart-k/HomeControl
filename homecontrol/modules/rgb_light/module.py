@@ -1,4 +1,3 @@
-from pigpio import pi
 import pigpio
 from dependencies.data_types import Color
 
@@ -6,7 +5,7 @@ from dependencies.data_types import Color
 class RGBLight:
     cfg: dict
     mode: str
-    gpio: pi
+    gpio: pigpio.pi
 
     async def init(self):
         self.gpio = self.cfg["pigpio_adapter"].pigpio

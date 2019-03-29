@@ -8,6 +8,11 @@ from datetime import datetime
 import os
 
 
+SPEC = """
+meta:
+  name: API v1
+"""
+
 class JSONEncoder(json.JSONEncoder):  # TODO Plan out custom types
     def default(self, o):
         if Item in o.__class__.__bases__:
@@ -44,45 +49,18 @@ class JSONDecoder(json.JSONDecoder):
 
 
 class Module:
-    auth_check: None
-
-    """
-    HTTPServer exposes HTTP endpoints for interaction from outside
-    """
-
     async def init(self):
-        """
-        Sets up an HTTPServer
-        """
-
-        self.main_app = web.Application(loop=self.core.loop)
-        self.middlewares = []
-        self.add_middlewares()
-        self.api_app = web.Application(loop=self.core.loop, middlewares=self.middlewares)
-
+        self.api_app = web.Application(loop=self.core.loop, middlewares=list(self.middlewares()))
+        self.route_table = self.routes()
+        await self.core.event_engine.gather("http_add_api_routes", router=self.route_table)
+        self.api_app.add_routes(self.route_table)
         self.event_sockets = set()
-        
-        event("core_bootstrap_complete")(self.start)
 
-    async def start(self, *args):
-        self.route_table_def = web.RouteTableDef()
-        self.routes()
-        await self.core.event_engine.gather("http_add_api_routes", router=self.route_table_def)
-        await self.core.event_engine.gather("http_add_api_subapps", api_app=self.api_app)
-        await self.core.event_engine.gather("http_add_main_subapps", main_app=self.main_app)
+        @event("http_add_main_subapps")
+        async def add_subapp(event, main_app):
+            main_app.add_subapp("/api", self.api_app)
 
-        self.api_app.add_routes(self.route_table_def)
-        self.main_app.add_subapp("/api", self.api_app)
-        self.handler = self.main_app.make_handler(loop=self.core.loop)
-
-        # Windows doesn't support reuse_port
-        self.future = self.core.loop.create_server(self.handler, self.core.cfg["api-server"]["host"],
-                                              self.core.cfg["api-server"]["port"],
-                                              reuse_address=True, reuse_port=os.name != "nt")
-        # asyncio.ensure_future(self.future, loop=self.core.loop)
-        asyncio.run_coroutine_threadsafe(self.future, loop=self.core.loop)
-
-    def add_middlewares(self):
+    def middlewares(self):
         @middleware
         async def auth_check(request, handler):
             response = await handler(request)
@@ -93,10 +71,10 @@ class Module:
                 response.headers[header] = value
             return response
 
-        self.middlewares.append(auth_check)
+        yield auth_check
 
     def routes(self):
-        r = self.route_table_def
+        r = web.RouteTableDef()
 
         @r.route("OPTIONS", "/{tail:.*}")
         async def get_options(request):
@@ -329,7 +307,4 @@ class Module:
                                            cls=JSONEncoder)),
                     loop=self.core.loop)
 
-    async def stop(self):
-        if self.main_app.frozen:
-            await self.main_app.cleanup()
-            self.future.close()
+        return r

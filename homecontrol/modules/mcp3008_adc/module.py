@@ -1,5 +1,3 @@
-import pigpio
-
 
 class MCP3008ADC:
     handle = None
@@ -17,7 +15,7 @@ class MCP3008ADC:
 
 
     async def stop(self):
-        if not self.handle == None:
+        if self.handle is not None:
             try:
                 self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
             except BrokenPipeError:

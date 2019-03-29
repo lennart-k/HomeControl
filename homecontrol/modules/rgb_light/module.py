@@ -1,4 +1,5 @@
 from pigpio import pi
+import pigpio
 from dependencies.data_types import Color
 
 
@@ -9,7 +10,10 @@ class RGBLight:
 
     async def init(self):
         self.gpio = self.cfg["pigpio_adapter"].pigpio
-        await self.states.set("color", Color.from_rgb((self.gpio.get_PWM_dutycycle(pin) for pin in (self.cfg["pin_r"], self.cfg["pin_g"], self.cfg["pin_b"]))))
+        try:
+            await self.states.set("color", Color.from_rgb((self.gpio.get_PWM_dutycycle(pin) for pin in (self.cfg["pin_r"], self.cfg["pin_g"], self.cfg["pin_b"]))))
+        except pigpio.error:  # Pins not used for PWM
+            pass
         await self.apply_color()
 
     async def set_color(self, color: Color) -> dict:

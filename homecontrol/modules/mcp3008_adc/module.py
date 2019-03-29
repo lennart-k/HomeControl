@@ -18,7 +18,10 @@ class MCP3008ADC:
 
     async def stop(self):
         if not self.handle == None:
-            self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
+            try:
+                self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
+            except BrokenPipeError:
+                print(f"SPI not properly closed for {self.identifier}")
 
 
 class AnalogInput:

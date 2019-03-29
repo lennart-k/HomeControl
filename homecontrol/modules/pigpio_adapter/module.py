@@ -81,7 +81,7 @@ class Button:
         try:
             self.cb.cancel()
         # pigpio socket already closed
-        except AttributeError:
+        except AttributeError or ConnectionResetError:
             pass
 
 

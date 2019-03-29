@@ -36,7 +36,7 @@ class Color:
 
     @property
     def rgb(self) -> (int, int, int):
-        return tuple(int(i*255) for i in colorsys.hls_to_rgb(self.hsl[0]/255, self.hsl[2]/255, self.hsl[1]/255))
+        return tuple(int(i*255) for i in colorsys.hls_to_rgb(self.hsl[0]/360, self.hsl[2]/255, self.hsl[1]/255))
 
     @rgb.setter
     def rgb(self, rgb):

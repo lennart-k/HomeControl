@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Callable, Any
 import asyncio
 import time
 
@@ -43,7 +43,7 @@ class EventEngine:
 
         return [asyncio.ensure_future(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
 
-    def broadcast_threaded(self, event_type: str, data: dict = None, **kwargs) -> List:
+    def broadcast_threaded(self, event_type: str, data: dict = None, **kwargs) -> List[asyncio.Task]:
         """
         Same as broadcast BUT
         - It returns Futures and not Tasks
@@ -61,7 +61,7 @@ class EventEngine:
         return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
 
 
-    async def gather(self, event_type: str, data: dict = None, **kwargs):
+    async def gather(self, event_type: str, data: dict = None, **kwargs) -> List[Any]:
         """
         Broadcast an event and return the results
         """

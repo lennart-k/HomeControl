@@ -1,3 +1,4 @@
+from contextlib import suppress
 import json
 from functools import reduce
 
@@ -12,14 +13,12 @@ class TasmotaRFAdapter:
         @event("mqtt_message_received")
         async def on_mqtt_message_received(event, mqtt_adapter, message):
             if mqtt_adapter == self.cfg["mqtt_adapter"]:
-                try:
+                with suppress(json.decoder.JSONDecodeError):
                     data = json.loads(message.payload)
                     if data.get("RfReceived"):
                         code = data["RfReceived"].get("Data", 0)
                         bits = bin(int(code, 16))[2:][::2]
                         self.core.event_engine.broadcast("rf_code_received", code=int(bits, 2), length=len(bits))
-                except json.decoder.JSONDecodeError:
-                    pass
 
     async def send_code(self, code):
         binary = bin(int(code))[2:]

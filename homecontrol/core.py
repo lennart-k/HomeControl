@@ -1,3 +1,4 @@
+from contextlib import suppress
 import signal
 import asyncio
 from dependencies.event_engine import EventEngine
@@ -51,10 +52,8 @@ class Core:
         self.event_engine.broadcast("core_bootstrap_complete")
 
     async def block_until_stop(self) -> int:
-        try:
+        with suppress(asyncio.CancelledError):
             await self.block_event.wait()
-        except asyncio.CancelledError:
-            pass
         return self.exit_return
 
     async def stop(self) -> None:

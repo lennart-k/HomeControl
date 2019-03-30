@@ -1,3 +1,4 @@
+from contextlib import suppress
 from dependencies.lcd import LCD
 import asyncio
 from dependencies.throttle_function import throttle
@@ -78,11 +79,8 @@ class Button:
         asyncio.run_coroutine_threadsafe(_async_callback(), loop=self.core.loop)
 
     async def stop(self):
-        try:
+        with suppress(AttributeError, ConnectionResetError):  # pigpio socket already closed
             self.cb.cancel()
-        # pigpio socket already closed
-        except AttributeError or ConnectionResetError:
-            pass
 
 
 class I2CLCD:

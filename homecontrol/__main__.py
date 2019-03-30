@@ -24,7 +24,6 @@ def get_arguments() -> argparse.Namespace:
     if os.name == "posix":
         parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
     
-
     return vars(parser.parse_args())
 
 def get_config(path: str) -> dict:

@@ -21,6 +21,7 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
+    parser.add_argument("-killprev", "-kp", action="store_true", default=None, help="Kills the previous HomeControl instance")
     if os.name == "posix":
         parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
     
@@ -97,7 +98,7 @@ def daemonize() -> None:
     os.dup2(outfd.fileno(), sys.stdout.fileno())
     os.dup2(outfd.fileno(), sys.stderr.fileno())
 
-def check_pid_file(pid_file: str) -> None:
+def check_pid_file(pid_file: str, kill: bool = False) -> None:
     if not os.path.isfile(pid_file):
         # No pid file existing
         return
@@ -112,6 +113,16 @@ def check_pid_file(pid_file: str) -> None:
     if pid == os.getpid():
         # Just restarted
         return
+
+    if kill:
+        try:
+            os.kill(pid, 9)
+            print("Killing previous instance of HomeControl")
+            while True:
+                os.kill(pid, 0)
+        except OSError:
+            # Process dead
+            return
 
     try:
         os.kill(pid, 0)
@@ -130,7 +141,7 @@ def main():
     cfg = get_config(args["cfgfile"])
 
     if args["pid_file"]:
-        check_pid_file(args["pid_file"])
+        check_pid_file(args["pid_file"], kill=args["killprev"])
 
     if args.get("daemon", False):
         print("Running as a daemon")

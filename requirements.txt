@@ -7,3 +7,4 @@ pychromecast
 pyyaml
 aiomonitor
 netdisco
+voluptuous

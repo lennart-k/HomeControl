@@ -23,7 +23,7 @@ class Constructor(SafeConstructor):
         
         SafeConstructor.__init__(self)
 
-    def _obj(self, cls, node) -> object:
+    def _obj(self, cls, node: yaml.Node) -> object:
         if not node:
             return cls
 

@@ -11,7 +11,7 @@ class ModuleManager:
         self.core = core
         self.loaded_modules = {}
 
-    async def load_folder(self, path) -> [object]:
+    async def load_folder(self, path: str) -> [object]:
         """
         Loads every module in a folder
         """
@@ -29,7 +29,7 @@ class ModuleManager:
 
         return out
 
-    async def load_file_module(self, mod_path, name) -> (Module, Exception):
+    async def load_file_module(self, mod_path: str, name: str) -> (Module, Exception):
         """
         Loads a module from a file and send an init trigger
         """
@@ -67,7 +67,7 @@ class ModuleManager:
         return mod_obj
 
 
-    async def load_module(self, path, name) -> (Module, Exception):
+    async def load_module(self, path: str, name: str) -> (Module, Exception):
         """
         Loads a module from a folder and send an init trigger
         """
@@ -110,7 +110,7 @@ class ModuleManager:
         self.core.event_engine.broadcast("module_loaded", module=mod_obj)
         return mod_obj
 
-    async def unload_module(self, name) -> None:
+    async def unload_module(self, name: str) -> None:
         """
         First removes all the adapters and items the module offers.
         Then it triggers the stop-coro and fully removes it.

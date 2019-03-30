@@ -1,5 +1,6 @@
 from typing import Callable
 import asyncio
+from collections import defaultdict
 
 
 class TickEngine:
@@ -9,7 +10,7 @@ class TickEngine:
     """
     def __init__(self, core):
         self.core = core
-        self.intervals = {}
+        self.intervals = defaultdict(set)
         self.futures = set()
 
     def tick(self, interval: int) -> Callable:
@@ -20,10 +21,10 @@ class TickEngine:
         """
 
         def _tick(coro) -> Callable:
-            if interval not in self.intervals:
-                self.intervals[interval] = set()
-                self.futures.add(asyncio.run_coroutine_threadsafe(self.do_tick(interval), self.core.loop))
             self.intervals[interval].add(coro)
+
+            if interval not in self.intervals:
+                self.futures.add(asyncio.run_coroutine_threadsafe(self.do_tick(interval), self.core.loop))
             return coro
         return _tick
 

@@ -1,6 +1,7 @@
 from typing import List, Callable, Any
 import asyncio
 import time
+from collections import defaultdict
 
 
 class Event:
@@ -20,7 +21,7 @@ class Event:
 class EventEngine:
     def __init__(self, core):
         self.core = core
-        self.handlers = {}
+        self.handlers = defaultdict(set)
 
     def broadcast(self, event_type: str, data: dict = None, **kwargs) -> List[asyncio.Future]:
         """
@@ -67,22 +68,12 @@ class EventEngine:
         """
         return await asyncio.gather(*self.broadcast(event_type, data, **kwargs))
 
-    def trigger(self, trigger, dest, *args, **kwargs) -> asyncio.Future:
+    def trigger(self, trigger: str, dest: Any, *args, **kwargs) -> asyncio.Future:
         """
         Triggers are similar to events but they are just there to call a method of a module, item or adapter
         """
         if hasattr(dest, trigger):
             return asyncio.ensure_future(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
-
-    def _register(self, event: str, coro) -> Callable:
-        """
-        Register a coroutine that will be triggered when the event occurs
-        Don't worry, every coroutine can only be registered once
-        """
-        if event not in self.handlers:
-            self.handlers[event] = set()
-        self.handlers[event].add(coro)
-        return coro
 
     def register(self, event: str) -> Callable:
         """
@@ -92,8 +83,6 @@ class EventEngine:
         :return:
         """
         def _register(coro):
-            if event not in self.handlers:
-                self.handlers[event] = set()
             self.handlers[event].add(coro)
             return coro
         return _register

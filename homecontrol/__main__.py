@@ -148,6 +148,4 @@ def main():
 
     run_homecontrol(config=cfg, start_args=args)
 
-start_command()
-
 main()

@@ -8,6 +8,5 @@ __pycache__/
 config
 scripts
 webapp
-entities.yaml
 homecontrol.lock
 .github

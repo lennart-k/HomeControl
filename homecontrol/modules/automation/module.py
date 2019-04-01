@@ -13,7 +13,7 @@ class EventTriggerProvider:
 
         # Subscribe to trigger event
         event(self.data["type"])(self.on_event)
-
+     
     async def on_event(self, event: str, **kwargs) -> None:
 
         if self.event_data.items() <= kwargs.items():

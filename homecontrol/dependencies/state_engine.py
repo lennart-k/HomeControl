@@ -1,9 +1,11 @@
 from typing import Callable, Any
+import voluptuous as vol
 from dependencies.data_types import types
+from dependencies.entity_types import Item
 
 
 class StateEngine:
-    def __init__(self, item, core):
+    def __init__(self, item: Item, core):
         self.item = item
         self.core = core
         self.states = {}
@@ -11,23 +13,24 @@ class StateEngine:
             self.states[state_name] = State(self, details.get("default", None),
                                             getter=getattr(item, details.get("getter", ""), None),
                                             setter=getattr(item, details.get("setter", ""), None),
+                                            schema=details.get("schema", None),
                                             state_type=types.get(details.get("type", ""), None),
                                             name=state_name,
                                             )
 
-    async def get(self, state):
+    async def get(self, state: str):
         if state in self.states:
             return await self.states[state].get()
 
-    async def set(self, state, value):
+    async def set(self, state: str, value) -> dict:
         if state in self.states:
             return await self.states[state].set(value)
 
-    async def update(self, state, value):
+    async def update(self, state: str, value):
         if state in self.states:
             return await self.states[state].update(value)
 
-    async def dump(self):
+    async def dump(self) -> dict:
         """
         Return a JSON serialisable object
         """
@@ -45,18 +48,21 @@ class State:
     value: Any
     mutable: bool
 
-    def __init__(self, state_engine, default, getter=None, setter=None, name=None, state_type=None):
+    def __init__(self, state_engine: StateEngine, default, getter: Callable=None, setter: Callable =None, name: str =None, state_type=None, schema=None):
         self.value = default if not state_type else state_type(*default)
         self.name = name
         self.getter = getter
         self.setter = setter
         self.state_engine = state_engine
+        self.schema = vol.Schema(schema) if schema else None
 
     async def get(self):
         if self.getter: return await self.getter()
         return self.value
 
     async def set(self, value) -> dict:
+        if self.schema:  # Apply schema to new value
+            value = self.schema(value)
         if self.setter:
             result: dict = await self.setter(value)
             for state, value in result.items():

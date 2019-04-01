@@ -14,7 +14,7 @@ class EventTriggerProvider:
         # Subscribe to trigger event
         event(self.data["type"])(self.on_event)
 
-    async def on_event(self, event, **kwargs):
+    async def on_event(self, event: str, **kwargs) -> None:
 
         if self.event_data.items() <= kwargs.items():
             await self.rule.on_trigger(kwargs)
@@ -30,7 +30,7 @@ class StateTriggerProvider:
         # Subscribe to state changes
         event("state_change")(self.on_state)
 
-    async def on_state(self, event, item, changes):
+    async def on_state(self, event: str, item, changes: dict) -> None:
         if item.identifier == self.data["target"] and self.data["state"] in changes:
             await self.rule.on_trigger({self.data["state"]: changes[self.data["state"]]})
 
@@ -44,7 +44,7 @@ class StateActionProvider:
 
         self.data = rule.data["action"]
 
-    async def on_trigger(self, data):
+    async def on_trigger(self, data: dict) -> None:
         target = self.core.entity_manager.items.get(self.data["target"])
         changes = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
@@ -62,7 +62,7 @@ class ItemActionProvider:
 
         self.data = rule.data["action"]
 
-    async def on_trigger(self, data):
+    async def on_trigger(self, data: dict) -> None:
         target = self.core.entity_manager.items.get(self.data["target"])
         params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
@@ -87,7 +87,7 @@ class Module:
 
         event("core_bootstrap_complete")(self.start)
 
-    async def start(self, event) -> None:
+    async def start(self, event: str) -> None:
         await self.core.event_engine.gather("gather_automation_providers", engine=self, callback=self.register_automation_providers)
 
         for rule in self.core.cfg.get("automation", []):
@@ -99,7 +99,7 @@ class Module:
         self.action_providers.update(action or {})
 
 class AutomationRule:
-    def __init__(self, data, engine: Module):
+    def __init__(self, data: dict, engine: Module):
         self.data = data
         self.engine = engine
         self.core = engine.core

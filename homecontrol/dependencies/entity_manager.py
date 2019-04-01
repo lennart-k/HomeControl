@@ -43,7 +43,7 @@ class EntityManager:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
 
-    async def create_item(self, identifier: str, item_type: str, cfg: dict) -> Item:
+    async def create_item(self, identifier: str, item_type: str, cfg: dict = None) -> Item:
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
@@ -57,7 +57,7 @@ class EntityManager:
         config = {}
         
         if spec.get("config_schema"):
-            config = vol.Schema(spec["config_schema"])(cfg)
+            config = vol.Schema(spec["config_schema"])(cfg or {})
 
         for key, value in list(config.items()):
             if type(value) == str:

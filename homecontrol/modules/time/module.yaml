@@ -1,0 +1,29 @@
+meta:
+  name: Time
+  description: Provides time related features
+
+
+items:
+  Timer:
+    state:
+      time_remaining:
+        type: Integer
+        default: 0
+
+      running:
+        type: Boolean
+        default: False
+
+    config_schema:
+      !vol/Required {schema: seconds, default: 60}:
+        !vol/All
+          - !vol/Coerce { type: !type/int }
+          - !vol/Range { min: 1 }
+
+
+    actions:
+      start: start
+      stop: stop_timer
+      reset: reset
+      set_time: set_time
+      add_time: add_time

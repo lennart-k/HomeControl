@@ -11,7 +11,7 @@ class TickEngine:
     def __init__(self, core):
         self.core = core
         self.intervals = defaultdict(set)
-        self.futures = set()
+        self.futures = dict()
 
     def tick(self, interval: int) -> Callable:
         """
@@ -23,8 +23,8 @@ class TickEngine:
         def _tick(coro) -> Callable:
             self.intervals[interval].add(coro)
 
-            if interval not in self.intervals:
-                self.futures.add(asyncio.run_coroutine_threadsafe(self.do_tick(interval), self.core.loop))
+            if not interval in self.futures:
+                self.futures[interval] = asyncio.run_coroutine_threadsafe(self.do_tick(interval), self.core.loop)
             return coro
         return _tick
 
@@ -35,5 +35,5 @@ class TickEngine:
             await asyncio.sleep(interval)
 
     async def stop(self):
-        for future in self.futures:
+        for future in self.futures.values():
             future.cancel()

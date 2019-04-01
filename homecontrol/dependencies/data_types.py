@@ -76,9 +76,6 @@ class Color:
     def dump(self) -> (int, int, int):
         return self.rgb
 
-    
-        
-
 
 @data_type
 class DateTime(datetime):

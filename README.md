@@ -13,9 +13,16 @@ Another approach to home automation
 
 ### Docker
 
+On amd64/x86 do:
 ```
 docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk01/homecontrol:latest
 ```
+
+On arm machines like the Raspberry Pi do:
+```
+docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk01/homecontrol:arm
+```
+If you are using arm you should consider the manual installation as I've not been able to set up automated builds for arm.
 
 
 ### Python
@@ -73,3 +80,4 @@ optional arguments:
   - 433MHz switches
 - IR devices
 - MQTT
+- Raspberry Pi (GPIO)

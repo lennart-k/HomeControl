@@ -5,12 +5,16 @@ from dependencies.entity_types import Item
 
 
 class StateEngine:
-    def __init__(self, item: Item, core):
+    def __init__(self, item: Item, core, state_defaults: dict = {}):
         self.item = item
         self.core = core
         self.states = {}
         for state_name, details in item.spec.get("state", {}).items():
-            self.states[state_name] = State(self, details.get("default", None),
+            default_state = state_defaults.get(state_name, details.get("default", None)) 
+            if item.identifier == "RGB Strip": print(default_state)
+
+            self.states[state_name] = State(self,
+                                            default=default_state,
                                             getter=getattr(item, details.get("getter", ""), None),
                                             setter=getattr(item, details.get("setter", ""), None),
                                             schema=details.get("schema", None),

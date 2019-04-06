@@ -49,7 +49,11 @@ class Core:
 
         # Create items from config file
         for item in self.cfg["items"]:
-            await self.entity_manager.create_item(item["id"], item["type"], item.get("cfg"))
+            await self.entity_manager.create_item(
+                identifier=item["id"],
+                item_type=item["type"],
+                cfg=item.get("cfg"),
+                state_defaults=item.get("state", {}))
 
         self.event_engine.broadcast("core_bootstrap_complete")
 

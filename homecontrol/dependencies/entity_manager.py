@@ -43,7 +43,7 @@ class EntityManager:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
 
-    async def create_item(self, identifier: str, item_type: str, cfg: dict = None) -> Item:
+    async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}) -> Item:
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
@@ -76,7 +76,7 @@ class EntityManager:
                         item.status = NOT_WORKING
 
         item.cfg = config
-        item.states = StateEngine(item, self.core)
+        item.states = StateEngine(item, self.core, state_defaults=state_defaults)
         item.actions = ActionEngine(item, self.core)
         item.__init__()
         

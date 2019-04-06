@@ -5,7 +5,7 @@ import asyncio
 
 class Timer:
     float_remaining: float
-    last_time: (float, float)
+    last_time: (float, float) = (0, 0)
 
     async def init(self):
         await self.reset()

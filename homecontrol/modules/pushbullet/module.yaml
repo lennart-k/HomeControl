@@ -1,0 +1,11 @@
+meta:
+  name: Pushbullet
+
+items:
+  Pushbullet:
+    config_schema:
+      !vol/Required {schema: access_token}:
+        !type/str
+
+    actions:
+      send_message: send_message

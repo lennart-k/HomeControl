@@ -55,12 +55,14 @@ class Module:
         self.api_app = web.Application(
             loop=self.core.loop, middlewares=list(self.middlewares()))
         self.route_table = self.routes()
-        await self.core.event_engine.gather("http_add_api_routes", router=self.route_table)
-        self.api_app.add_routes(self.route_table)
         self.event_sockets = set()
 
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
+            # Gather API routes
+            await self.core.event_engine.gather("http_add_api_routes", router=self.route_table)
+            self.api_app.add_routes(self.route_table)
+
             main_app.add_subapp("/api", self.api_app)
 
     def middlewares(self):

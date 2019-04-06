@@ -1,6 +1,12 @@
 from core import Core
 
 
+SPEC = """
+meta:
+  name: Automation
+  author: Lennart K
+"""
+
 class EventTriggerProvider:
     def __init__(self, rule, engine):
         self.rule = rule

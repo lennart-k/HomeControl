@@ -18,9 +18,8 @@ def data_type(cls: object) -> object:
 class Color:
     hsl: (int, int, int)
 
-    def __init__(self, r: int, g: int, b: int):
-        hls = colorsys.rgb_to_hls(*(i/255 for i in (r, g, b)))
-        self.hsl = int(hls[0]*360), int(hls[2]*255), int(hls[1]*255)
+    def __init__(self, h: int, s: int, l: int):
+        self.hsl = (h, s, l)
 
     @staticmethod
     def from_hsl(hsl: tuple):
@@ -75,7 +74,7 @@ class Color:
         self.hsl = hsl
 
     def dump(self) -> (int, int, int):
-        return self.rgb
+        return self.hsl
 
 
 @data_type

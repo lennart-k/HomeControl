@@ -34,6 +34,10 @@ class StateEngine:
         if state in self.states:
             return await self.states[state].update(value)
 
+    async def bulk_update(self, **kwargs):
+        for state, value in kwargs.items():
+            await self.states[state].update(value)
+
     async def dump(self) -> dict:
         """
         Return a JSON serialisable object

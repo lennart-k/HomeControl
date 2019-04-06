@@ -9,9 +9,9 @@ meta:
 class Module:
     async def init(self):
 
-        @event("add_api_routes")
+        @event("http_add_api_routes")
         async def add_route(event, router):
-
+            
             @router.get("/webhook/{target}")
             async def gassist(request):
                 self.core.event_engine.broadcast("webhook_event", target=request.match_info["target"], params={})

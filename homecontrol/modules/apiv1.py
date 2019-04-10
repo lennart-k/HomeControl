@@ -111,6 +111,20 @@ class Module:
                     content_type="application/json",
                     status=402)
 
+        @r.get("/items")
+        async def get_items(request):
+            """
+            Get information about all items
+            """
+            return web.Response(body=json.dumps([{
+                "id": item.identifier,
+                "module": item.module.name,
+                "config": item.cfg,
+                "success": True
+            } for item in self.core.entity_manager.items.values()], sort_keys=True, indent=4, cls=JSONEncoder).encode(),
+                content_type="application/json",
+                status=200)
+        
         @r.post("/item/{id}/action/{name}")
         @r.get("/item/{id}/action/{name}")
         async def execute_action(request):

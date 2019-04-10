@@ -13,10 +13,8 @@ class Module:
 
 class IntertechnoSwitch:
     cfg: dict
-    on: bool
 
     async def init(self):
-        self.on = await self.states.get("on")
 
         @event("intertechno_code_received")
         async def on_it_code(event, house, id, state):
@@ -24,9 +22,8 @@ class IntertechnoSwitch:
                 await self.states.update("on", state)
 
     async def switch(self, on):
-        self.on = on
         await self.cfg["433mhz_tx_adapter"].send_code(to_code(self.cfg["house"], self.cfg["id"], on))
         return {"on": on}
 
     async def toggle_on(self):
-        return await self.states.set("on", not self.on)
+        return await self.states.set("on", not await self.states.get("on"))

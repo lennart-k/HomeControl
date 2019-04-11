@@ -119,8 +119,7 @@ class Module:
             return web.Response(body=json.dumps([{
                 "id": item.identifier,
                 "module": item.module.name,
-                "config": item.cfg,
-                "success": True
+                "config": item.cfg
             } for item in self.core.entity_manager.items.values()], sort_keys=True, indent=4, cls=JSONEncoder).encode(),
                 content_type="application/json",
                 status=200)

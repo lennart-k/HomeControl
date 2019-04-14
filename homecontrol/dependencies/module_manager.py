@@ -16,16 +16,19 @@ class ModuleManager:
         Loads every module in a folder
         """
         out = []
+        blacklist = self.core.cfg.get("module-manager", {}).get("blacklist", [])
         for node in os.listdir(path):
             if node == "__pycache__":
                 continue
             mod_path = os.path.join(path, node)
+            mod_name = node if os.path.isdir(node) else ".".join(os.path.splitext(node)[:-1])
 
-            if os.path.isdir(mod_path):
-                out.append(await self.load_module(mod_path, node))
+            if not mod_name in blacklist:
+                if os.path.isdir(mod_path):
+                    out.append(await self.load_module(mod_path, mod_name))
 
-            elif os.path.isfile(mod_path) and node.endswith(".py"):
-                out.append(await self.load_file_module(mod_path, ".".join(os.path.splitext(node)[:-1])))
+                elif os.path.isfile(mod_path) and node.endswith(".py"):
+                    out.append(await self.load_file_module(mod_path, mod_name))
 
         return out
 

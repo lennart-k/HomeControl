@@ -5,7 +5,6 @@ import voluptuous as vol
 from core import Core
 from dependencies.data_types import types
 from dependencies.entity_types import (
-    Module,
     Item
 )
 from exceptions import (
@@ -42,7 +41,7 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     def __init__(self, core: Core, *args, **kwargs):
         self.core = core
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, object_hook=object_hook)
 
     def object_hook(self, obj):
         if "!type" in obj:

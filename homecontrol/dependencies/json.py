@@ -39,7 +39,6 @@ class JSONEncoder(json.JSONEncoder):
                 "id": obj.identifier
             }
         elif Module in obj.__class__.__bases__:
-            print("IT'S A MODULE!")
             return {
                 "!type": "Module",
                 "name": obj.name,

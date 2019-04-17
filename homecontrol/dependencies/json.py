@@ -5,10 +5,12 @@ import voluptuous as vol
 from core import Core
 from dependencies.data_types import types
 from dependencies.entity_types import (
-    Item
+    Item,
+    Module
 )
 from exceptions import (
-    ItemNotFoundException
+    ItemNotFoundException,
+    ModuleNotFoundException
 )
 
 
@@ -17,6 +19,12 @@ ITEM_SCHEMA = vol.Schema({
     vol.Required("id"): str,
     vol.Required("!type"): "Item"
 })
+MODULE_SCHEMA = vol.Schema({
+    vol.Optional("meta"): str,
+    vol.Required("name"): str,
+    vol.Required("!type"): "Module"
+})
+
 
 class JSONEncoder(json.JSONEncoder):
     def __init__(self, core: Core, *args, **kwargs):
@@ -28,7 +36,14 @@ class JSONEncoder(json.JSONEncoder):
             return {
                 "!type": "Item",
                 "item_type": obj.type,
-                "id": obj.id
+                "id": obj.identifier
+            }
+        elif Module in obj.__class__.__bases__:
+            print("IT'S A MODULE!")
+            return {
+                "!type": "Module",
+                "name": obj.name,
+                "meta": obj.meta
             }
         elif obj.__class__ in types.values():
             return {
@@ -41,7 +56,7 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     def __init__(self, core: Core, *args, **kwargs):
         self.core = core
-        super().__init__(*args, **kwargs, object_hook=object_hook)
+        super().__init__(*args, **kwargs, object_hook=self.object_hook)
 
     def object_hook(self, obj):
         if "!type" in obj:
@@ -51,6 +66,14 @@ class JSONDecoder(json.JSONDecoder):
                 assert obj["id"] in self.core.entity_manager.items, ItemNotFoundException(
                     f"There's no item with id {obj['id']}")
                 return self.core.entity_manager.items[obj["id"]]
+
+            elif obj["!type"] == "Module":
+                MODULE_SCHEMA(obj)  # Check if obj has needed attributes
+                # Check if module exists
+                assert obj["name"] in self.core.module_manager.loaded_modules, ModuleNotFoundException(
+                    f"There's no module with name {obj['name']}"
+                )
+                return self.core.module_manager.loaded_modules[obj["name"]]
 
             elif obj["!type"] in types:
                 return types[obj["!type"]].from_data(obj["data"])

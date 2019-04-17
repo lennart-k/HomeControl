@@ -43,11 +43,8 @@ class StateEngine:
         Return a JSON serialisable object
         """
         return {
-            "item": self.item,
-            "states": {
-                name: await self.states[name].get() for name in self.states.keys()
+            name: await self.states[name].get() for name in self.states.keys()
             }
-        }
 
 
 class State:
@@ -87,3 +84,5 @@ class State:
             })
             return True
         return False
+
+    

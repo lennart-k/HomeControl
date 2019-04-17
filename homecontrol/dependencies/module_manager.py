@@ -48,7 +48,9 @@ class ModuleManager:
         mod.tick = self.core.tick_engine.tick
         spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
-            mod.Module = Module
+            mod.Module = type("Module_"+name, (Module,), {})
+        else:
+            mod.Module = type("Module_"+name, (mod.Module, Module), {})
 
         cfg = (mod.SPEC if type(mod.SPEC) == dict else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
@@ -94,7 +96,10 @@ class ModuleManager:
         spec.loader.exec_module(mod)
         sys.path.append(path)
         if not hasattr(mod, "Module"):
-            mod.Module = Module
+            mod.Module = type("Module_"+name, (Module,), {})
+        else:
+            mod.Module = type("Module_"+name, (mod.Module, Module), {})
+
         mod_obj = mod.Module.__new__(mod.Module)
         mod_obj.core = self.core
         mod_obj.meta = cfg.get("meta", {})

@@ -36,9 +36,15 @@ class JSONEncoder(json.JSONEncoder):
                 "name": obj.name,
                 "meta": obj.meta
             }
+        elif isinstance(obj, Exception):
+            return {
+                "!type": "Exception",
+                "type": obj.__class__.__name__,
+                "message": str(obj)
+            }
         elif obj.__class__ in types.values():
             return {
-                "!type": obj.__class.__name__,
+                "!type": obj.__class__.__name__,
                 "data": obj.dump()
             }
         return obj

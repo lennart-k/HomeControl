@@ -48,11 +48,11 @@ items:
         default: 0
 
     actions:
-      pause: pause
-      play: play
-      rewind: rewind
-      skip: skip
-      stop: stop
-      toggle_muted: toggle_muted
-      play_url: play_url
-      quit: quit
+      pause: action_pause
+      play: action_play
+      rewind: action_rewind
+      skip: action_skip
+      stop: action_stop
+      toggle_muted: action_toggle_muted
+      play_url: action_play_url
+      quit: action_quit

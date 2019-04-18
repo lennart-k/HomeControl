@@ -60,7 +60,7 @@ class Chromecast:
             **self.media_controller.status.__dict__
         }
 
-    async def pause(self):
+    async def action_pause(self):
         self.media_controller.pause()
         return True
 
@@ -76,22 +76,22 @@ class Chromecast:
         await self.states.update("playing", value)
         return {"playing": value}
 
-    async def play(self):
+    async def action_play(self):
         self.media_controller.play()
         return True
 
-    async def play_url(self, url, mime):
+    async def action_play_url(self, url, mime):
         self.media_controller.play_media(url=url, content_type=mime)
 
-    async def rewind(self):
+    async def action_rewind(self):
         self.media_controller.rewind()
         return True
 
-    async def skip(self):
+    async def action_skip(self):
         self.media_controller.skip()
         return True
 
-    async def stop(self):
+    async def action_stop(self):
         if self.media_controller.is_active:
             self.media_controller.stop()
         return True
@@ -104,11 +104,11 @@ class Chromecast:
         self.cc.set_volume_muted(bool(value))
         return {"muted": value} if await self.states.update("muted", value) else {}
 
-    async def toggle_muted(self):
+    async def action_toggle_muted(self):
         new_state = not (await self.states.get("muted"))
         await self.states.set("muted", new_state)
 
-    async def quit(self):
+    async def action_quit(self):
         self.cc.quit_app()
 
     def new_cast_status(self, status):

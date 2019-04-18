@@ -63,13 +63,14 @@ optional arguments:
 - [x] Szenes
 - [x] API
   - [x] Webhooks 
-- [ ] API v2
-  - [ ] web interface
+- [x] API v2
+  - [ ] web interface (in progress)
 - [ ] Tests
 - [x] Docker builds
   - [ ] Automated ARM builds
 - [ ] Data validation
   - [x] item config  
+  - [x] item states
   - [ ] configuration.yaml
 
 

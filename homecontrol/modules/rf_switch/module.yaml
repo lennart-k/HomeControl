@@ -24,7 +24,9 @@ items:
         default: True
         setter: switch
         schema:
-          !vol/Coerce { type: !type/bool }
+          !vol/All
+            - !vol/Any [ !type/bool , !type/int ]
+            - !vol/Coerce { type: !type/bool }
 
     actions:
       toggle: toggle_on

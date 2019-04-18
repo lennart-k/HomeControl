@@ -9,10 +9,12 @@ items:
       time_remaining:
         type: Integer
         default: 0
+        schema: !type/int
 
       running:
         type: Boolean
         default: False
+        schema: !type/bool
 
     config_schema:
       !vol/Required {schema: seconds, default: 60}:

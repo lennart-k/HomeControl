@@ -29,6 +29,10 @@ items:
         type: Integer
         default: 1
         setter: set_speed
+        schema:
+          !vol/All
+            - !type/int
+            - !vol/Range { min: 0, max: 4 }
 
     actions:
       start_party: start_party

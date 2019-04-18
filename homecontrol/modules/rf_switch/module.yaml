@@ -23,6 +23,8 @@ items:
       "on":
         default: True
         setter: switch
+        schema:
+          !vol/Coerce { type: !type/bool }
 
     actions:
       toggle: toggle_on

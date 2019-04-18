@@ -30,6 +30,12 @@ class StateEngine:
         if state in self.states:
             return await self.states[state].set(value)
 
+    def check_value(self, state: str, value) -> vol.error.Error:
+        """
+        Checks if a value is valid for a state
+        """
+        return self.states[state].check_value(value)
+
     async def update(self, state: str, value):
         if state in self.states:
             return await self.states[state].update(value)
@@ -75,6 +81,14 @@ class State:
             self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes=result)
             return result
         return {}
+
+    def check_value(self, value) -> vol.error.Error:
+        """
+        Checks if a value is valid for a state
+        """
+        if self.schema:
+            try: self.schema(value)
+            except vol.error.Error as e: return e
 
     async def update(self, value):
         if not self.value == value:

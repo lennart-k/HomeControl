@@ -12,18 +12,10 @@ from exceptions import (
     ItemNotFoundException,
     ModuleNotFoundException
 )
-
-
-ITEM_SCHEMA = vol.Schema({
-    vol.Optional("item_type"): str,
-    vol.Required("id"): str,
-    vol.Required("!type"): "Item"
-})
-MODULE_SCHEMA = vol.Schema({
-    vol.Optional("meta"): str,
-    vol.Required("name"): str,
-    vol.Required("!type"): "Module"
-})
+from const import (
+    MODULE_SCHEMA,
+    ITEM_SCHEMA
+)
 
 
 class JSONEncoder(json.JSONEncoder):

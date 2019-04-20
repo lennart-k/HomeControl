@@ -17,7 +17,7 @@ from const import (
 
 
 class JSONResponse(web.Response):
-    def __init__(self, data=None, error=None, status_code: int = 200, core=None):
+    def __init__(self, data=None, error=None, status_code: int = 200, core=None, headers=None):
         response = {
             "success": not error,
             **({"error": error} if error else {}),
@@ -26,7 +26,7 @@ class JSONResponse(web.Response):
         }
         super().__init__(body=json.dumps(response, indent=4, sort_keys=True, core=core),
                          status=status_code, content_type="application/json",
-                         charset="utf-8")
+                         charset="utf-8", headers=headers)
 
 
 class Module:
@@ -36,13 +36,26 @@ class Module:
 
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
-            middlewares = []
+            middlewares = self.middlewares()
             await self.core.event_engine.gather("http_add_api_middlewares", middlewares=middlewares)
             self.api_app = web.Application(middlewares=middlewares)
             route_table = self.routes()
             await self.core.event_engine.gather("http_add_api_routes", router=route_table)
             self.api_app.add_routes(route_table)
             main_app.add_subapp("/api", self.api_app)
+
+    def middlewares(self) -> list:
+        middlewares = []
+
+        @middlewares.append
+        @web.middleware
+        async def config_headers(request, handler):
+            response = await handler(request)
+            response.headers.update(self.core.cfg.get(
+                "api-server", {}).get("headers", {}))
+            return response
+
+        return middlewares
 
     def routes(self) -> web.RouteTableDef:
         r = web.RouteTableDef()
@@ -66,9 +79,12 @@ class Module:
             return JSONResponse([
                 {
                     "id": item.identifier,
+                    "name": item.name,
                     "type": item.type,
                     "module": item.module,
-                    "online": item.status
+                    "online": item.status,
+                    "actions": list(item.actions.actions.keys()),
+                    "state": await item.states.dump()
                 } for item in self.core.entity_manager.items.values()
             ])
 
@@ -237,13 +253,6 @@ class Module:
                 })
             except Exception as e:
                 return JSONResponse(error=e)
-
-        @r.route("OPTIONS", "/{tail:.*}")
-        async def get_options(request):
-            return web.Response(headers={"Allow": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
-                                         "Access-Control-Request-Method": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
-                                         "Access-Control-Allow-Origin": "*",
-                                         "Access-Control-Allow-Headers": "X-PINGOTHER, Content-Type"})
 
         @r.route("*", "/{path:.*}")
         async def not_found(request: web.Request) -> JSONResponse:

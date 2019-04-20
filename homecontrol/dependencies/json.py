@@ -1,6 +1,5 @@
 import json
 from functools import partial
-import voluptuous as vol
 
 from core import Core
 from dependencies.data_types import types
@@ -54,9 +53,9 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     def __init__(self, core: Core, *args, **kwargs):
         self.core = core
-        super().__init__(*args, **kwargs, object_hook=self.object_hook)
+        super().__init__(*args, **kwargs, object_hook=self._object_hook)
 
-    def object_hook(self, obj):
+    def _object_hook(self, obj):
         if "!type" in obj:
             if obj["!type"] == "Item":
                 ITEM_SCHEMA(obj)  # Check if obj has needed attributes

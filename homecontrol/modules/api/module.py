@@ -3,10 +3,8 @@ import voluptuous as vol
 from dependencies import json
 from json import JSONDecodeError
 from aiohttp import web
-import asyncio
-from dependencies.entity_types import Module
+from dependencies.json_response import JSONResponse
 from const import (
-    ERROR404,
     ERROR_ITEM_NOT_FOUND,
     ITEM_STATE_NOT_FOUND,
     ITEM_ACTION_NOT_FOUND,
@@ -14,20 +12,6 @@ from const import (
     ERROR_INVALID_ITEM_STATE,
     STATE_COMMIT_SCHEMA
 )
-
-
-class JSONResponse(web.Response):
-    def __init__(self, data=None, error=None, status_code: int = 200, core=None, headers=None):
-        response = {
-            "success": not error,
-            **({"error": error} if error else {}),
-            "status_code": status_code,
-            **({"data": data} if not error else {})
-        }
-        super().__init__(body=json.dumps(response, indent=4, sort_keys=True, core=core),
-                         status=status_code, content_type="application/json",
-                         charset="utf-8", headers=headers)
-
 
 class Module:
     api_app: web.Application

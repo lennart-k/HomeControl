@@ -16,6 +16,10 @@ class Logger:
         async def on_entity_discovered(event, d_type, d_info):
             print(f"ENTITY DISCOVERED:\t{d_type}\t\t{d_info}")
 
+        @event("core_bootstrap_complete")
+        async def on_core_bootstrap_complete(event):
+            print(f"CORE BOOTSTRAP COMPLETE")
+
     def info(self, *args: str):
         pass
 

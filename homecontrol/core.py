@@ -51,6 +51,7 @@ class Core:
         for item in self.cfg["items"]:
             await self.entity_manager.create_item(
                 identifier=item["id"],
+                name=item.get("name"),
                 item_type=item["type"],
                 cfg=item.get("cfg"),
                 state_defaults=item.get("state", {}))

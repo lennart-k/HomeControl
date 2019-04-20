@@ -43,7 +43,7 @@ class EntityManager:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
 
-    async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}) -> Item:
+    async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}, name: str = None) -> Item:
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
@@ -52,6 +52,7 @@ class EntityManager:
         item.module = spec["module"]
         item.status = WORKING
         item.identifier = identifier
+        item.name = name or identifier
         item.dependant_items = set()  # Items that will depend on this one
         item.depends_on = set()  # Items this new item depends on
         config = {}
@@ -79,6 +80,7 @@ class EntityManager:
         item.states = StateEngine(item, self.core, state_defaults=state_defaults)
         item.actions = ActionEngine(item, self.core)
         item.__init__()
+
         
         if not item.status == NOT_WORKING:
             init_result = await item.init() if hasattr(item, "init") else None
@@ -91,4 +93,5 @@ class EntityManager:
         self.core.event_engine.broadcast("item_created", item=item)
         if item.status == NOT_WORKING:
             self.core.event_engine.broadcast("item_not_working", item=item)
+
         return item

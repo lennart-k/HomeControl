@@ -28,7 +28,8 @@ class JSONEncoder(json.JSONEncoder):
             return {
                 "!type": "Item",
                 "item_type": obj.type,
-                "id": obj.identifier
+                "id": obj.identifier,
+                "name": obj.name
             }
         elif Module in obj.__class__.__bases__:
             return {

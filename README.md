@@ -77,8 +77,8 @@ optional arguments:
 ## Compatible Modules
 
 - Chromecast
-- RF devices
   - 433MHz switches
 - IR devices
 - MQTT
 - Raspberry Pi (GPIO)
+- RF devices

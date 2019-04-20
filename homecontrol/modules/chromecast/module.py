@@ -5,7 +5,10 @@ class Chromecast:
     last_time_jump = 0
 
     async def init(self):
-        self.cc = pychromecast.Chromecast(host=self.cfg["host"], port=self.cfg["port"])
+        try:
+            self.cc = pychromecast.Chromecast(host=self.cfg["host"], port=self.cfg["port"])
+        except pychromecast.error.ChromecastConnectionError as e:
+            return False
         self.media_controller = self.cc.media_controller
         self.last_time_jump = self.media_controller.__dict__.get("current_time", 0)
         await self.states.update("playing", self.media_controller.__dict__.get("player_state") == "PLAYING")

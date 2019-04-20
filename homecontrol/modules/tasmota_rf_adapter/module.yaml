@@ -11,5 +11,10 @@ items:
       !vol/Required {schema: topic}:
         !type/str
 
+      !vol/Required {schema: tx_interval, default: 0.5}:
+        !vol/All
+          - !vol/Coerce {type: !type/float }
+          - !vol/Range {min: 0}
+
     actions:
-      send_code: send_code
+      send_code: action_send_code

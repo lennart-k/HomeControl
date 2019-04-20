@@ -2,7 +2,9 @@ from typing import Callable, Any
 import voluptuous as vol
 from dependencies.data_types import types
 from dependencies.entity_types import Item
-
+from const import (
+    NOT_WORKING
+)
 
 class StateEngine:
     def __init__(self, item: Item, core, state_defaults: dict = {}):
@@ -68,6 +70,8 @@ class State:
         self.schema = vol.Schema(schema) if schema else None
 
     async def get(self):
+        if self.state_engine.item.status == NOT_WORKING:
+            return None
         if self.getter: return await self.getter()
         return self.value
 

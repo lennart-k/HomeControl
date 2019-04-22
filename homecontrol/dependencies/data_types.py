@@ -31,8 +31,8 @@ class Color:
         return Color(int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
 
     @staticmethod
-    def from_data(rgb: tuple):
-        return Color.from_rgb(rgb)
+    def from_data(hsl: tuple):
+        return Color.from_hsl(hsl)
 
     @property
     def rgb(self) -> (int, int, int):

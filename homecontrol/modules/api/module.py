@@ -41,6 +41,10 @@ class Module:
 
         return middlewares
 
+    async def stop(self):
+        if self.api_app.frozen:
+            await self.api_app.cleanup()
+
     def routes(self) -> web.RouteTableDef:
         r = web.RouteTableDef()
 

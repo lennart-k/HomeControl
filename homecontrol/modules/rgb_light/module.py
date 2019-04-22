@@ -45,15 +45,15 @@ class RGBLight:
     async def set_hue(self, value):
         color = await self.states.get("color")
         color.h = value
-        await self.set_color(color)
+        await self.states.set("color", color)
 
     async def set_saturation(self, value):
         color = await self.states.get("color")
         color.s = value
-        await self.set_color(color)
+        await self.states.set("color", color)
 
     async def set_brightness(self, value):
         color = await self.states.get("color")
         color.l = value
-        await self.set_color(color)
+        await self.states.set("color", color)
 

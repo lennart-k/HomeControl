@@ -35,7 +35,7 @@ class EntityManager:
                 in list(item.dependant_items)+[item] 
                 if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
         except Exception as e:
-            print(traceback.print_exc())
+            print(e.__traceback__)
 
         for dependant_item in item.dependant_items:
             dependant_item.status = STOPPED

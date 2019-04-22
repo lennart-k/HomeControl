@@ -31,10 +31,10 @@ stop() {
     /bin/cat $PID_FILE &> /dev/null
     case $? in
         0)
-            kill -s SIGINT `cat $PID_FILE` > /dev/null 2>&1
+            kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1
             case $? in 
                 0)        
-                    timeout 10 tail --pid=`cat $PID_FILE` -f /dev/null > /dev/null 2>&1
+                    timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1
                     if [ $? -eq 0 ]
                         then
                             echo -e "Service was ${GREEN}successfully${NC} stopped"

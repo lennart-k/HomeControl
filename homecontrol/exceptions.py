@@ -16,4 +16,3 @@ class InvalidConfigException(HomeControlException):
 
 class TemplateErrorException(HomeControlException):
     pass
-

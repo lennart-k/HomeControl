@@ -10,7 +10,7 @@ items:
         !type/str
 
       !vol/Required {schema: spi_channel, default: 0}:
-        !vol/All  
+        !vol/All
           - !type/int
           - !vol/Range {min: 0, max: 2}
 

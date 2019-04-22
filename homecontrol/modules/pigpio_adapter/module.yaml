@@ -67,10 +67,10 @@ items:
     config_schema:
       !vol/Required {schema: pigpio_adapter}:
         !type/str
-      
+
       !vol/Required {schema: bus, default: 0}:
         !vol/Coerce { type: !type/int }
-      
+
       !vol/Required {schema: address, default: 0x27}:
         !vol/Coerce { type: !type/int }
 

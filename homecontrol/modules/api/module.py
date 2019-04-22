@@ -1,8 +1,9 @@
+import asyncio
 from collections import ChainMap
 import voluptuous as vol
 from dependencies import json
 from json import JSONDecodeError
-from aiohttp import web
+from aiohttp import web, WSMsgType
 from dependencies.json_response import JSONResponse
 from const import (
     ERROR_ITEM_NOT_FOUND,
@@ -17,6 +18,7 @@ class Module:
     api_app: web.Application
 
     async def init(self):
+        self.event_sockets = set()
 
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
@@ -47,6 +49,38 @@ class Module:
 
     def routes(self) -> web.RouteTableDef:
         r = web.RouteTableDef()
+
+        @event("state_change")
+        async def on_item_state_change(event, item, changes: dict):
+            for ws in self.event_sockets:
+                try:
+                    await ws.send_json({
+                        "type": "state_change",
+                        "item": item,
+                        "changes": changes
+                    }, dumps=json.dumps)
+
+                except Exception as e:
+                    print(e.__traceback__)
+
+        @r.get("/websocket")
+        async def events_websockets(request: web.Request) -> web.WebSocketResponse:
+            ws = web.WebSocketResponse()
+            await ws.prepare(request)
+            self.event_sockets.add(ws)
+
+            async for msg in ws:
+                try:
+                    data = json.loads(msg.data)
+                except:
+                    continue
+                
+                if msg.data == "close":
+                    await ws.close()
+
+            self.event_sockets.remove(ws)
+            return ws
+
 
         @r.get("/ping")
         async def ping(request: web.Request) -> JSONResponse:

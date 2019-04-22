@@ -21,6 +21,9 @@ class Color:
     def __init__(self, h: int, s: int, l: int):
         self.hsl = (h, s, l)
 
+    def __repr__(self) -> str:
+        return f"<Color rgb={self.rgb} hsl={self.hsl}>"
+
     @staticmethod
     def from_hsl(hsl: tuple):
         return Color(*hsl)

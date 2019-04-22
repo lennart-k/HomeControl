@@ -13,7 +13,6 @@ class StateEngine:
         self.states = {}
         for state_name, details in item.spec.get("state", {}).items():
             default_state = state_defaults.get(state_name, details.get("default", None)) 
-            if item.identifier == "RGB Strip": print(default_state)
 
             self.states[state_name] = State(self,
                                             default=default_state,

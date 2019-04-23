@@ -1,9 +1,8 @@
-import asyncio
 from collections import ChainMap
 import voluptuous as vol
 from dependencies import json
 from json import JSONDecodeError
-from aiohttp import web, WSMsgType
+from aiohttp import web
 from dependencies.json_response import JSONResponse
 from const import (
     ERROR_ITEM_NOT_FOUND,
@@ -18,8 +17,6 @@ class Module:
     api_app: web.Application
 
     async def init(self):
-        self.event_sockets = set()
-
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
             middlewares = self.middlewares()
@@ -62,25 +59,6 @@ class Module:
 
                 except Exception as e:
                     print(e.__traceback__)
-
-        @r.get("/websocket")
-        async def events_websockets(request: web.Request) -> web.WebSocketResponse:
-            ws = web.WebSocketResponse()
-            await ws.prepare(request)
-            self.event_sockets.add(ws)
-
-            async for msg in ws:
-                try:
-                    data = json.loads(msg.data)
-                except:
-                    continue
-                
-                if msg.data == "close":
-                    await ws.close()
-
-            self.event_sockets.remove(ws)
-            return ws
-
 
         @r.get("/ping")
         async def ping(request: web.Request) -> JSONResponse:
@@ -243,7 +221,7 @@ class Module:
         async def execute_action(request: web.Request) -> JSONResponse:
             """
             Executes an item's action and returns a boolean indicating the success of the action.
-            Changed states or other events can be handled through the websocket endpoint /events
+            Changed states or other events can be handled through the websocket endpoint /websocket
             """
 
             identifier = request.match_info["id"]

@@ -1,4 +1,3 @@
-import traceback
 import asyncio
 from dependencies.state_engine import StateEngine
 from dependencies.action_engine import ActionEngine

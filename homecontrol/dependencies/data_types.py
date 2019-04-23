@@ -88,4 +88,3 @@ class DateTime(datetime):
 
     def dump(self):
         return self.isoformat()
-

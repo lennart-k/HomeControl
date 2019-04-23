@@ -41,7 +41,7 @@ def get_config(path: str) -> dict:
 
 def clear_port(port: int):
     if os.name == "posix":
-        subprocess.call(["fuser", "-k", "{port}/tcp".format(port=port)])
+        subprocess.call(["/bin/fuser", "-k", "{port}/tcp".format(port=port)])
 
 
 def validate_python_version():

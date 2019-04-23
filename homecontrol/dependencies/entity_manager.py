@@ -61,7 +61,7 @@ class EntityManager:
             config = vol.Schema(spec["config_schema"])(cfg or {})
 
         for key, value in list(config.items()):
-            if type(value) == str:
+            if isinstance(value, str):
                 if value.startswith("i!"):
                     i = self.items.get(value[2:], None)
                     config[key] = i

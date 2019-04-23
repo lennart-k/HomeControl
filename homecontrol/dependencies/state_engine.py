@@ -71,7 +71,8 @@ class State:
     async def get(self):
         if self.state_engine.item.status == NOT_WORKING:
             return None
-        if self.getter: return await self.getter()
+        if self.getter:
+            return await self.getter()
         return self.value
 
     async def set(self, value) -> dict:
@@ -79,8 +80,8 @@ class State:
             value = self.schema(value)
         if self.setter:
             result: dict = await self.setter(value)
-            for state, value in result.items():
-                self.state_engine.states[state].value = value
+            for state, change in result.items():
+                self.state_engine.states[state].value = change
             self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes=result)
             return result
         return {}
@@ -90,8 +91,12 @@ class State:
         Checks if a value is valid for a state
         """
         if self.schema:
-            try: self.schema(value)
-            except vol.error.Error as e: return e
+            try:
+                self.schema(value)
+                return True
+            except vol.error.Error as e:
+                return e
+        return True
 
     async def update(self, value):
         if not self.value == value:
@@ -101,5 +106,3 @@ class State:
             })
             return True
         return False
-
-    

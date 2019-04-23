@@ -34,8 +34,7 @@ stop() {
             kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1
             case $? in 
                 0)        
-                    timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1
-                    if [ $? -eq 0 ]
+                    if [ $(timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1) -eq 0 ]
                         then
                             echo -e "Service was ${GREEN}successfully${NC} stopped"
                         else

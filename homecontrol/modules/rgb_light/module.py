@@ -35,9 +35,9 @@ class RGBLight:
     async def set_on(self, value: bool) -> dict:
         if value:
             return {"on": True, "color": await self.apply_color()} if not await self.states.get("on") else {}
-        else:
-            await self.apply_color(Color(0, 0, 0))
-            return {"on": False}
+        
+        await self.apply_color(Color(0, 0, 0))
+        return {"on": False}
 
     async def toggle_on(self):
         await self.set_on(not await self.states.get("on"))
@@ -56,4 +56,3 @@ class RGBLight:
         color = await self.states.get("color")
         color.l = value
         await self.states.set("color", color)
-

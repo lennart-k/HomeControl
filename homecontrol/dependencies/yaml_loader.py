@@ -31,19 +31,19 @@ class Constructor(SafeConstructor):
         
         if node.value == "":
             return cls
-        elif type(value) == dict:
+        if isinstance(value, dict):
             return cls(**value)
-        elif type(value) in (list, tuple):
+        if isinstance(value, (list, tuple)):
             return cls(*value)
-        else:
-            return cls(value)
+
+        return cls(value)
 
     def file_import_constructor(self, node: yaml.Node = None) -> object:
         path = self.construct_scalar(node)
         if os.path.isfile(path):
             return self.__class__.load(open(path, "r"))
-        else:
-            return {}
+
+        return {}
 
     def vol_constructor(self, suffix: str, node: yaml.Node = None) -> vol.Schema:
         return self._obj(getattr(vol, suffix), node)

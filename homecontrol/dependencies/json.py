@@ -23,26 +23,26 @@ class JSONEncoder(json.JSONEncoder):
         super().__init__(*args, **kwargs)
 
     def default(self, obj):
-        if Item in obj.__class__.__bases__:
+        if isinstance(obj, Item):
             return {
                 "!type": "Item",
                 "item_type": obj.type,
                 "id": obj.identifier,
                 "name": obj.name
             }
-        elif Module in obj.__class__.__bases__:
+        if isinstance(obj, Module):
             return {
                 "!type": "Module",
                 "name": obj.name,
                 "meta": obj.meta
             }
-        elif isinstance(obj, Exception):
+        if isinstance(obj, Exception):
             return {
                 "!type": "Exception",
                 "type": obj.__class__.__name__,
                 "message": str(obj)
             }
-        elif obj.__class__ in types.values():
+        if obj.__class__ in types.values():
             return {
                 "!type": obj.__class__.__name__,
                 "data": obj.dump()
@@ -64,7 +64,7 @@ class JSONDecoder(json.JSONDecoder):
                     f"There's no item with id {obj['id']}")
                 return self.core.entity_manager.items[obj["id"]]
 
-            elif obj["!type"] == "Module":
+            if obj["!type"] == "Module":
                 MODULE_SCHEMA(obj)  # Check if obj has needed attributes
                 # Check if module exists
                 assert obj["name"] in self.core.module_manager.loaded_modules, ModuleNotFoundException(

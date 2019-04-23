@@ -4,7 +4,6 @@ import paho.mqtt.client as mqtt
 class MQTTAdapter:
     async def init(self):
         self.client = mqtt.Client()
-        self.client.loop
         self.client.connect_async(self.cfg["host"], self.cfg["port"])
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message

@@ -52,7 +52,7 @@ class ModuleManager:
         else:
             mod.Module = type("Module_"+name, (mod.Module, Module), {})
 
-        cfg = (mod.SPEC if type(mod.SPEC) == dict else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
+        cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
         mod_obj = mod.Module.__new__(mod.Module)
         mod_obj.core = self.core

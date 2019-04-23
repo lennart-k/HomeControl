@@ -74,8 +74,10 @@ class Chromecast:
         return self.cc.media_controller.is_playing
 
     async def set_playing(self, value):
-        if value: self.media_controller.play()
-        else: self.media_controller.pause()
+        if value:
+            self.media_controller.play()
+        else:
+            self.media_controller.pause()
         await self.states.update("playing", value)
         return {"playing": value}
 

@@ -16,8 +16,7 @@ BLUE='\033[1;34m'
 NC='\033[0m' #No Color
 
 start() {
-    (cd $HOMECONTROL_PATH && exec python3.7 homecontrol $START_PARAMS) 
-    case $? in
+    case $(cd $HOMECONTROL_PATH && exec python3.7 homecontrol $START_PARAMS) in
         0)
             echo -e "HomeControl was ${GREEN}successfully${NC} started"
             ;;
@@ -28,11 +27,9 @@ start() {
 }
 
 stop() {
-    /bin/cat $PID_FILE &> /dev/null
-    case $? in
+    case $(/bin/cat $PID_FILE &> /dev/null) in
         0)
-            kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1
-            case $? in 
+            case $(kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1) in 
                 0)        
                     if [ $(timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1) -eq 0 ]
                         then
@@ -54,11 +51,9 @@ stop() {
 }
 
 status() {
-    /bin/cat $PID_FILE &> /dev/null
-    case $? in
+    case $(/bin/cat $PID_FILE &> /dev/null) in
         0)
-            kill -n 0 `cat $PID_FILE` > /dev/null 2>&1
-            case $? in
+            case $(kill -n 0 $(cat $PID_FILE) > /dev/null 2>&1) in
                 0)
                     echo -e "Service is ${GREEN}running${NC}"
                     ;;

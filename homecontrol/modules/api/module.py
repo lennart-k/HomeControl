@@ -173,7 +173,7 @@ class Module:
                 content = (await request.content.read()).decode()
                 value = json.loads(content) if content else {}
                 result = await item.states.set(state_name, value)
-            except Exception or vol.error.Error as e:
+            except (Exception, vol.error.Error) as e:
                 return JSONResponse(error=e)
 
             return JSONResponse(result)

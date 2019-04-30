@@ -39,12 +39,12 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(obj, Exception):
             return {
                 "!type": "Exception",
-                "type": obj.__class__.__name__,
+                "type": type(obj).__name__,
                 "message": str(obj)
             }
-        if obj.__class__ in types.values():
+        if type(obj) in types.values():
             return {
-                "!type": obj.__class__.__name__,
+                "!type": type(obj).__name__,
                 "data": obj.dump()
             }
         return obj

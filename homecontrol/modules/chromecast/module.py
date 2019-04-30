@@ -10,8 +10,8 @@ class Chromecast:
         except pychromecast.error.ChromecastConnectionError as e:
             return False
         self.media_controller = self.cc.media_controller
-        self.last_time_jump = self.media_controller.__dict__.get("current_time", 0)
-        await self.states.update("playing", self.media_controller.__dict__.get("player_state") == "PLAYING")
+        self.last_time_jump = vars(self.media_controller).get("current_time", 0)
+        await self.states.update("playing", vars(self.media_controller).get("player_state") == "PLAYING")
         await self.states.update("cast_state", self.media_controller.status)
         await self.states.update("content_type", self.media_controller.status.content_type)
         await self.states.update("metadata", self.media_controller.status.media_metadata)
@@ -24,7 +24,7 @@ class Chromecast:
                 self.core.event_engine.broadcast("state_change", item=self,
                                                        changes={"playtime": data.current_time})
             self.last_time_jump = data.current_time
-            await self.states.update("playing", data.__dict__.get("player_state") == "PLAYING")
+            await self.states.update("playing", vars(data).get("player_state") == "PLAYING")
             await self.states.update("metadata", data.media_metadata)
             await self.states.update("content_type", data.content_type)
             await self.states.update("cast_state", data)
@@ -32,8 +32,8 @@ class Chromecast:
             await self.states.update("duration", data.duration)
 
     async def get_playtime(self):
-        await self.states.update("playtime", self.media_controller.__dict__.get("current_time"))
-        return self.media_controller.__dict__.get("current_time")
+        await self.states.update("playtime", vars(self.media_controller).get("current_time"))
+        return vars(self.media_controller).get("current_time")
 
     async def set_playtime(self, value):
         value = max(0, min(value, await self.states.get("duration")))
@@ -60,7 +60,7 @@ class Chromecast:
             'supports_stream_mute': self.media_controller.status.supports_stream_mute,
             'supports_skip_forward': self.media_controller.status.supports_skip_forward,
             'supports_skip_backward': self.media_controller.status.supports_skip_backward,
-            **self.media_controller.status.__dict__
+            **vars(self.media_controller.status)
         }
 
     async def action_pause(self):

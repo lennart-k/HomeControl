@@ -14,7 +14,7 @@ from const import (
     EXIT_RESTART
 )
 
-def get_arguments() -> argparse.Namespace:
+def get_arguments() -> dict:
     parser = argparse.ArgumentParser(description="HomeControl")
 
     parser.add_argument("-cfgfile", "-cf", default="config.yaml", help="File storing the HomeControl configuration")

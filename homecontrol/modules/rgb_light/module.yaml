@@ -2,6 +2,9 @@ meta:
   name: RGB Light
   description: Enables RGB light over a pigpio adapter
 
+pip-requirements:
+  - pigpio
+
 items:
   RGBLight:
     config_schema:

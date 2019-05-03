@@ -6,6 +6,9 @@ SPEC = """
 meta: SocialBlade
 description: Track follower stats on YouTube, Twitch, Twitter and Instagram
 
+pip-requirements:
+  - lxml
+
 items:
   YouTubeFollowers:
     config_schema:

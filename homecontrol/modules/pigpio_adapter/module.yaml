@@ -3,8 +3,8 @@ meta:
   description: Contains an adapter for PiGPIO
   author: Lennart K
 
-requirements:
-  - "pigpio"
+pip-requirements:
+  - pigpio
 
 items:
   PiGPIOAdapter:

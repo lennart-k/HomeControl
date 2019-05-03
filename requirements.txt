@@ -1,11 +1,6 @@
 asyncio
 aiohttp
-pigpio
 requests
-paho-mqtt
-pychromecast
 pyyaml
 aiomonitor
-netdisco
 voluptuous
-lxml

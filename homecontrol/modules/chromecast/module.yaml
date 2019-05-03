@@ -2,6 +2,9 @@ meta:
   name: Chromecast
   description: Adds support for Chromecast
 
+pip-requirements:
+  - PyChromecast
+
 items:
   Chromecast:
     config_schema:

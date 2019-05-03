@@ -47,20 +47,23 @@ class NECIRReceiver:  # TODO Repeat codes
 
     def on_packet(self, edges):
         pulse_edges = list(map(lambda x: math.floor((x + HALF_PULSE_LENGTH) / PULSE_LENGTH), edges))
-        if pulse_edges.pop(0) == 16:  # Leading pulse
-            if pulse_edges.pop(0) == 8:  # 8 unit space
-                if reduce(lambda x, y: 1 if x == y else 0, pulse_edges[::2]):
-                    bits = [0 if bit == 1 else 1 for bit in pulse_edges[1::2]]
-                    address = self._bits_to_int(bits[:8])
-                    for bit, inverse in zip(bits[:8], bits[8:16]):
-                        if not bit + inverse == 1:
-                            address = None
-                    data = self._bits_to_int(bits[16:24])
-                    for bit, inverse in zip(bits[16:24], bits[24:32]):
-                        if not bit + inverse == 1:
-                            data = None
+        if pulse_edges.pop(0) != 16:  # Leading pulse
+            return
+        if pulse_edges.pop(0) != 8:  # 8 unit space
+            return
+        if not reduce(lambda x, y: 1 if x == y else 0, pulse_edges[::2]):
+            return
+        bits = [0 if bit == 1 else 1 for bit in pulse_edges[1::2]]
+        address = self._bits_to_int(bits[:8])
+        for bit, inverse in zip(bits[:8], bits[8:16]):
+            if bit + inverse != 1:
+                address = None
+        data = self._bits_to_int(bits[16:24])
+        for bit, inverse in zip(bits[16:24], bits[24:32]):
+            if bit + inverse != 1:
+                data = None
 
-                    self.callback(address, data, bits)
+            self.callback(address, data, bits)
 
     def stop(self):
         self.cb.cancel()

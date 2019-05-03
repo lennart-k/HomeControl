@@ -57,17 +57,16 @@ class LCD:
 
     _LCD_ROW = [0x80, 0xC0, 0x94, 0xD4]
 
-    def __init__(self, pi, bus=1, addr=0x27, width=16, backlight_on=True,
-                 RS=0, RW=1, E=2, BL=3, B4=4):
+    def __init__(self, pi, bus=1, addr=0x27, width=16, backlight_on=True):
 
         self.pi = pi
         self.width = width
         self.backlight_on = backlight_on
 
-        self.RS = (1 << RS)
-        self.E = (1 << E)
-        self.BL = (1 << BL)
-        self.B4 = B4
+        self.RS = (1 << 0)
+        self.E = (1 << 2)
+        self.BL = (1 << 3)
+        self.B4 = 4
 
         self._h = pi.i2c_open(bus, addr)
 
@@ -82,12 +81,12 @@ class LCD:
 
     def _init(self):
 
-        self._inst(0x33)  # Initialise 1
-        self._inst(0x32)  # Initialise 2
-        self._inst(0x06)  # Cursor increment
-        self._inst(0x0C)  # Display on,move_to off, blink off
-        self._inst(0x28)  # 4-bits, 1 line, 5x8 font
-        self._inst(0x01)  # Clear display
+        self.instruct(0x33)  # Initialise 1
+        self.instruct(0x32)  # Initialise 2
+        self.instruct(0x06)  # Cursor increment
+        self.instruct(0x0C)  # Display on,move_to off, blink off
+        self.instruct(0x28)  # 4-bits, 1 line, 5x8 font
+        self.instruct(0x01)  # Clear display
 
     def _byte(self, MSb, LSb):
 
@@ -98,7 +97,7 @@ class LCD:
         self.pi.i2c_write_device(self._h,
                                  [MSb | self.E, MSb & ~self.E, LSb | self.E, LSb & ~self.E])
 
-    def _inst(self, bits):
+    def instruct(self, bits):
 
         MSN = (bits >> 4) & 0x0F
         LSN = bits & 0x0F
@@ -122,13 +121,7 @@ class LCD:
         """
         Position cursor at row and column (0 based).
         """
-        self._inst(self._LCD_ROW[row] + column)
-
-    def put_inst(self, byte):
-        """
-        Write an instruction byte.
-        """
-        self._inst(byte)
+        self.instruct(self._LCD_ROW[row] + column)
 
     def put_symbol(self, index):
         """
@@ -167,43 +160,6 @@ class LCD:
         Close the LCD (clearing the screen) and release used resources.
         """
         try:
-            self._inst(0x01)
+            self.instruct(0x01)
         finally:
             self.pi.i2c_close(self._h)
-
-
-if __name__ == "__main__":
-
-    pi = pigpio.pi("192.168.20.141")
-    if not pi.connected:
-        exit(0)
-
-    lcd = LCD(pi, width=16)
-
-    count = 1
-
-    try:
-        while True:
-            lcd.put_line(0, "pigpio")
-            lcd.put_line(1, "             library")
-            lcd.put_line(2, time.asctime())
-            lcd.move_to(3, 8)
-            lcd.put_str(str(count))
-
-            count += 1
-
-            time.sleep(1)
-
-            lcd.put_line(0, "              pigpio")
-            lcd.put_line(1, "library")
-            lcd.put_line(2, time.asctime())
-            lcd.move_to(3, 8)
-            lcd.put_str(str(count))
-
-            count += 1
-
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        lcd.close()
-        pi.stop()

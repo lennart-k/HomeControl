@@ -8,7 +8,9 @@ from const import (
     NOT_WORKING,
     STOPPED
 )
-
+from exceptions import (
+    ItemTypeNotFound
+)
 
 class EntityManager:
     def __init__(self, core):
@@ -43,6 +45,7 @@ class EntityManager:
         del self.items[identifier]
 
     async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}, name: str = None) -> Item:
+        assert item_type in self.item_specs, ItemTypeNotFound(item_type)
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type

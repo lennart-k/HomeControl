@@ -16,3 +16,6 @@ class InvalidConfigException(HomeControlException):
 
 class TemplateErrorException(HomeControlException):
     pass
+
+class ItemTypeNotFound(HomeControlException):
+    pass

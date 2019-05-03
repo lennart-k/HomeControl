@@ -17,5 +17,8 @@ class InvalidConfigException(HomeControlException):
 class TemplateErrorException(HomeControlException):
     pass
 
+class PipInstallError(HomeControlException):
+    pass
+
 class ItemTypeNotFound(HomeControlException):
     pass

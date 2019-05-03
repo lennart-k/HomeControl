@@ -1,15 +1,23 @@
+import subprocess
 import sys
 import importlib
 import importlib.util
 import os
+import json
+import io
+
+from pip._vendor.distlib.version import NormalizedMatcher
+
 from dependencies.yaml_loader import YAMLLoader
 from dependencies.entity_types import Module
-
+from exceptions import PipInstallError
 
 class ModuleManager:
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
+        pip_list = subprocess.check_output([sys.executable, "-m", "pip", "list", "--format=json", "--disable-pip-version-check"])
+        self.installed_requirements = {item["name"]: item["version"] for item in json.loads(pip_list)}
 
     async def load_folder(self, path: str) -> [object]:
         """
@@ -73,6 +81,21 @@ class ModuleManager:
 
         cfg = YAMLLoader.load(open(cfg_path))
         
+        unsatisfied_pip_dependencies = set()
+        for requirement in cfg.get("pip-requirements", []):
+            matcher = NormalizedMatcher(requirement)
+            if not matcher.name in self.installed_requirements:
+                unsatisfied_pip_dependencies.add(requirement)
+                continue
+            if not matcher.match(self.installed_requirements[matcher.name]):
+                unsatisfied_pip_dependencies.add(requirement)
+
+        if unsatisfied_pip_dependencies:
+            process = subprocess.Popen([sys.executable, "-m", "pip", "install", *unsatisfied_pip_dependencies])
+            if process.wait():
+                self.core.event_engine.broadcast("module_not_loaded", exception=PipInstallError(), name=name)
+                return
+
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
         mod.event = self.core.event_engine.register

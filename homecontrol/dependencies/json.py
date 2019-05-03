@@ -72,7 +72,7 @@ class JSONDecoder(json.JSONDecoder):
                 )
                 return self.core.module_manager.loaded_modules[obj["name"]]
 
-            elif obj["!type"] in types:
+            if obj["!type"] in types:
                 return types[obj["!type"]].from_data(obj["data"])
         return obj
 

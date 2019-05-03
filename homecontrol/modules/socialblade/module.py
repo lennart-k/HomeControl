@@ -1,56 +1,5 @@
-from lxml import html
 import requests
-
-SPEC = """
-
-meta: SocialBlade
-description: Track follower stats on YouTube, Twitch, Twitter and Instagram
-
-pip-requirements:
-  - lxml
-
-items:
-  YouTubeFollowers:
-    config_schema:
-      !vol/Any [rawname, name]: !type/str
-      !vol/Required { schema: update_interval, default: 10 }: !type/int
-
-    state:
-      followers:
-        type: Integer
-        default: 0
-
-    actions:
-      update_followers: update_followers
-
-  TwitchFollowers:
-    config_schema:
-      !vol/Any [rawname, name]: !type/str
-      !vol/Required { schema: update_interval, default: 10 }: !type/int
-
-    state:
-      followers:
-        type: Integer
-        default: 0
-
-    actions:
-      update_followers: update_followers
-
-  TwitterFollowers:
-    config_schema:
-      !vol/Required { schema: name }: !type/str
-      !vol/Required { schema: update_interval, default: 10 }: !type/int
-
-    state:
-      followers:
-        type: Integer
-        default: 0
-
-    actions:
-      update_followers: update_followers
-
-
-"""
+from lxml import html
 
 LOOKUP_URL = "https://bastet.socialblade.com/{platform}/lookup"
 
@@ -70,7 +19,8 @@ class TwitchFollowers:
         await self.states.update("followers", int(requests.get(LOOKUP_URL.format(platform="twitch"), params={"query": self.cfg["rawname"]}).content))
 
     def get_rawname(self):
-        content = html.fromstring(requests.get(NAME_URL.format(name=self.cfg["name"], platform="twitch")).content)
+        content = html.fromstring(requests.get(NAME_URL.format(
+            name=self.cfg["name"], platform="twitch")).content)
         result = content.xpath(NAME_PATH)
         if result:
             return str(result[0])
@@ -88,11 +38,13 @@ class YouTubeFollowers:
         await self.states.update("followers", int(requests.get(LOOKUP_URL.format(platform="youtube"), params={"query": self.cfg["rawname"]}).content))
 
     def get_rawname(self):
-        content = html.fromstring(requests.get(NAME_URL.format(name=self.cfg["name"], platform="youtube")).content)
+        content = html.fromstring(requests.get(NAME_URL.format(
+            name=self.cfg["name"], platform="youtube")).content)
         result = content.xpath(NAME_PATH)
         if result:
             return str(result[0])
         return None
+
 
 class TwitterFollowers:
     async def init(self) -> bool:

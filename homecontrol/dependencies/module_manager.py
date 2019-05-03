@@ -25,7 +25,7 @@ class ModuleManager:
 
             if not mod_name in blacklist:
                 if os.path.isdir(mod_path):
-                    out.append(await self.load_module(mod_path, mod_name))
+                    out.append(await self.load_folder_module(mod_path, mod_name))
 
                 elif os.path.isfile(mod_path) and node.endswith(".py"):
                     out.append(await self.load_file_module(mod_path, mod_name))
@@ -54,25 +54,10 @@ class ModuleManager:
 
         cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
-        mod_obj = mod.Module.__new__(mod.Module)
-        mod_obj.core = self.core
-        mod_obj.meta = cfg.get("meta", {})
-        mod_obj.name = name
-        mod_obj.path = mod_path
-        mod_obj.items = {}
-        mod_obj.item_specs = {}
-        mod_obj.mod = mod
-        mod_obj.spec = cfg
-        mod_obj.__init__()
-
-        self.loaded_modules[name] = mod_obj
-        await self.core.entity_manager.add_from_module(mod_obj)
-        if hasattr(mod_obj, "init"):
-            await mod_obj.init()
-        return mod_obj
+        return await self._load_module_object(cfg, name, mod_path, mod)
 
 
-    async def load_module(self, path: str, name: str) -> (Module, Exception):
+    async def load_folder_module(self, path: str, name: str) -> (Module, Exception):
         """
         Loads a module from a folder and send an init trigger
         """
@@ -94,13 +79,20 @@ class ModuleManager:
         mod.tick = self.core.tick_engine.tick
         sys.path.append(path)
         spec.loader.exec_module(mod)
-        sys.path.append(path)
+        sys.path.remove(path)
+        return await self._load_module_object(cfg, name, path, mod)
+
+    async def _load_module_object(self, cfg: dict, name: str, path: str, mod) -> Module:
+        """
+        Initialises a module
+        """
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_"+name, (Module,), {})
         else:
             mod.Module = type("Module_"+name, (mod.Module, Module), {})
 
         mod_obj = mod.Module.__new__(mod.Module)
+
         mod_obj.core = self.core
         mod_obj.meta = cfg.get("meta", {})
         mod_obj.name = name

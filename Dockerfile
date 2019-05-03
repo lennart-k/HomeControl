@@ -12,4 +12,6 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
+RUN ln -s /config /usr/src/app
+
 CMD [ "python", "homecontrol", "-cfgfile", "/config/config.yaml" ]

@@ -4,7 +4,6 @@ import importlib
 import importlib.util
 import os
 import json
-import io
 
 from pip._vendor.distlib.version import NormalizedMatcher
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import pigpio
-import time
-
 
 class LCD:
     """
@@ -57,7 +55,7 @@ class LCD:
 
     _LCD_ROW = [0x80, 0xC0, 0x94, 0xD4]
 
-    def __init__(self, pi, bus=1, addr=0x27, width=16, backlight_on=True):
+    def __init__(self, pi: pigpio.pi, bus: int=1, addr: int=0x27, width: int=16, backlight_on: bool=True):
 
         self.pi = pi
         self.width = width
@@ -72,7 +70,7 @@ class LCD:
 
         self._init()
 
-    def backlight(self, on):
+    def backlight(self, on: bool):
         """
         Switch backlight on (True) or off (False).
         """
@@ -88,7 +86,7 @@ class LCD:
         self.instruct(0x28)  # 4-bits, 1 line, 5x8 font
         self.instruct(0x01)  # Clear display
 
-    def _byte(self, MSb, LSb):
+    def _byte(self, MSb: int, LSb: int):
 
         if self.backlight_on:
             MSb |= self.BL
@@ -97,7 +95,7 @@ class LCD:
         self.pi.i2c_write_device(self._h,
                                  [MSb | self.E, MSb & ~self.E, LSb | self.E, LSb & ~self.E])
 
-    def instruct(self, bits):
+    def instruct(self, bits: int):
 
         MSN = (bits >> 4) & 0x0F
         LSN = bits & 0x0F
@@ -107,7 +105,7 @@ class LCD:
 
         self._byte(MSb, LSb)
 
-    def _data(self, bits):
+    def _data(self, bits: int):
 
         MSN = (bits >> 4) & 0x0F
         LSN = bits & 0x0F
@@ -117,27 +115,27 @@ class LCD:
 
         self._byte(MSb, LSb)
 
-    def move_to(self, row, column):
+    def move_to(self, row: int, column: int):
         """
         Position cursor at row and column (0 based).
         """
         self.instruct(self._LCD_ROW[row] + column)
 
-    def put_symbol(self, index):
+    def put_symbol(self, index: int):
         """
         Write the symbol with index at the current cursor postion
         and increment the cursor.
         """
         self._data(index)
 
-    def put_chr(self, char):
+    def put_chr(self, char: str):
         """
         Write a character at the current cursor postion and
         increment the cursor.
         """
         self._data(ord(char))
 
-    def put_str(self, text):
+    def put_str(self, text: str):
         """
         Write a string at the current cursor postion.  The cursor will
         end up at the character after the end of the string.
@@ -145,7 +143,7 @@ class LCD:
         for i in text:
             self.put_chr(i)
 
-    def put_line(self, row, text):
+    def put_line(self, row: int, text: str):
         """
         Replace a row (0 based) of the LCD with a new string.
         """

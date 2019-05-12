@@ -20,10 +20,8 @@ class Chromecast:
 
         @event("chromecast_media_status")
         async def on_status(event, data):
-            if data.current_time != self.last_time_jump:
-                self.core.event_engine.broadcast("state_change", item=self,
-                                                       changes={"playtime": data.current_time})
             self.last_time_jump = data.current_time
+            await self.states.update("playtime", data.current_time)
             await self.states.update("playing", vars(data).get("player_state") == "PLAYING")
             await self.states.update("metadata", data.media_metadata)
             await self.states.update("content_type", data.content_type)

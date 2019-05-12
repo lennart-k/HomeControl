@@ -1,8 +1,9 @@
 debug: true
 
 module-manager:
-  folders:
-    - homecontrol/modules
+  folders: []
+  load-internal-modules: true
+  install-pip-requirements: true
 
 entity-discovery:
   active: true

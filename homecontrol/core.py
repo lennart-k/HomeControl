@@ -1,12 +1,14 @@
 from contextlib import suppress
 import signal
 import asyncio
+import pkg_resources
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
 from homecontrol.dependencies.entity_manager import EntityManager
 from homecontrol.dependencies.logger import Logger
 from homecontrol.dependencies.tick_engine import TickEngine
+import homecontrol
 
 from homecontrol.const import (
     EXIT_SHUTDOWN,
@@ -47,6 +49,10 @@ class Core:
         """
         for folder in self.cfg.get("module-manager", {}).get("folders", {}):
             await self.module_manager.load_folder(folder)
+
+        if self.cfg.get("module-manager", {}).get("load-internal-modules", False):
+            internal_module_folder = pkg_resources.resource_filename(homecontrol.__name__, "modules")
+            await self.module_manager.load_folder(internal_module_folder)
 
         # Create items from config file
         for item in self.cfg["items"]:

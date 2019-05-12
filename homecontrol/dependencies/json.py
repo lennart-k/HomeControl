@@ -1,17 +1,17 @@
 import json
 from functools import partial
 
-from core import Core
-from dependencies.data_types import types
-from dependencies.entity_types import (
+from homecontrol.core import Core
+from homecontrol.dependencies.data_types import types
+from homecontrol.dependencies.entity_types import (
     Item,
     Module
 )
-from exceptions import (
+from homecontrol.exceptions import (
     ItemNotFoundException,
     ModuleNotFoundException
 )
-from const import (
+from homecontrol.const import (
     MODULE_SCHEMA,
     ITEM_SCHEMA
 )

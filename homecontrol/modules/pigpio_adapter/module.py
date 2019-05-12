@@ -1,8 +1,8 @@
 from contextlib import suppress
 from dependencies.lcd import LCD
 import asyncio
-from dependencies.throttle_function import throttle
-from core import Core
+from homecontrol.dependencies.throttle_function import throttle
+from homecontrol.core import Core
 import pigpio
 
 

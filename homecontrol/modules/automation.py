@@ -1,4 +1,4 @@
-from core import Core
+from homecontrol.core import Core
 
 
 SPEC = """

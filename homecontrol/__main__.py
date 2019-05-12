@@ -1,15 +1,16 @@
 import traceback
-from core import Core
 import asyncio
 import aiomonitor
 from functools import partial
-from dependencies.yaml_loader import YAMLLoader
 import yaml
 import sys
 import argparse
 import os
 import subprocess
-from const import (
+
+from homecontrol.core import Core
+from homecontrol.dependencies.yaml_loader import YAMLLoader
+from homecontrol.const import (
     MINIMUM_PYTHON_VERSION,
     EXIT_RESTART
 )

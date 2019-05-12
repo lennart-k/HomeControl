@@ -1,6 +1,6 @@
 from contextlib import suppress
 import pigpio
-from dependencies.data_types import Color
+from homecontrol.dependencies.data_types import Color
 
 
 class RGBLight:

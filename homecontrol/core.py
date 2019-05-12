@@ -1,13 +1,14 @@
 from contextlib import suppress
 import signal
 import asyncio
-from dependencies.event_engine import EventEngine
-from dependencies.module_manager import ModuleManager
-from dependencies.entity_manager import EntityManager
-from dependencies.logger import Logger
-from dependencies.tick_engine import TickEngine
 
-from const import (
+from homecontrol.dependencies.event_engine import EventEngine
+from homecontrol.dependencies.module_manager import ModuleManager
+from homecontrol.dependencies.entity_manager import EntityManager
+from homecontrol.dependencies.logger import Logger
+from homecontrol.dependencies.tick_engine import TickEngine
+
+from homecontrol.const import (
     EXIT_SHUTDOWN,
     EXIT_RESTART
 )

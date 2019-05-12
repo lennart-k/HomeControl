@@ -1,10 +1,10 @@
 from collections import ChainMap
 import voluptuous as vol
-from dependencies import json
+from homecontrol.dependencies import json
 from json import JSONDecodeError
 from aiohttp import web
-from dependencies.json_response import JSONResponse
-from const import (
+from homecontrol.dependencies.json_response import JSONResponse
+from homecontrol.const import (
     ERROR_ITEM_NOT_FOUND,
     ITEM_STATE_NOT_FOUND,
     ITEM_ACTION_NOT_FOUND,

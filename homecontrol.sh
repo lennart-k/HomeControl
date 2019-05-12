@@ -16,7 +16,7 @@ BLUE='\033[1;34m'
 NC='\033[0m' #No Color
 
 start() {
-    case $(cd $HOMECONTROL_PATH && exec python3.7 homecontrol $START_PARAMS) in
+    case $(cd $HOMECONTROL_PATH && exec python3.7 -m homecontrol $START_PARAMS) in
         0)
             echo -e "HomeControl was ${GREEN}successfully${NC} started"
             ;;

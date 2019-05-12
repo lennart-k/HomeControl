@@ -1,4 +1,4 @@
-from dependencies import json
+from homecontrol.dependencies import json
 from aiohttp import web
 
 class JSONResponse(web.Response):

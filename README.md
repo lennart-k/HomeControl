@@ -36,7 +36,7 @@ cd HomeControl
 
 pip install -r requirements.txt
 
-python homecontrol --help
+python -m homecontrol --help
 ```
 
 ```

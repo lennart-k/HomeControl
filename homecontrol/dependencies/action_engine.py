@@ -1,4 +1,4 @@
-from dependencies.entity_types import Item
+from homecontrol.dependencies.entity_types import Item
 
 class ActionEngine:
     def __init__(self, item: Item, core):

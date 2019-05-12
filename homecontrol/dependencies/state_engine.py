@@ -1,8 +1,8 @@
 from typing import Callable, Any
 import voluptuous as vol
-from dependencies.data_types import types
-from dependencies.entity_types import Item
-from const import (
+from homecontrol.dependencies.data_types import types
+from homecontrol.dependencies.entity_types import Item
+from homecontrol.const import (
     NOT_WORKING
 )
 

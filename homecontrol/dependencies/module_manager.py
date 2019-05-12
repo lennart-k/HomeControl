@@ -7,9 +7,9 @@ import json
 
 from pip._vendor.distlib.version import NormalizedMatcher
 
-from dependencies.yaml_loader import YAMLLoader
-from dependencies.entity_types import Module
-from exceptions import PipInstallError
+from homecontrol.dependencies.yaml_loader import YAMLLoader
+from homecontrol.dependencies.entity_types import Module
+from homecontrol.exceptions import PipInstallError
 
 class ModuleManager:
     def __init__(self, core):

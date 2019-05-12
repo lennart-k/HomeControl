@@ -14,4 +14,4 @@ COPY . .
 
 RUN ln -s /config /usr/src/app
 
-CMD [ "python", "homecontrol", "-cfgfile", "/config/config.yaml" ]
+CMD [ "python", "-m", "homecontrol", "-cfgfile", "/config/config.yaml" ]

@@ -9,7 +9,7 @@ from yaml.composer import Composer
 from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
 
-from dependencies.entity_types import (
+from homecontrol.dependencies.entity_types import (
     Item,
     Module
 )

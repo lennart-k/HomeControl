@@ -1,3 +1,8 @@
+import logging
+
+
+LOGGER = logging.getLogger(__name__)
+
 
 class MCP3008ADC:
     handle = None
@@ -19,7 +24,7 @@ class MCP3008ADC:
             try:
                 self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
             except BrokenPipeError:
-                print(f"SPI not properly closed for {self.identifier}")
+                LOGGER.warning(f"SPI transport not properly closed for {self.identifier}")
 
 
 class AnalogInput:

@@ -1,7 +1,10 @@
 from typing import List, Callable, Any
 import asyncio
+import logging
 import time
 from collections import defaultdict
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Event:
@@ -37,8 +40,7 @@ class EventEngine:
         data.update(kwargs)
         event = Event(event_type, data=data, time=int(time.time()))
 
-        if self.core.start_args.get("verbose"):
-            print(f"EVENT: {event}")
+        LOGGER.debug(f"Event: {event}")
 
         handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
 
@@ -54,8 +56,7 @@ class EventEngine:
         data.update(kwargs)
         event = Event(event_type, data=data, time=int(time.time()))
 
-        if self.core.start_args.get("verbose"):
-            print(f"EVENT: {event}")
+        LOGGER.debug(f"Event: {event}")
 
         handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
 

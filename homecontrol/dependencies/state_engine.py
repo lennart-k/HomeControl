@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Any
 import voluptuous as vol
 from homecontrol.dependencies.data_types import types
@@ -6,20 +7,27 @@ from homecontrol.const import (
     NOT_WORKING
 )
 
+LOGGER = logging.getLogger(__name__)
+
+
 class StateEngine:
     def __init__(self, item: Item, core, state_defaults: dict = {}):
         self.item = item
         self.core = core
         self.states = {}
         for state_name, details in item.spec.get("state", {}).items():
-            default_state = state_defaults.get(state_name, details.get("default", None)) 
+            default_state = state_defaults.get(
+                state_name, details.get("default", None))
 
             self.states[state_name] = State(self,
                                             default=default_state,
-                                            getter=getattr(item, details.get("getter", ""), None),
-                                            setter=getattr(item, details.get("setter", ""), None),
+                                            getter=getattr(
+                                                item, details.get("getter", ""), None),
+                                            setter=getattr(
+                                                item, details.get("setter", ""), None),
                                             schema=details.get("schema", None),
-                                            state_type=types.get(details.get("type", ""), None),
+                                            state_type=types.get(
+                                                details.get("type", ""), None),
                                             name=state_name,
                                             )
 
@@ -51,7 +59,7 @@ class StateEngine:
         """
         return {
             name: await self.states[name].get() for name in self.states.keys()
-            }
+        }
 
 
 class State:
@@ -60,7 +68,7 @@ class State:
     value: Any
     mutable: bool
 
-    def __init__(self, state_engine: StateEngine, default, getter: Callable=None, setter: Callable =None, name: str =None, state_type=None, schema=None):
+    def __init__(self, state_engine: StateEngine, default, getter: Callable = None, setter: Callable = None, name: str = None, state_type=None, schema=None):
         self.value = default if not state_type else state_type(*default)
         self.name = name
         self.getter = getter
@@ -82,7 +90,9 @@ class State:
             result: dict = await self.setter(value)
             for state, change in result.items():
                 self.state_engine.states[state].value = change
-            self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes=result)
+            self.state_engine.core.event_engine.broadcast(
+                "state_change", item=self.state_engine.item, changes=result)
+            LOGGER.debug(f"State change: {self.state_engine.item.identifier} {result}")
             return result
         return {}
 
@@ -104,5 +114,7 @@ class State:
             self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes={
                 self.name: self.value
             })
+            LOGGER.debug(f"State change: {self.state_engine.item.identifier} {result}")
+
             return True
         return False

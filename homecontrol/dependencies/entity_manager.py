@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import voluptuous as vol
 
 from homecontrol.const import (
@@ -12,6 +13,9 @@ from homecontrol.dependencies.entity_types import Item
 from homecontrol.exceptions import (
     ItemTypeNotFound
 )
+
+LOGGER = logging.getLogger(__name__)
+
 
 class EntityManager:
     def __init__(self, core):
@@ -37,7 +41,7 @@ class EntityManager:
                 in list(item.dependant_items)+[item] 
                 if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
         except Exception as e:
-            print(e.__traceback__)
+            LOGGER.warning("An error occured when removing an item", exc_info=True)
 
         for dependant_item in item.dependant_items:
             dependant_item.status = STOPPED
@@ -94,6 +98,7 @@ class EntityManager:
         self.items[identifier] = item
         spec["module"].items[identifier] = item
         self.core.event_engine.broadcast("item_created", item=item)
+        LOGGER.debug(f"Item created: {item.identifier}")
         if item.status == NOT_WORKING:
             self.core.event_engine.broadcast("item_not_working", item=item)
 

@@ -1,3 +1,6 @@
+from contextlib import suppress
+import logging
+import logging.config
 import traceback
 import asyncio
 import aiomonitor
@@ -15,6 +18,8 @@ from homecontrol.const import (
     EXIT_RESTART
 )
 
+LOGGER = logging.getLogger(__name__)
+
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser(description="HomeControl")
 
@@ -22,6 +27,7 @@ def get_arguments() -> dict:
     parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
+    parser.add_argument("-color", action="store_true", default=True, help="Sets whether the console output should be colored or not")
     parser.add_argument("-killprev", "-kp", action="store_true", default=None, help="Kills the previous HomeControl instance")
     if os.name == "posix":
         parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
@@ -30,13 +36,12 @@ def get_arguments() -> dict:
 
 def get_config(path: str) -> dict:
     if not os.path.isfile(path):
-        print("Config file does not exist!")
+        LOGGER.critical("Config file does not exist: %s", path)
         sys.exit(1)
     try:
         cfg = YAMLLoader.load(open(path))
     except yaml.YAMLError as e:
-        print("Error in config file")
-        traceback.print_exc()
+        LOGGER.error("Error in config file", exc_info=True)
         sys.exit(1)
     return cfg
 
@@ -47,7 +52,7 @@ def clear_port(port: int):
 
 def validate_python_version():
     if sys.version_info[:3] < MINIMUM_PYTHON_VERSION:
-        print("The minimum Python version for HomeControl to work is {}.{}.{}".format(*MINIMUM_PYTHON_VERSION))
+        LOGGER.critical("The minimum Python version for HomeControl to work is %s", ".".join(MINIMUM_PYTHON_VERSION))
         sys.exit(1)
 
 
@@ -60,7 +65,7 @@ def run_homecontrol(config: dict, start_args: dict):
     loop.stop()
     loop.close()
     if exit_return == EXIT_RESTART:
-        print("RESTARTING NOW"+4*"\n")
+        LOGGER.warning("Restarting now"+4*"\n")
         args = start_command()
         os.execv(args[0], args)
     elif start_args["pid_file"]:
@@ -88,7 +93,7 @@ def daemonize() -> None:
         sys.exit(0)
 
     os.setsid()
-    print("Process ID:", os.getpid())
+    LOGGER.info("Process ID: %s", os.getpid())
 
     # redirect standard file descriptors to devnull
     infd = open(os.devnull, 'r')
@@ -118,7 +123,7 @@ def check_pid_file(pid_file: str, kill: bool = False) -> None:
     if kill:
         try:
             os.kill(pid, 9)
-            print("Killing previous instance of HomeControl")
+            LOGGER.info("Killing previous instance of HomeControl")
             while True:
                 os.kill(pid, 0)
         except OSError:
@@ -131,9 +136,39 @@ def check_pid_file(pid_file: str, kill: bool = False) -> None:
         # PID does not exist. Last session not closed properly
         return
 
-    print("FATAL ERROR: HomeControl is already running on pid", pid)
+    LOGGER.error("HomeControl is already running on pid %s", pid)
     sys.exit(1)
 
+
+def setup_logging(verbose: bool = False,
+                  color: bool = True):
+    """
+    Set up logging
+    """
+    logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
+
+    fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    datefmt = '%Y-%m-%d %H:%M:%S'
+
+    if color:
+        with suppress(ImportError):
+            from colorlog import ColoredFormatter
+            
+            logging.basicConfig(level=logging.INFO)
+
+            colorfmt = "%(log_color)s{}%(reset)s".format(fmt)
+            logging.getLogger().handlers[0].setFormatter(ColoredFormatter(
+                colorfmt,
+                datefmt=datefmt,
+                reset=True,
+                log_colors={
+                    'DEBUG': 'cyan',
+                    'INFO': 'white',
+                    'WARNING': 'yellow',
+                    'ERROR': 'orange',
+                    'CRITICAL': 'red',
+                }
+            ))
 
 def main():
     validate_python_version()
@@ -141,11 +176,13 @@ def main():
     args = get_arguments()
     cfg = get_config(args["cfgfile"])
 
+    setup_logging(verbose=args["verbose"], color=args["color"])
+
     if args["pid_file"]:
         check_pid_file(args["pid_file"], kill=args["killprev"])
 
     if args.get("daemon", False):
-        print("Running as a daemon")
+        LOGGER.info("Running as a daemon")
         daemonize()
 
     if args["pid_file"]:
@@ -153,7 +190,7 @@ def main():
             with open(args["pid_file"], "w") as file:
                 file.write(str(os.getpid()))
         except IOError:
-            print("Error: Cannot write pid file {}".format(args["pid_file"]))
+            LOGGER.warning("Cannot write pid file {}".format(args["pid_file"]))
 
     if args["clearport"]:
         clear_port(cfg["api-server"]["port"])

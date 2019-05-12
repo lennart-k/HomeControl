@@ -1,5 +1,7 @@
 from homecontrol.core import Core
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 SPEC = """
 meta:
@@ -54,9 +56,9 @@ class StateActionProvider:
         target = self.core.entity_manager.items.get(self.data["target"])
         changes = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
-        if self.core.start_args.get("verbose"):
-            print("STATE ACTION by automation", changes, target)
 
+        LOGGER.debug(f"State action triggered {changes} {target.identifier}")
+        
         for state, value in changes.items():
             await target.states.set(state, value)
 

@@ -1,3 +1,4 @@
+import logging
 from collections import ChainMap
 import voluptuous as vol
 from homecontrol.dependencies import json
@@ -13,6 +14,7 @@ from homecontrol.const import (
     STATE_COMMIT_SCHEMA
 )
 
+LOGGER = logging.getLogger(__name__)
 class Module:
     api_app: web.Application
 

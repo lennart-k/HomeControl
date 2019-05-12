@@ -1,12 +1,12 @@
 from contextlib import suppress
 import signal
 import asyncio
+import logging
 import pkg_resources
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
 from homecontrol.dependencies.entity_manager import EntityManager
-from homecontrol.dependencies.logger import Logger
 from homecontrol.dependencies.tick_engine import TickEngine
 import homecontrol
 
@@ -14,6 +14,8 @@ from homecontrol.const import (
     EXIT_SHUTDOWN,
     EXIT_RESTART
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Core:
@@ -33,7 +35,6 @@ class Core:
         self.block_event = asyncio.Event()
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
-        self.logger = Logger(core=self)
         self.module_manager = ModuleManager(core=self)
         self.entity_manager = EntityManager(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
@@ -64,6 +65,7 @@ class Core:
                 state_defaults=item.get("state", {}))
 
         self.event_engine.broadcast("core_bootstrap_complete")
+        LOGGER.info("Core bootstrap complete")
 
     async def block_until_stop(self) -> int:
         with suppress(asyncio.CancelledError):
@@ -72,15 +74,15 @@ class Core:
 
     async def stop(self) -> None:
         await self.tick_engine.stop()
-        print("SHUTTING DOWN!")
+        LOGGER.warning("Shutting Down")
 
         for module in list(self.module_manager.loaded_modules.keys()):
             await self.module_manager.unload_module(module)
         pending = asyncio.Task.all_tasks(loop=self.loop)
 
-        print("Waiting for pending tasks (1s)")
+        LOGGER.info("Waiting for pending tasks (1s)")
         await asyncio.wait(pending, loop=self.loop, timeout=1)
-        print("Closing the loop soon")
+        LOGGER.warning("Closing the loop soon")
         self.block_event.set()
 
     async def restart(self) -> None:

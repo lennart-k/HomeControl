@@ -1,7 +1,7 @@
 docs/build
 venv_linux
 venv_win
-.idea/*
+.idea
 __pycache__/
 .pytest_cache
 .vscode
@@ -10,3 +10,6 @@ scripts
 webapp
 homecontrol.lock
 .github
+dist
+build
+homecontrol.egg-info

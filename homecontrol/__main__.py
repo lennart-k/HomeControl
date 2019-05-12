@@ -1,7 +1,6 @@
 from contextlib import suppress
 import logging
 import logging.config
-import traceback
 import asyncio
 import aiomonitor
 from functools import partial

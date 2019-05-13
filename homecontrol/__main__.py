@@ -110,9 +110,9 @@ def daemonize() -> None:
     outfd = open(os.devnull, 'a+')
     sys.stdout.flush()
     sys.stderr.flush()
-    os.dup2(infd.fileno(), sys.stdin.fileno())
-    os.dup2(outfd.fileno(), sys.stdout.fileno())
-    os.dup2(outfd.fileno(), sys.stderr.fileno())
+    # os.dup2(infd.fileno(), sys.stdin.fileno())
+    # os.dup2(outfd.fileno(), sys.stdout.fileno())
+    # os.dup2(outfd.fileno(), sys.stderr.fileno())
 
 def check_pid_file(pid_file: str, kill: bool = False) -> None:
     if not os.path.isfile(pid_file):
@@ -193,8 +193,9 @@ def main():
 
     args = get_arguments()
     logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]), "homecontrol.log")
-    setup_logging(verbose=args["verbose"], color=not args["nocolor"], logfile=logfile)
     cfg = get_config(args["cfgfile"])
+    
+    setup_logging(verbose=args["verbose"], color=not args["nocolor"], logfile=logfile)
 
     if args["pid_file"]:
         check_pid_file(args["pid_file"], kill=args["killprev"])

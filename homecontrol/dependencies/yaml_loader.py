@@ -1,7 +1,8 @@
 import os
 import voluptuous as vol
-import yaml
+import logging
 
+import yaml
 from yaml.reader import Reader
 from yaml.scanner import Scanner
 from yaml.parser import Parser
@@ -14,12 +15,15 @@ from homecontrol.dependencies.entity_types import (
     Module
 )
 
+LOGGER = logging.getLogger(__name__)
+
 
 class Constructor(SafeConstructor):
     def __init__(self):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
-        self.add_constructor("!import", self.__class__.file_import_constructor)
+        self.add_constructor("!include", self.__class__.file_include_constructor)
+        self.add_constructor("!env_var", self.__class__.env_var_constructor)
         
         SafeConstructor.__init__(self)
 
@@ -38,12 +42,33 @@ class Constructor(SafeConstructor):
 
         return cls(value)
 
-    def file_import_constructor(self, node: yaml.Node = None) -> object:
-        path = self.construct_scalar(node)
-        if os.path.isfile(path):
-            return self.__class__.load(open(path, "r"))
+    def file_include_constructor(self, node: yaml.Node = None) -> object:
+        """
+        !include <path>
+        ~/  for paths relative to your home directory
+        /   for absolute paths
+        anything else for paths relative to your config folder
+        """
+        if node.value.startswith("~"):
+            path = os.path.expanduser(node.value)
+        elif node.value.startswith("/"):
+            path = node.value
+        else:
+            path = os.path.join(os.path.dirname(self.name), node.value)
 
-        return {}
+        return self.__class__.load(open(path, "r"))
+
+    def env_var_constructor(self, node: yaml.nodes.Node) -> str:
+        """
+        Embeds an environment variable
+        !env_var <name> [default]
+        """
+        args = node.value.split()
+
+        if len(args) > 1:
+            return os.getenv(args[0], default=" ".join(args[1:]))
+
+        return os.environ[args[0]]
 
     def vol_constructor(self, suffix: str, node: yaml.Node = None) -> vol.Schema:
         return self._obj(getattr(vol, suffix), node)

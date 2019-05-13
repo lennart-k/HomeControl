@@ -26,7 +26,7 @@ def get_arguments() -> dict:
     parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
-    parser.add_argument("-color", action="store_true", default=True, help="Sets whether the console output should be colored or not")
+    parser.add_argument("-nocolor", action="store_true", default=False, help="Disables colored console output")
     parser.add_argument("-killprev", "-kp", action="store_true", default=None, help="Kills the previous HomeControl instance")
     if os.name == "posix":
         parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
@@ -183,7 +183,8 @@ def main():
     validate_python_version()
 
     args = get_arguments()
-    setup_logging(verbose=args["verbose"], color=args["color"])
+    print(not args["nocolor"])
+    setup_logging(verbose=args["verbose"], color=not args["nocolor"])
     cfg = get_config(args["cfgfile"])
 
     if args["pid_file"]:

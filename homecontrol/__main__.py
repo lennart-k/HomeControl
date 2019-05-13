@@ -65,9 +65,14 @@ def validate_python_version():
         LOGGER.critical("The minimum Python version for HomeControl to work is %s", ".".join(MINIMUM_PYTHON_VERSION))
         sys.exit(1)
 
-
 def run_homecontrol(config: dict, config_folder: str, start_args: dict):
     loop = asyncio.get_event_loop()
+    if os.name == "nt":
+        def windows_wakeup():
+            # This seems to be a workaround so that SIGINT signals also work on Windows
+            loop.call_later(0.1, windows_wakeup)
+        # https://stackoverflow.com/questions/24774980/why-cant-i-catch-sigint-when-asyncio-event-loop-is-running/24775107#answer-24775107
+        windows_wakeup()
     core = Core(cfg=config, cfg_folder=config_folder, loop=loop, start_args=start_args)
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
@@ -194,7 +199,7 @@ def main():
     args = get_arguments()
     logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]), "homecontrol.log")
     cfg = get_config(args["cfgfile"])
-    
+
     setup_logging(verbose=args["verbose"], color=not args["nocolor"], logfile=logfile)
 
     if args["pid_file"]:

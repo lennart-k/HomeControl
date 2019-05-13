@@ -1,3 +1,4 @@
+import os
 from contextlib import suppress
 import signal
 import asyncio
@@ -44,10 +45,15 @@ class Core:
         """
         Startup coroutine for Core
         """
-        self.loop.add_signal_handler(
-            signal.SIGINT, lambda: self.loop.create_task(self.stop()))
-        self.loop.add_signal_handler(
-            signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
+        if not os.name == "nt":  # Windows does not have signals
+            self.loop.add_signal_handler(
+                signal.SIGINT, lambda: self.loop.create_task(self.stop()))
+            self.loop.add_signal_handler(
+                signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
+        else:
+            # Windows needs its special signal handling
+            signal.signal(signal.SIGINT, lambda *args: self.loop.create_task(self.stop()))
+            signal.signal(signal.SIGTERM, lambda *args: self.loop.create_task(self.stop()))
 
         for folder in self.cfg.get("module-manager", {}).get("folders", {}):
             await self.module_manager.load_folder(folder)

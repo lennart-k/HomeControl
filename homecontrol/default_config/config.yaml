@@ -3,7 +3,7 @@ module-manager:
   load-internal-modules: true
   install-pip-requirements: true
 
-api-server:
+http-server:
   host: null
   port: 8080
 

@@ -183,7 +183,6 @@ def main():
     validate_python_version()
 
     args = get_arguments()
-    print(not args["nocolor"])
     setup_logging(verbose=args["verbose"], color=not args["nocolor"])
     cfg = get_config(args["cfgfile"])
 

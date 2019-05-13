@@ -1,6 +1,6 @@
 from homecontrol import const
 
-from setuptools import setup, find_packages, find_namespace_packages
+from setuptools import setup, find_namespace_packages
 
 REQUIREMENTS = open("requirements.txt").read().splitlines()
 

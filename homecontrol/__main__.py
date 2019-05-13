@@ -1,3 +1,5 @@
+import pkg_resources
+import shutil
 from contextlib import suppress
 import logging
 import logging.config
@@ -21,8 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser(description="HomeControl")
-
-    parser.add_argument("-cfgfile", "-cf", default="config.yaml", help="File storing the HomeControl configuration")
+    parser.add_argument("-cfgfile", "-cf", default=os.path.expanduser("~/.homecontrol/config.yaml"), help="File storing the HomeControl configuration")
     parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
     parser.add_argument("-verbose", action="store_true", default=None)
@@ -35,7 +36,17 @@ def get_arguments() -> dict:
 
 def get_config(path: str) -> dict:
     if not os.path.isfile(path):
-        LOGGER.critical("Config file does not exist: %s", path)
+        LOGGER.critical(f"Config file does not exist: {path}")
+        create_new_config = input(f"Shall a default config folder be created at {os.path.dirname(path)}? [Y/n]")
+        if not create_new_config or create_new_config.lower()[0] == "y":
+            LOGGER.info(f"Installing the default configuration to {os.path.dirname(path)}")
+            import homecontrol
+            source = pkg_resources.resource_filename(homecontrol.__name__, "default_config")
+            shutil.copytree(source, os.path.dirname(path))
+            LOGGER.info(f"Running HomeControl with default config")
+            return get_config(path=path)
+        else:
+            LOGGER.critical("Terminating")
         sys.exit(1)
     try:
         cfg = YAMLLoader.load(open(path))
@@ -164,7 +175,7 @@ def setup_logging(verbose: bool = False,
                     'DEBUG': 'cyan',
                     'INFO': 'white',
                     'WARNING': 'yellow',
-                    'ERROR': 'orange',
+                    'ERROR': 'red',
                     'CRITICAL': 'red',
                 }
             ))
@@ -173,9 +184,8 @@ def main():
     validate_python_version()
 
     args = get_arguments()
-    cfg = get_config(args["cfgfile"])
-
     setup_logging(verbose=args["verbose"], color=args["color"])
+    cfg = get_config(args["cfgfile"])
 
     if args["pid_file"]:
         check_pid_file(args["pid_file"], kill=args["killprev"])

@@ -5,7 +5,6 @@ import logging
 import logging.config
 import asyncio
 import aiomonitor
-from functools import partial
 import yaml
 import sys
 import argparse
@@ -70,7 +69,7 @@ def run_homecontrol(config: dict, config_folder: str, start_args: dict):
     loop = asyncio.get_event_loop()
     core = Core(cfg=config, cfg_folder=config_folder, loop=loop, start_args=start_args)
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
-        loop.call_soon(partial(loop.create_task, core.bootstrap()))
+        loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
     loop.stop()
     loop.close()

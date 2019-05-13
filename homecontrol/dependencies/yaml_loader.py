@@ -10,12 +10,21 @@ from yaml.composer import Composer
 from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
 
+from homecontrol.dependencies.resolve_path import resolve_path
 from homecontrol.dependencies.entity_types import (
     Item,
     Module
 )
 
 LOGGER = logging.getLogger(__name__)
+
+def resolve_path(path: str, config_dir: str) -> str:
+    if path.startswith("~"):
+        return os.path.expanduser(path)
+    elif path.startswith("/"):
+        return path
+    else:
+        return os.path.join(config_dir, path)
 
 
 class Constructor(SafeConstructor):
@@ -24,6 +33,7 @@ class Constructor(SafeConstructor):
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
         self.add_constructor("!include", self.__class__.file_include_constructor)
         self.add_constructor("!env_var", self.__class__.env_var_constructor)
+        self.add_constructor("!path", self.__class__.path_constructor)
         
         SafeConstructor.__init__(self)
 
@@ -49,14 +59,17 @@ class Constructor(SafeConstructor):
         /   for absolute paths
         anything else for paths relative to your config folder
         """
-        if node.value.startswith("~"):
-            path = os.path.expanduser(node.value)
-        elif node.value.startswith("/"):
-            path = node.value
-        else:
-            path = os.path.join(os.path.dirname(self.name), node.value)
-
+        path = resolve_path(node.value, os.path.dirname(self.name))
         return self.__class__.load(open(path, "r"))
+
+    def path_constructor(self, node: yaml.Node = None) -> str:
+        """
+        !path <path>
+        ~/  for paths relative to your home directory
+        /   for absolute paths
+        anything else for paths relative to your config folder
+        """
+        return resolve_path(node.value, os.path.dirname(self.name))
 
     def env_var_constructor(self, node: yaml.nodes.Node) -> str:
         """

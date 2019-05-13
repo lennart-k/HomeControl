@@ -25,8 +25,9 @@ def get_arguments() -> dict:
     parser.add_argument("-cfgfile", "-cf", default=os.path.expanduser("~/.homecontrol/config.yaml"), help="File storing the HomeControl configuration")
     parser.add_argument("-pid-file", default=None, help="Location of the PID file when running as a daemon. Ensures that only one session is running")
     parser.add_argument("-clearport", action="store_true", default=None, help="Frees the port for the API server using fuser. Therefore only available on Linux")
-    parser.add_argument("-verbose", action="store_true", default=None)
+    parser.add_argument("-verbose", action="store_true", default=None, help="Sets the loglevel for the logfile to INFO")
     parser.add_argument("-nocolor", action="store_true", default=False, help="Disables colored console output")
+    parser.add_argument("-logfile", default=None, help="Logfile location")
     parser.add_argument("-killprev", "-kp", action="store_true", default=None, help="Kills the previous HomeControl instance")
     if os.name == "posix":
         parser.add_argument("-daemon", "-d", action="store_true", default=None, help="Start HomeControl as a daemon process [posix only]")
@@ -150,7 +151,9 @@ def check_pid_file(pid_file: str, kill: bool = False) -> None:
 
 
 def setup_logging(verbose: bool = False,
-                  color: bool = True):
+                  color: bool = True,
+                  logfile: str = None
+                  ):
     """
     Set up logging
     """
@@ -178,12 +181,19 @@ def setup_logging(verbose: bool = False,
                     'CRITICAL': 'red',
                 }
             ))
+    
+    if logfile:
+        file_handler = logging.FileHandler(logfile, mode="w")
+        file_handler.setLevel(logging.INFO if verbose else logging.WARNING)
+        file_handler.setFormatter(logging.Formatter(fmt, datefmt=datefmt))
+        logging.getLogger().addHandler(file_handler)
 
 def main():
     validate_python_version()
 
     args = get_arguments()
-    setup_logging(verbose=args["verbose"], color=not args["nocolor"])
+    logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]), "homecontrol.log")
+    setup_logging(verbose=args["verbose"], color=not args["nocolor"], logfile=logfile)
     cfg = get_config(args["cfgfile"])
 
     if args["pid_file"]:
@@ -200,8 +210,8 @@ def main():
         except IOError:
             LOGGER.warning("Cannot write pid file {}".format(args["pid_file"]))
 
-    if args["clearport"]:
-        clear_port(cfg["api-server"]["port"])
+    if args["clearport"] and cfg.get("http-server", {}).get("port"):
+        clear_port(cfg["http-server"]["port"])
 
     run_homecontrol(config=cfg, config_folder=os.path.dirname(args["cfgfile"]), start_args=args)
 

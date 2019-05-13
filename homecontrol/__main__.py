@@ -66,10 +66,10 @@ def validate_python_version():
         sys.exit(1)
 
 
-def run_homecontrol(config: dict, start_args: dict):
+def run_homecontrol(config: dict, config_folder: str, start_args: dict):
     loop = asyncio.get_event_loop()
-    with aiomonitor.Monitor(loop=loop):
-        core = Core(cfg=config, loop=loop, start_args=start_args)
+    core = Core(cfg=config, cfg_folder=config_folder, loop=loop, start_args=start_args)
+    with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(partial(loop.create_task, core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
     loop.stop()
@@ -204,6 +204,6 @@ def main():
     if args["clearport"]:
         clear_port(cfg["api-server"]["port"])
 
-    run_homecontrol(config=cfg, start_args=args)
+    run_homecontrol(config=cfg, config_folder=os.path.dirname(args["cfgfile"]), start_args=args)
 
 main()

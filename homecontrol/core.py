@@ -23,13 +23,14 @@ class Core:
     Represents the root object for HomeControl
     """
 
-    def __init__(self, cfg: dict, loop: asyncio.AbstractEventLoop = None, start_args: dict = None, exit_return: int = None) -> None:
+    def __init__(self, cfg: dict, cfg_folder: str, loop: asyncio.AbstractEventLoop = None, start_args: dict = None, exit_return: int = None) -> None:
         """
 
         :param cfg: Config dictionary
         :param loop: asyncio EventLoop
         """
         self.cfg = cfg
+        self.cfg_folder = cfg_folder
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
         self.block_event = asyncio.Event()
@@ -39,15 +40,15 @@ class Core:
         self.entity_manager = EntityManager(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
+    async def bootstrap(self) -> None:
+        """
+        Startup coroutine for Core
+        """
         self.loop.add_signal_handler(
             signal.SIGINT, lambda: self.loop.create_task(self.stop()))
         self.loop.add_signal_handler(
             signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
 
-    async def bootstrap(self) -> None:
-        """
-        Startup coroutine for Core
-        """
         for folder in self.cfg.get("module-manager", {}).get("folders", {}):
             await self.module_manager.load_folder(folder)
 

@@ -34,16 +34,19 @@ You can install it the following:
 git clone https://github.com/lennart-k/HomeControl
 cd HomeControl
 
-pip install -r requirements.txt
 
+python setup.py install
+homecontrol --help
+
+OR
+
+pip install -r requirements.txt
 python -m homecontrol --help
 ```
 
 ```
 usage: homecontrol [-h] [-cfgfile CFGFILE] [-pid-file PID_FILE] [-clearport]
-                   [-verbose] [-daemon]
-
-HomeControl
+                   [-verbose] [-nocolor] [-killprev] [-daemon]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -54,7 +57,9 @@ optional arguments:
   -clearport            Frees the port for the API server using fuser.
                         Therefore only available on Linux
   -verbose
-  -daemon, -d           Start HomeControl as a daemon process
+  -nocolor              Disables colored console output
+  -killprev, -kp        Kills the previous HomeControl instance
+  -daemon, -d           Start HomeControl as a daemon process [posix only]
   ```
 
 

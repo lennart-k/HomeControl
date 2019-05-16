@@ -22,6 +22,7 @@ class ItemManager:
     ItemManager manages all your stateful items
     and takes care of dependant items when removing one
     """
+
     def __init__(self, core):
         self.core = core
         self.items = {}
@@ -50,10 +51,11 @@ class ItemManager:
         try:
             await asyncio.gather(*[
                 self.core.loop.create_task(dependant_item.stop()) for dependant_item
-                in list(item.dependant_items)+[item] 
+                in list(item.dependant_items)+[item]
                 if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
         except Exception as e:
-            LOGGER.warning("An error occured when removing an item", exc_info=True)
+            LOGGER.warning(
+                "An error occured when removing an item", exc_info=True)
 
         for dependant_item in item.dependant_items:
             dependant_item.status = STOPPED
@@ -61,7 +63,12 @@ class ItemManager:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
 
-    async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}, name: str = None) -> Item:
+    async def create_item(self,
+                          identifier: str,
+                          item_type: str,
+                          cfg: dict = None,
+                          state_defaults: dict = {},
+                          name: str = None) -> Item:
         """
         Creates a HomeControl item
 
@@ -87,7 +94,7 @@ class ItemManager:
         item.dependant_items = set()  # Items that will depend on this one
         item.depends_on = set()  # Items this new item depends on
         config = {}
-        
+
         if spec.get("config_schema"):
             config = vol.Schema(spec["config_schema"])(cfg or {})
 
@@ -108,11 +115,11 @@ class ItemManager:
                         item.status = NOT_WORKING
 
         item.cfg = config
-        item.states = StateEngine(item, self.core, state_defaults=state_defaults)
+        item.states = StateEngine(
+            item, self.core, state_defaults=state_defaults)
         item.actions = ActionEngine(item, self.core)
         item.__init__()
 
-        
         if not item.status == NOT_WORKING:
             init_result = await item.init() if hasattr(item, "init") else None
 
@@ -124,7 +131,8 @@ class ItemManager:
         self.core.event_engine.broadcast("item_created", item=item)
         LOGGER.debug(f"Item created: {item.identifier}")
         if item.status == NOT_WORKING:
-            LOGGER.warning(f"Item could not be initialised: {identifier} [{item_type}]")
+            LOGGER.warning(
+                f"Item could not be initialised: {identifier} [{item_type}]")
             self.core.event_engine.broadcast("item_not_working", item=item)
 
         return item

@@ -35,6 +35,10 @@ def get_arguments() -> dict:
     return vars(parser.parse_args())
 
 def get_config(path: str) -> dict:
+    """
+    Loads the config file from path
+    If the config file does not exist it will ask the user if it should initialise with default configuration
+    """
     if not os.path.isfile(path):
         LOGGER.critical(f"Config file does not exist: {path}")
         create_new_config = input(f"Shall a default config folder be created at {os.path.dirname(path)}? [Y/n]")
@@ -56,6 +60,7 @@ def get_config(path: str) -> dict:
     return cfg
 
 def clear_port(port: int):
+    """Clears a TCP port, only works on posix as it depends on fuser"""
     if os.name == "posix":
         subprocess.call(["/bin/fuser", "-k", "{port}/tcp".format(port=port)])
 
@@ -66,6 +71,17 @@ def validate_python_version():
         sys.exit(1)
 
 def run_homecontrol(config: dict, config_folder: str, start_args: dict):
+    """
+    Runs HomeControl
+
+    config: dict
+        The loaded config file
+    config_folder: str
+        The folder containing the config file
+        This is where logfiles for example will be placed by default
+    start_args: dict
+        The commandline arguments by ArgumentParser
+    """
     loop = asyncio.get_event_loop()
     if os.name == "nt":
         def windows_wakeup():
@@ -90,9 +106,7 @@ def run_homecontrol(config: dict, config_folder: str, start_args: dict):
             pass
 
 def start_command():
-    """
-    Returns a command to re-execute HomeControl with the same parameters except the daemon parameter
-    """
+    """Returns a command to re-execute HomeControl with the same parameters except the daemon parameter"""
     if os.path.basename(sys.argv[0]) == "__main__.py" or (os.path.split(sys.argv[0])[-1] == "homecontrol" and os.path.isdir(sys.argv[0])):
         os.environ["PYTHONPATH"] = os.path.dirname(os.path.dirname(sys.argv[0]))
         return [sys.executable] + [arg for arg in sys.argv if not arg in ("-d", "-daemon")]
@@ -101,7 +115,7 @@ def start_command():
 
 
 def daemonize() -> None:
-    """Move current process to daemon process."""
+    """Move current process to a daemon process."""
     # Create first fork
     pid = os.fork()
     if pid > 0:
@@ -194,6 +208,7 @@ def setup_logging(verbose: bool = False,
         logging.getLogger().addHandler(file_handler)
 
 def main():
+    """The main function"""
     validate_python_version()
 
     args = get_arguments()

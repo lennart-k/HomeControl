@@ -12,6 +12,7 @@ from homecontrol.dependencies.entity_types import Module
 from homecontrol.exceptions import PipInstallError
 
 class ModuleManager:
+    """Manages your modules"""
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
@@ -19,9 +20,7 @@ class ModuleManager:
         self.installed_requirements = {item["name"]: item["version"] for item in json.loads(pip_list)}
 
     async def load_folder(self, path: str) -> [object]:
-        """
-        Loads every module in a folder
-        """
+        """Load every module in a folder"""
         out = []
         blacklist = self.core.cfg.get("module-manager", {}).get("blacklist", [])
         for node in os.listdir(path):
@@ -41,11 +40,14 @@ class ModuleManager:
 
     async def load_file_module(self, mod_path: str, name: str) -> (Module, Exception):
         """
-        Loads a module from a file and send an init trigger
+        Loads a module from a file and initialises it
+        
+        Returns a Module object
         """
         try:
             assert os.path.isfile(mod_path)
         except AssertionError as e:
+            LOGGER.warning(f"Module could not be loaded: {name} at {mod_path}")
             self.core.event_engine.broadcast("module_not_loaded", exception=e)
             return e
 
@@ -66,7 +68,11 @@ class ModuleManager:
 
     async def load_folder_module(self, path: str, name: str) -> (Module, Exception):
         """
-        Loads a module from a folder and send an init trigger
+        Loads a module from a folder and initialises it
+        
+        It also takes care of pip requirements
+
+        Returns a Module object
         """
         mod_path = os.path.join(path, "module.py")
         cfg_path = os.path.join(path, "module.yaml")
@@ -106,7 +112,8 @@ class ModuleManager:
 
     async def _load_module_object(self, cfg: dict, name: str, path: str, mod) -> Module:
         """
-        Initialises a module
+        Initialises a module object
+        This method should only be invoked by ModuleManager
         """
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_"+name, (Module,), {})
@@ -134,7 +141,7 @@ class ModuleManager:
 
     async def unload_module(self, name: str) -> None:
         """
-        First removes all the adapters and items the module offers.
+        First removes all the items the module offers.
         Then it triggers the stop-coro and fully removes it.
         """
         for identifier in self.loaded_modules[name].items.keys():

@@ -18,6 +18,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class EntityManager:
+    """
+    EntityManager manages all your stateful items
+    and takes care of dependant items when removing one
+    """
     def __init__(self, core):
         self.core = core
         self.items = {}
@@ -25,7 +29,9 @@ class EntityManager:
 
     async def add_from_module(self, mod_obj) -> None:
         """
-        Adds the adapter and item specs of a module to the dict of available ones
+        Adds the item specifications of a module to the dict of available ones
+
+        mod_obj: homecontrol.data_types.Module
         """
         for name, spec in mod_obj.spec.get("items", {}).items():
             spec["class"] = type(name, (getattr(mod_obj.mod, name), Item), {})
@@ -34,6 +40,12 @@ class EntityManager:
             mod_obj.item_specs[name] = spec
 
     async def remove_item(self, identifier: str) -> None:
+        """
+        Removes a HomeControl item and disables dependant items
+
+        identifier: str
+            The item's identifier
+        """
         item = self.items[identifier]
         try:
             await asyncio.gather(*[
@@ -50,6 +62,18 @@ class EntityManager:
         del self.items[identifier]
 
     async def create_item(self, identifier: str, item_type: str, cfg: dict = None, state_defaults: dict = {}, name: str = None) -> Item:
+        """
+        Creates a HomeControl item
+
+        identifier: str
+        item_type: str
+            The type of your item consisting of MODULE.CLASS
+        cfg: dict
+        state_defaults: dict
+            If the initial state cannot be polled on init you can pass a default
+        name: str
+            How your item should be displayed in the frontend
+        """
         assert item_type in self.item_specs, ItemTypeNotFound(item_type)
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])

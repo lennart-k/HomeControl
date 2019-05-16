@@ -15,9 +15,10 @@ class TickEngine:
 
     def tick(self, interval: int) -> Callable:
         """
-
-        :param interval: Interval in seconds
-        :return:
+        Register a tick
+        
+        interval: int
+            Interval in seconds
         """
 
         def _tick(coro) -> Callable:

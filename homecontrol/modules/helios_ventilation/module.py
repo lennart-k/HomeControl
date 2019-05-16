@@ -21,17 +21,17 @@ class HeliosVentilation:
             "v00091": duration,
             "v00092": party_level,
             "v00093": 0,
-            "v00094": 1
+            "v00094": 1  # Activate party mode
         })
 
     async def stop_party(self):
         requests.post(f"http://{self.cfg['host']}/party.htm", data={
-            "v00094": 0,
+            "v00094": 0,  # Deactivate party mode
         })
 
     async def set_speed(self, value):
         await self.states.update("speed", value)
         requests.post(f"http://{self.cfg['host']}/index.htm", data={
-            "v00102": value,
+            "v00102": value,  # Speed register
         })
         return {"speed": value}

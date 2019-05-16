@@ -15,7 +15,7 @@ items:
       !vol/Required {schema: port, default: 8888}:
         !vol/Coerce { type: !type/int }
 
-  BinarySwitch:
+  BinaryOutput:
     config_schema:
       !vol/Required {schema: pin, default: 16}:
         !vol/All

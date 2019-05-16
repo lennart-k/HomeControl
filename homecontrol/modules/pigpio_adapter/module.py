@@ -36,7 +36,7 @@ class PiGPIOAdapter:
         self.pigpio.stop()
 
 
-class BinarySwitch:
+class BinaryOutput:
     cfg: dict
     core: Core
 

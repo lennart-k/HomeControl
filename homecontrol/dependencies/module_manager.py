@@ -4,12 +4,16 @@ import importlib
 import importlib.util
 import os
 import json
+import logging
 
 from pip._vendor.distlib.version import NormalizedMatcher
 
 from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.dependencies.entity_types import Module
 from homecontrol.exceptions import PipInstallError
+
+LOGGER = logging.getLogger(__name__)
+
 
 class ModuleManager:
     """Manages your modules"""
@@ -81,6 +85,7 @@ class ModuleManager:
             assert os.path.isfile(mod_path)
             assert os.path.isfile(cfg_path)
         except AssertionError as e:
+            LOGGER.warning(f"Module could not be loaded: {name} at {path}")
             self.core.event_engine.broadcast("module_not_loaded", exception=e, name=name)
             return e
 
@@ -98,6 +103,7 @@ class ModuleManager:
         if unsatisfied_pip_dependencies:
             process = subprocess.Popen([sys.executable, "-m", "pip", "install", *unsatisfied_pip_dependencies])
             if process.wait():
+                LOGGER.warning(f"Module could not be loaded: {name} at {path}")
                 self.core.event_engine.broadcast("module_not_loaded", exception=PipInstallError(), name=name)
                 return
 

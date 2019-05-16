@@ -79,7 +79,7 @@ class Constructor(SafeConstructor):
             raise TypeError(f"folder must be of type str")
         folder = resolve_path(node.value, os.path.dirname(self.name))
         if not os.path.isdir(folder):
-            raise FileNotFoundError(path)
+            raise FileNotFoundError(folder)
 
         return {
             os.path.splitext(file)[0]: self.__class__.load(open(os.path.join(folder, file), "r"))

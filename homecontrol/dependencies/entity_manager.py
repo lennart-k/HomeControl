@@ -124,6 +124,7 @@ class EntityManager:
         self.core.event_engine.broadcast("item_created", item=item)
         LOGGER.debug(f"Item created: {item.identifier}")
         if item.status == NOT_WORKING:
+            LOGGER.warning(f"Item could not be initialised: {identifier} [{item_type}]")
             self.core.event_engine.broadcast("item_not_working", item=item)
 
         return item

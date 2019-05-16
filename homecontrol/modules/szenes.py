@@ -19,6 +19,9 @@ class Module:
 
 
 class Szene:
+    """
+    A Szene is a set of states that should be set and actions that should be executed when invoked
+    """
     def __init__(self, module, data):
         self.core = module.core
         self.data = data
@@ -37,6 +40,7 @@ class Szene:
         return await self.invoke()
 
 class SzeneActionProvider:
+    """An automation provider for szenes"""
     def __init__(self, module, rule, engine):
         self.rule = rule
         self.module = module

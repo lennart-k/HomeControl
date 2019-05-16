@@ -5,7 +5,6 @@ venv_win
 __pycache__/
 .pytest_cache
 .vscode
-config
 scripts
 webapp
 homecontrol.lock

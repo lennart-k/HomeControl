@@ -69,12 +69,6 @@ class EventEngine:
         """
         return await asyncio.gather(*self.broadcast(event_type, data, **kwargs))
 
-    def trigger(self, trigger: str, dest: Any, *args, **kwargs) -> asyncio.Future:
-        """
-        Triggers are similar to events but they are just there to call a method of a module, item or adapter
-        if hasattr(dest, trigger):
-            return asyncio.ensure_future(getattr(dest, trigger)(*args, **kwargs), loop=self.core.loop)
-
     def register(self, event: str) -> Callable:
         """
         Decorator to register event handlers

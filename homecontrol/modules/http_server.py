@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from aiohttp import web
 import os
 
@@ -7,6 +8,9 @@ SPEC = """
 meta:
   name: HTTP Server
 """
+
+LOGGER = logging.getLogger(__name__)
+logging.getLogger("aiohttp").setLevel(logging.WARNING)
 
 
 class Module:

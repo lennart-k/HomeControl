@@ -11,7 +11,7 @@ items:
       !vol/Any [rawname, name]: !type/str
       !vol/Required { schema: update_interval, default: 10 }: !type/int
 
-    state:
+    states:
       followers:
         type: Integer
         default: 0
@@ -24,7 +24,7 @@ items:
       !vol/Any [rawname, name]: !type/str
       !vol/Required { schema: update_interval, default: 10 }: !type/int
 
-    state:
+    states:
       followers:
         type: Integer
         default: 0
@@ -37,7 +37,7 @@ items:
       !vol/Required { schema: name }: !type/str
       !vol/Required { schema: update_interval, default: 10 }: !type/int
 
-    state:
+    states:
       followers:
         type: Integer
         default: 0

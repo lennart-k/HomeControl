@@ -16,7 +16,7 @@ items:
     actions:
       update: update_stats
 
-    state:
+    states:
       last_update:
         type: Float
       market_price_usd:

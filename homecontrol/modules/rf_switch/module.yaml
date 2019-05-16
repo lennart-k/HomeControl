@@ -19,7 +19,7 @@ items:
       !vol/Required {schema: 433mhz_tx_adapter}:
         !type/str
 
-    state:
+    states:
       "on":
         default: True
         setter: switch

@@ -29,7 +29,7 @@ items:
         !type/int
       
 
-    state:
+    states:
       weather_data:
         type: WeatherData
         default: None

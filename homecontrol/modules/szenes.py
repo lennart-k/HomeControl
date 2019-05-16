@@ -27,7 +27,7 @@ class Szene:
         for item_id, data in self.data.get("items", {}).items():
             item = self.core.item_manager.items[item_id]
 
-            for state_name, value in data.get("state", {}).items():
+            for state_name, value in data.get("states", {}).items():
                 await item.states.set(state_name, value)
 
             for action_instruction in data.get("action", []):

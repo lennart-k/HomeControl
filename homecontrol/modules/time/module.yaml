@@ -5,7 +5,7 @@ meta:
 
 items:
   Timer:
-    state:
+    states:
       time_remaining:
         type: Integer
         default: 0

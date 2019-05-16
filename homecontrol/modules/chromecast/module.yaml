@@ -14,7 +14,7 @@ items:
       !vol/Required {schema: port, default: 8009}:
         !vol/Coerce { type: !type/int }
 
-    state:
+    states:
       volume:
         default: 100
         setter: set_volume

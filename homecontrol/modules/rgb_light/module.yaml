@@ -26,7 +26,7 @@ items:
       !vol/Required {schema: pigpio_adapter}:
         !type/str
 
-    state:
+    states:
       mode:
         setter: set_mode
         default: static

@@ -15,7 +15,7 @@ class StateEngine:
         self.item = item
         self.core = core
         self.states = {}
-        for state_name, details in item.spec.get("state", {}).items():
+        for state_name, details in item.spec.get("states", {}).items():
             default_state = state_defaults.get(
                 state_name, details.get("default", None))
 

@@ -86,7 +86,7 @@ class Module:
                     "module": item.module,
                     "online": item.status,
                     "actions": list(item.actions.actions.keys()),
-                    "state": await item.states.dump()
+                    "states": await item.states.dump()
                 } for item in self.core.item_manager.items.values()
             ])
 
@@ -109,7 +109,7 @@ class Module:
                 "online": item.status
             })
 
-        @r.get("/item/{id}/state")
+        @r.get("/item/{id}/states")
         async def get_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -123,10 +123,10 @@ class Module:
             return JSONResponse({
                 "item": item,
                 "type": item.type,
-                "state": await item.states.dump(),
+                "states": await item.states.dump(),
             })
 
-        @r.post("/item/{id}/state")
+        @r.post("/item/{id}/states")
         async def set_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -152,7 +152,7 @@ class Module:
 
             return JSONResponse(dict(ChainMap(*[await item.states.set(state, value) for state, value in commit.items()])))
 
-        @r.post("/item/{id}/state/{state_name}")
+        @r.post("/item/{id}/states/{state_name}")
         async def set_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -180,7 +180,7 @@ class Module:
 
             return JSONResponse(result)
 
-        @r.get("/item/{id}/state/{state_name}")
+        @r.get("/item/{id}/states/{state_name}")
         async def get_item_state(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             state_name = request.match_info["state_name"]
@@ -201,7 +201,7 @@ class Module:
             return JSONResponse({
                 "item": item,
                 "type": item.type,
-                "state": {
+                "states": {
                     state_name: await item.states.get(state_name)
                 }
             })

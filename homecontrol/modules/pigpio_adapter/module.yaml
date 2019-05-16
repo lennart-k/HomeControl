@@ -31,7 +31,7 @@ items:
         !type/str
 
 
-    state:
+    states:
       "on":
         setter: set_on
         default: False
@@ -59,7 +59,7 @@ items:
           - !vol/Any [ !type/bool , !type/int ]
           - !vol/Coerce { type: !type/bool }
 
-    state:
+    states:
       value:
         default: 0
 
@@ -74,7 +74,7 @@ items:
       !vol/Required {schema: address, default: 0x27}:
         !vol/Coerce { type: !type/int }
 
-    state:
+    states:
       backlight:
         type: Boolean
         default: True

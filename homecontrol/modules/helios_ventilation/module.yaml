@@ -16,7 +16,7 @@ items:
           - !vol/Coerce { type: !type/int }
           - !vol/Range {min: 1, max: 4}
 
-    state:
+    states:
       mode:
         type: String
         default: default

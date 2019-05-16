@@ -44,7 +44,7 @@ items:
         - !vol/Coerce { type: !type/int }
         - !vol/Range {min: 0}
 
-    state:
+    states:
       value:
         default: 0
         getter: get_value

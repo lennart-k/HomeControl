@@ -69,7 +69,7 @@ class Core:
                 name=item.get("name"),
                 item_type=item["type"],
                 cfg=item.get("cfg"),
-                state_defaults=item.get("state", {}))
+                state_defaults=item.get("states", {}))
 
         self.event_engine.broadcast("core_bootstrap_complete")
         LOGGER.info("Core bootstrap complete")

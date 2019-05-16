@@ -139,7 +139,7 @@ class ModuleManager:
         mod_obj.__init__()
 
         self.loaded_modules[name] = mod_obj
-        await self.core.entity_manager.add_from_module(mod_obj)
+        await self.core.item_manager.add_from_module(mod_obj)
         if hasattr(mod_obj, "init"):
             await mod_obj.init()
         self.core.event_engine.broadcast("module_loaded", module=mod_obj)
@@ -151,7 +151,7 @@ class ModuleManager:
         Then it triggers the stop-coro and fully removes it.
         """
         for identifier in self.loaded_modules[name].items.keys():
-            await self.core.entity_manager.remove_item(identifier)
+            await self.core.item_manager.remove_item(identifier)
         if hasattr(self.loaded_modules[name], "stop"):
             await self.loaded_modules[name].stop()
         del self.loaded_modules[name]

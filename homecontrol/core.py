@@ -7,7 +7,7 @@ import pkg_resources
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
-from homecontrol.dependencies.entity_manager import EntityManager
+from homecontrol.dependencies.item_manager import ItemManager
 from homecontrol.dependencies.tick_engine import TickEngine
 import homecontrol
 
@@ -38,7 +38,7 @@ class Core:
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
         self.module_manager = ModuleManager(core=self)
-        self.entity_manager = EntityManager(core=self)
+        self.item_manager = ItemManager(core=self)
         self.exit_return = exit_return or EXIT_SHUTDOWN
 
     async def bootstrap(self) -> None:
@@ -64,7 +64,7 @@ class Core:
 
         # Create items from config file
         for item in self.cfg["items"]:
-            await self.entity_manager.create_item(
+            await self.item_manager.create_item(
                 identifier=item["id"],
                 name=item.get("name"),
                 item_type=item["type"],

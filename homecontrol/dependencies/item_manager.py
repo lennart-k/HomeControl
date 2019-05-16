@@ -17,9 +17,9 @@ from homecontrol.exceptions import (
 LOGGER = logging.getLogger(__name__)
 
 
-class EntityManager:
+class ItemManager:
     """
-    EntityManager manages all your stateful items
+    ItemManager manages all your stateful items
     and takes care of dependant items when removing one
     """
     def __init__(self, core):

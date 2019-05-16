@@ -87,13 +87,13 @@ class Module:
                     "online": item.status,
                     "actions": list(item.actions.actions.keys()),
                     "state": await item.states.dump()
-                } for item in self.core.entity_manager.items.values()
+                } for item in self.core.item_manager.items.values()
             ])
 
         @r.get("/item/{id}")
         async def get_item(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
 
             if not item:
                 return JSONResponse(error={
@@ -112,7 +112,7 @@ class Module:
         @r.get("/item/{id}/state")
         async def get_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
 
             if not item:
                 return JSONResponse(error={
@@ -129,7 +129,7 @@ class Module:
         @r.post("/item/{id}/state")
         async def set_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
 
             if not item:
                 return JSONResponse(error={
@@ -155,7 +155,7 @@ class Module:
         @r.post("/item/{id}/state/{state_name}")
         async def set_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
 
             if not item:
                 return JSONResponse(error={
@@ -184,7 +184,7 @@ class Module:
         async def get_item_state(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             state_name = request.match_info["state_name"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
 
             if not item:
                 return JSONResponse(error={
@@ -209,7 +209,7 @@ class Module:
         @r.get("/item/{id}/action")
         async def get_actions(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
             if not item:
                 return JSONResponse(error={
                     "type": ERROR_ITEM_NOT_FOUND,
@@ -228,7 +228,7 @@ class Module:
 
             identifier = request.match_info["id"]
             action_name = request.match_info["action_name"]
-            item = self.core.entity_manager.items.get(identifier)
+            item = self.core.item_manager.items.get(identifier)
             if not item:
                 return JSONResponse(error={
                     "type": ERROR_ITEM_NOT_FOUND,

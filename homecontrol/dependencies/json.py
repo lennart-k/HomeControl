@@ -60,9 +60,9 @@ class JSONDecoder(json.JSONDecoder):
             if obj["!type"] == "Item":
                 ITEM_SCHEMA(obj)  # Check if obj has needed attributes
                 # Check if item exists
-                assert obj["id"] in self.core.entity_manager.items, ItemNotFoundException(
+                assert obj["id"] in self.core.item_manager.items, ItemNotFoundException(
                     f"There's no item with id {obj['id']}")
-                return self.core.entity_manager.items[obj["id"]]
+                return self.core.item_manager.items[obj["id"]]
 
             if obj["!type"] == "Module":
                 MODULE_SCHEMA(obj)  # Check if obj has needed attributes

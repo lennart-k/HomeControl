@@ -25,7 +25,7 @@ class Szene:
     
     async def invoke(self):
         for item_id, data in self.data.get("items", {}).items():
-            item = self.core.entity_manager.items[item_id]
+            item = self.core.item_manager.items[item_id]
 
             for state_name, value in data.get("state", {}).items():
                 await item.states.set(state_name, value)

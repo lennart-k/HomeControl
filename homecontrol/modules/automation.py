@@ -53,7 +53,7 @@ class StateActionProvider:
         self.data = rule.data["action"]
 
     async def on_trigger(self, data: dict) -> None:
-        target = self.core.entity_manager.items.get(self.data["target"])
+        target = self.core.item_manager.items.get(self.data["target"])
         changes = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
 
@@ -71,7 +71,7 @@ class ItemActionProvider:
         self.data = rule.data["action"]
 
     async def on_trigger(self, data: dict) -> None:
-        target = self.core.entity_manager.items.get(self.data["target"])
+        target = self.core.item_manager.items.get(self.data["target"])
         params = {**self.data.get("data", {}), **{key: data.get(ref) for key, ref in self.data.get("var-data", {}).items()}}
 
         await target.actions.execute(self.data["action"], **params)

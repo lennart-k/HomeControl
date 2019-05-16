@@ -1,0 +1,41 @@
+
+[EXCEPTIONS]
+overgeneral-exceptions=BaseException,Exception,HomeControlException
+
+[BASIC]
+good-names=i,
+           _,
+           e  # Exceptions
+
+
+[FORMAT]
+expected-line-ending-format=LF
+single-line-class-stmt=yes
+single-line-if-stmt=yes
+logging-format-style=old
+ignore-long-lines=\s*(# )?<?https?://\S+>?$
+
+[VARIABLES]
+additional-builtins=event,tick
+defining-attr-methods=__init__,
+                      __new__,
+                      init
+callbacks=cb_,
+          _cb,
+          on_,
+          handle_
+
+[DESIGN]
+max-args=8
+max-attributes=12
+min-public-methods=1
+
+[TYPECHECK]
+generated-members=states,cfg,core,identifier
+
+[MESSAGES CONTROL]
+disable=unused-argument,
+        unused-variable,
+
+[SIMILARITIES]
+min-similarity-lines=6

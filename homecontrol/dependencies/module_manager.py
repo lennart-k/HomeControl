@@ -140,5 +140,5 @@ class ModuleManager:
         for identifier in self.loaded_modules[name].items.keys():
             await self.core.entity_manager.remove_item(identifier)
         if hasattr(self.loaded_modules[name], "stop"):
-            self.core.event_engine.trigger("stop", self.loaded_modules[name])
+            await self.loaded_modules[name].stop()
         del self.loaded_modules[name]

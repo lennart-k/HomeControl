@@ -1,3 +1,5 @@
+"""StateEngine module"""
+
 import logging
 from typing import Callable, Any
 import voluptuous as vol
@@ -11,7 +13,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class StateEngine:
-    def __init__(self, item: Item, core, state_defaults: dict = {}):
+    """Holds the states of an item"""
+    def __init__(self, item: Item, core, state_defaults: dict = None):
+        state_defaults = state_defaults or {}
+
         self.item = item
         self.core = core
         self.states = {}
@@ -32,43 +37,53 @@ class StateEngine:
                                             )
 
     async def get(self, state: str):
+        """Gets an item's state"""
         if state in self.states:
             return await self.states[state].get()
 
     async def set(self, state: str, value) -> dict:
+        """Sets an item's state"""
         if state in self.states:
             return await self.states[state].set(value)
 
     def check_value(self, state: str, value) -> vol.error.Error:
-        """
-        Checks if a value is valid for a state
-        """
+        """Checks if a value is valid for a state"""
         return self.states[state].check_value(value)
 
     async def update(self, state: str, value):
+        """Called from an item to update its state"""
         if state in self.states:
             return await self.states[state].update(value)
 
     async def bulk_update(self, **kwargs):
+        """Called from an item to update multiple states"""
         for state, value in kwargs.items():
             await self.states[state].update(value)
 
     async def dump(self) -> dict:
-        """
-        Return a JSON serialisable object
-        """
+        """Return a JSON serialisable object"""
         return {
-            name: await self.states[name].get() for name in self.states.keys()
+            name: await self.states[name].get() for name in self.states
         }
 
 
 class State:
+    """Holds one state of an item"""
+
     getter: Callable
     setter: Callable
     value: Any
     mutable: bool
 
-    def __init__(self, state_engine: StateEngine, default, getter: Callable = None, setter: Callable = None, name: str = None, state_type=None, schema=None):
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 state_engine: StateEngine,
+                 default,
+                 getter: Callable = None,
+                 setter: Callable = None,
+                 name: str = None,
+                 state_type: type = None,
+                 schema: dict = None) -> None:
         self.value = default if not state_type else state_type(*default)
         self.name = name
         self.getter = getter
@@ -77,6 +92,7 @@ class State:
         self.schema = vol.Schema(schema) if schema else None
 
     async def get(self):
+        """Gets a state"""
         if self.state_engine.item.status == NOT_WORKING:
             return None
         if self.getter:
@@ -84,6 +100,7 @@ class State:
         return self.value
 
     async def set(self, value) -> dict:
+        """Sets a state"""
         if self.schema:  # Apply schema to new value
             value = self.schema(value)
         if self.setter:
@@ -92,29 +109,30 @@ class State:
                 self.state_engine.states[state].value = change
             self.state_engine.core.event_engine.broadcast(
                 "state_change", item=self.state_engine.item, changes=result)
-            LOGGER.debug(f"State change: {self.state_engine.item.identifier} {result}")
+            LOGGER.debug("State change: %s %s", self.state_engine.item.identifier, result)
             return result
         return {}
 
     def check_value(self, value) -> vol.error.Error:
-        """
-        Checks if a value is valid for a state
-        """
+        """Checks if a value is valid for a state"""
         if self.schema:
             try:
                 self.schema(value)
                 return True
-            except vol.error.Error as e:
-                return e
+            except vol.error.Error as error:
+                return error
         return True
 
     async def update(self, value):
+        """Updates a state"""
         if not self.value == value:
             self.value = value
-            self.state_engine.core.event_engine.broadcast("state_change", item=self.state_engine.item, changes={
-                self.name: self.value
-            })
-            LOGGER.debug(f"State change: {self.state_engine.item.identifier} {result}")
+            self.state_engine.core.event_engine.broadcast(
+                "state_change", item=self.state_engine.item, changes={
+                    self.name: self.value
+                })
+            LOGGER.debug("State change: %s %s",
+                         self.state_engine.item.identifier, {self.name: value})
 
             return True
         return False

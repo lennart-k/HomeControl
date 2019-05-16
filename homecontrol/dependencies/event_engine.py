@@ -1,3 +1,5 @@
+"""EventEngine for HomeControl"""
+
 from typing import List, Callable, Any
 import asyncio
 import logging
@@ -7,14 +9,21 @@ from collections import defaultdict
 LOGGER = logging.getLogger(__name__)
 
 
+# pylint: disable=too-few-public-methods
 class Event:
-    __slots__ = ["event_type", "data", "time", "kwargs"]
+    """Representation for an Event"""
 
-    def __init__(self, event_type: str, data: dict = None, time: int = None, kwargs: dict = None):
-        
+    __slots__ = ["event_type", "data", "timestamp", "kwargs"]
+
+    def __init__(self,
+                 event_type: str,
+                 data: dict = None,
+                 timestamp: int = None,
+                 kwargs: dict = None) -> None:
+
         self.event_type = event_type
         self.data = data or {}
-        self.time = time
+        self.timestamp = timestamp
         self.kwargs = kwargs or {}
 
     def __repr__(self) -> str:
@@ -22,7 +31,8 @@ class Event:
 
 
 class EventEngine:
-    def __init__(self, core):
+    """Dispatcher for events"""
+    def __init__(self, core: "homecontrol.Core") -> None:
         self.core = core
         self.handlers = defaultdict(set)
 
@@ -38,15 +48,22 @@ class EventEngine:
 
         data = data or {}
         data.update(kwargs)
-        event = Event(event_type, data=data, time=int(time.time()))
+        event = Event(event_type, data=data, timestamp=int(time.time()))
 
-        LOGGER.debug(f"Event: {event}")
+        LOGGER.debug("Event: %s", event)
 
-        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+        handlers = (
+            list(self.handlers.get("*", list()))
+            + list(self.handlers.get(event_type, list()))
+        )
 
-        return [asyncio.ensure_future(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
+        return [asyncio.ensure_future(handler(event, **kwargs),
+                                      loop=self.core.loop) for handler in handlers]
 
-    def broadcast_threaded(self, event_type: str, data: dict = None, **kwargs) -> List[asyncio.Task]:
+    def broadcast_threaded(self,
+                           event_type: str,
+                           data: dict = None,
+                           **kwargs) -> List[asyncio.Task]:
         """
         Same as broadcast BUT
         - It returns Futures and not Tasks
@@ -54,13 +71,17 @@ class EventEngine:
         """
         data = data or {}
         data.update(kwargs)
-        event = Event(event_type, data=data, time=int(time.time()))
+        event = Event(event_type, data=data, timestamp=int(time.time()))
 
-        LOGGER.debug(f"Event: {event}")
+        LOGGER.debug("Event: %s", event)
 
-        handlers = list(self.handlers.get("*", list())) + list(self.handlers.get(event_type, list()))
+        handlers = (
+            list(self.handlers.get("*", list()))
+            + list(self.handlers.get(event_type, list()))
+        )
 
-        return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs), loop=self.core.loop) for handler in handlers]
+        return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs),
+                                                 loop=self.core.loop) for handler in handlers]
 
 
     async def gather(self, event_type: str, data: dict = None, **kwargs) -> List[Any]:

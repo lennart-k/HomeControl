@@ -1,14 +1,15 @@
+"""data types for HomeControl that can be translated to JSON for API usage"""
+
 import colorsys
 from datetime import datetime
 
+# pylint: disable=invalid-name
 types = {}
 type_set = set()
 
 
 def data_type(cls: object) -> object:
-    """
-    Decorator to add a data type to the types dict
-    """
+    """Decorator to add a data type to the types dict"""
     type_set.add(cls)
     types[cls.__name__] = cls
     return cls
@@ -16,6 +17,7 @@ def data_type(cls: object) -> object:
 
 @data_type
 class Color:
+    """Representation for a color"""
     hsl: (int, int, int)
 
     def __init__(self, h: int, s: int, l: int):
@@ -26,20 +28,25 @@ class Color:
 
     @staticmethod
     def from_hsl(hsl: tuple):
+        """HSL constructor"""
         return Color(*hsl)
 
     @staticmethod
     def from_rgb(rgb: tuple):
+        """RGB constructor"""
         hls = colorsys.rgb_to_hls(*(i/255 for i in rgb))
         return Color(int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
 
     @staticmethod
     def from_data(hsl: tuple):
+        """Constructor from the data received through the API or configuration"""
         return Color.from_hsl(hsl)
 
     @property
     def rgb(self) -> (int, int, int):
-        return tuple(int(i*255) for i in colorsys.hls_to_rgb(self.hsl[0]/360, self.hsl[2]/255, self.hsl[1]/255))
+        """RGB"""
+        return tuple(int(i*255) for i in
+                     colorsys.hls_to_rgb(self.hsl[0]/360, self.hsl[2]/255, self.hsl[1]/255))
 
     @rgb.setter
     def rgb(self, rgb: tuple):
@@ -48,6 +55,7 @@ class Color:
 
     @property
     def h(self) -> int:
+        """Hue"""
         return self.hsl[0]
 
     @h.setter
@@ -58,6 +66,7 @@ class Color:
 
     @property
     def s(self) -> int:
+        """Saturation"""
         return self.hsl[1]
 
     @s.setter
@@ -68,6 +77,7 @@ class Color:
 
     @property
     def l(self) -> int:
+        """Lightness"""
         return self.hsl[2]
 
     @l.setter
@@ -77,14 +87,18 @@ class Color:
         self.hsl = hsl
 
     def dump(self) -> (int, int, int):
+        """Dumps the Color into a JSON serialisable format"""
         return self.hsl
 
 
 @data_type
 class DateTime(datetime):
+    """date time format"""
     @staticmethod
     def from_data(data):
+        """Construct from JSON serialisable data"""
         return DateTime.fromisoformat(*data)
 
     def dump(self):
+        """Dump to JSON serialisable data"""
         return self.isoformat()

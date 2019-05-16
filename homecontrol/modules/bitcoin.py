@@ -1,3 +1,5 @@
+"""Bitcoin stats"""
+
 import voluptuous as vol
 import requests
 
@@ -42,10 +44,13 @@ DATA_URL = "https://api.blockchain.info/stats"
 
 
 class BitcoinStats:
+    """Item holding Bitcoin stats"""
     async def init(self):
+        """Initialise the item"""
         tick(self.cfg["update_interval"])(self.update_stats)
 
     async def update_stats(self):
+        """Update the current states"""
         try:
             result = RESULT_SCHEMA(requests.get(DATA_URL).json())
         except vol.SchemaError as e:

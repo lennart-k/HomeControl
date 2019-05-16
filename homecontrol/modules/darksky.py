@@ -1,5 +1,6 @@
-import requests
+"""Weather forecast using DarkSky"""
 
+import requests
 
 SPEC = """
 meta:
@@ -39,17 +40,28 @@ items:
 EXCLUDE = ["minutely", "hourly"]
 URL = "https://api.darksky.net/forecast/{token}/{location}?lang={lang}&units={units}&exclude={exclude}"
 
+
 class WeatherProvider:
+    """The WeatherProvider item"""
     async def init(self):
+        """Initialise the WeatherProvider item"""
         tick(self.cfg["update_interval"])(self.fetch_weather)
 
     async def fetch_weather(self):
-        request = requests.get(URL.format(token=self.cfg["token"], lang=self.cfg["language"], units=self.cfg["units"], exclude=",".join(EXCLUDE), location=self.cfg["location"]))
+        """Fetch the weather from the DarkSky API"""
+        request = requests.get(URL.format(token=self.cfg["token"],
+                                          lang=self.cfg["language"],
+                                          units=self.cfg["units"],
+                                          exclude=",".join(EXCLUDE),
+                                          location=self.cfg["location"]))
         data = request.json()
         if not data.get("flags", {}).get("darksky-unavailable"):
-            await self.states.update("weather_data", WeatherData(data, "DarkSky", self.cfg["location"]))
+            await self.states.update(
+                "weather_data", WeatherData(data, "DarkSky", self.cfg["location"]))
+
 
 class WeatherData:
+    """A class holding the weather data"""
     def __init__(self, data, provider, location):
         self.data = data
         self.provider = provider

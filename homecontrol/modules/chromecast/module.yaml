@@ -34,7 +34,7 @@ items:
 
       cast_state:
         default: None
-        getter: get_state
+        getter: get_cast_state
 
       metadata:
         default: {}

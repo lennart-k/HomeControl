@@ -17,4 +17,4 @@ items:
           - !vol/Range {min: 0}
 
     actions:
-      send_code: action_send_code
+      send_code: send_code

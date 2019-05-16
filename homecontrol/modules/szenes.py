@@ -1,3 +1,5 @@
+"""Szenes for HomeControl"""
+
 SPEC = """
 meta:
   name: Szenes
@@ -5,7 +7,9 @@ meta:
 """
 
 class Module:
+    """The Szene module holding the szene settings"""
     async def init(self):
+        """Initialise the szenes"""
         data = self.core.cfg.get("szenes", [])
         self.szenes = {szene["alias"]: Szene(self, szene) for szene in data}
 
@@ -14,6 +18,7 @@ class Module:
             callback(action={"szene": self.provider_factory})
 
     def provider_factory(self, rule, engine):
+        """Returns a szene as an action provider for the automation module"""
         target = rule.data["action"]["target"]
         return self.szenes[target]
 
@@ -25,8 +30,9 @@ class Szene:
     def __init__(self, module, data):
         self.core = module.core
         self.data = data
-    
+
     async def invoke(self):
+        """Invoke the szene"""
         for item_id, data in self.data.get("items", {}).items():
             item = self.core.item_manager.items[item_id]
 
@@ -34,18 +40,9 @@ class Szene:
                 await item.states.set(state_name, value)
 
             for action_instruction in data.get("action", []):
-                await item.actions.execute(action_instruction["name"], **action_instruction.get("data", {}))
+                await item.actions.execute(action_instruction["name"],
+                                           **action_instruction.get("data", {}))
 
     async def on_trigger(self, data):
+        """Implement an automation action provider"""
         return await self.invoke()
-
-class SzeneActionProvider:
-    """An automation provider for szenes"""
-    def __init__(self, module, rule, engine):
-        self.rule = rule
-        self.module = module
-        self.engine = engine
-        self.core = engine.core
-
-    async def on_trigger(self, data):
-        return await self.module.szenes[self.rule["trigger"]["target"]].invoke()

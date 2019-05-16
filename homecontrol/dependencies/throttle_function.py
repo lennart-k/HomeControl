@@ -1,8 +1,12 @@
+"""throttle_function"""
+
 from functools import wraps
 import time
+from typing import Callable
 
 
-class throttle(object):
+# pylint: disable=invalid-name,inconsistent-return-statements,too-few-public-methods
+class throttle:
     """
     Throttles a function so it only gets called at a fixed frequency
     """
@@ -10,7 +14,7 @@ class throttle(object):
         self.throttle_period = s
         self.time_of_last_call = time.time()
 
-    def __call__(self, fn: callable):
+    def __call__(self, fn: callable) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
             now = time.time()

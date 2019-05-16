@@ -1,7 +1,9 @@
+"""Provides a YAML loader"""
+
 import itertools
 import os
-import voluptuous as vol
 import logging
+import voluptuous as vol
 
 import yaml
 from yaml.reader import Reader
@@ -18,25 +20,53 @@ from homecontrol.dependencies.entity_types import (
 
 LOGGER = logging.getLogger(__name__)
 
+TYPES = {
+    "bool": bool,
+    "str": str,
+    "int": int,
+    "float": float,
+    "dict": dict,
+    "set": set,
+    "tuple": tuple,
+    "list": list,
+    "complex": complex,
+    "bytes": bytes,
+    "object": object,
+    # Custom types
+    "Item": Item,
+    "Module": Module,
+}
+
 def resolve_path(path: str, config_dir: str) -> str:
+    """
+    Resolves a path:
+    ~/  for paths relative to your home directory
+    /   for absolute paths
+    anything else for paths relative to your config folder
+    """
     if path.startswith("~"):
         return os.path.expanduser(path)
-    elif path.startswith("/"):
+    if path.startswith("/"):
         return path
-    else:
-        return os.path.join(config_dir, path)
+    return os.path.join(config_dir, path)
 
 
+# pylint: disable=no-member,no-self-use
 class Constructor(SafeConstructor):
+    """Constructor for yaml"""
+
+    name: str
+
     def __init__(self):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
         self.add_constructor("!include", self.__class__.include_file_constructor)
         self.add_constructor("!include_merge", self.__class__.include_merge_constructor)
-        self.add_constructor("!include_dir_file_mapped", self.__class__.include_dir_file_mapped_constructor)
+        self.add_constructor("!include_dir_file_mapped",
+                             self.__class__.include_dir_file_mapped_constructor)
         self.add_constructor("!env_var", self.__class__.env_var_constructor)
         self.add_constructor("!path", self.__class__.path_constructor)
-        
+
         SafeConstructor.__init__(self)
 
     def _obj(self, cls, node: yaml.Node) -> object:
@@ -44,7 +74,7 @@ class Constructor(SafeConstructor):
             return cls
 
         value = getattr(self, "construct_"+node.id)(node)
-        
+
         if node.value == "":
             return cls
         if isinstance(value, dict):
@@ -72,7 +102,7 @@ class Constructor(SafeConstructor):
     def include_dir_file_mapped_constructor(self, node: yaml.Node = None) -> dict:
         """
         !include_dir_file_mapped <folder>
-        
+
         Loads multiple files from a folder and maps their contents to their filenames
         """
         if not isinstance(node.value, str):
@@ -109,16 +139,18 @@ class Constructor(SafeConstructor):
                 for file in os.listdir(path):
                     if file.endswith(".yaml"):
                         files.add(os.path.join(path, file))
-        
+
         loaded_files = [self.__class__.load(open(file, "r")) for file in files]
 
-        if not all(type(loaded_file) == type(loaded_files[0]) for loaded_file in loaded_files):
-            raise yaml.YAMLError(f"Cannot join {files}, they are not all of type {type(loaded_files[0]).__name__}")
+        if not all(isinstance(loaded_file, type(loaded_files[0])) for loaded_file in loaded_files):
+            raise yaml.YAMLError(
+                f"Cannot join {files}, they are not all of type {type(loaded_files[0]).__name__}")
 
         if isinstance(loaded_files[0], list):
             return list(itertools.chain(*loaded_files))
-        elif isinstance(loaded_files[0], dict):
+        if isinstance(loaded_files[0], dict):
             return dict(itertools.chain(*[loaded_file.items() for loaded_file in loaded_files]))
+        raise yaml.YAMLError(f"Unmergable type: {type(loaded_files[0]).__name__}")
 
     def path_constructor(self, node: yaml.Node) -> str:
         """
@@ -142,30 +174,19 @@ class Constructor(SafeConstructor):
         return os.environ[args[0]]
 
     def vol_constructor(self, suffix: str, node: yaml.Node = None) -> vol.Schema:
+        """Construct a voluptuous object"""
         return self._obj(getattr(vol, suffix), node)
 
+    # pylint: disable=inconsistent-return-statements
     def type_constructor(self, suffix: str, node: yaml.Node = None) -> type:
-        TYPES = {
-            "bool": bool,
-            "str": str,
-            "int": int,
-            "float": float,
-            "dict": dict,
-            "set": set,
-            "tuple": tuple,
-            "list": list,
-            "complex": complex,
-            "bytes": bytes,
-            "object": object,
-            # Custom types
-            "Item": Item,
-            "Module": Module,
-        }
+        """Construct a custom object"""
         if suffix in TYPES:
             return self._obj(TYPES.get(suffix), node)
-        
 
+
+# pylint: disable=too-many-ancestors
 class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
+    """Loads YAML with custom constructors"""
     def __init__(self, stream):
         Reader.__init__(self, stream)
         Scanner.__init__(self)
@@ -176,6 +197,7 @@ class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
 
     @classmethod
     def load(cls, data):
+        """Loads data"""
         loader = cls(data)
         try:
             return loader.get_single_data()

@@ -1,5 +1,8 @@
-import requests
+"""Pushbullet module"""
+
 import json
+
+import requests
 
 BASE_URL = "https://api.pushbullet.com/v2"
 PUSH_URL = BASE_URL+"/pushes"
@@ -7,7 +10,9 @@ ME_URL = BASE_URL+"/users/me"
 
 
 class Pushbullet:
+    """The Pushbullet item"""
     async def init(self):
+        """Initialise Pushbullet"""
         try:
             return requests.get(ME_URL, headers={
                 "Access-Token": self.cfg["access_token"],
@@ -17,6 +22,7 @@ class Pushbullet:
             return False
 
     async def send_message(self, **data):
+        """Sends a message"""
         data = {
             "type": "note",
             **data

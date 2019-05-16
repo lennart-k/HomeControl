@@ -1,24 +1,22 @@
-class HomeControlException(BaseException):
-    pass
+"""Exceptions"""
 
+class HomeControlException(BaseException):
+    """The base exception for HomeControl"""
 
 class ItemNotFoundException(HomeControlException):
-    pass
+    """Item not found"""
 
 class ModuleNotFoundException(HomeControlException):
-    pass
+    """Module not found"""
 
 class NoCoreException(HomeControlException):
-    pass
+    """No core passed. Can for example be raised by yaml_loader when trying to construct an item"""
 
 class InvalidConfigException(HomeControlException):
-    pass
-
-class TemplateErrorException(HomeControlException):
-    pass
+    """There's an error in the config directory"""
 
 class PipInstallError(HomeControlException):
-    pass
+    """A pip install failed"""
 
 class ItemTypeNotFound(HomeControlException):
-    pass
+    """There is no spec for the item type"""

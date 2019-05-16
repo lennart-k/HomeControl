@@ -1,3 +1,5 @@
+"""The core instance for HomeControl"""
+
 import os
 from contextlib import suppress
 import signal
@@ -19,16 +21,25 @@ from homecontrol.const import (
 LOGGER = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-instance-attributes
 class Core:
     """
     Represents the root object for HomeControl
     """
 
-    def __init__(self, cfg: dict, cfg_folder: str, loop: asyncio.AbstractEventLoop = None, start_args: dict = None, exit_return: int = None) -> None:
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 cfg: dict,
+                 cfg_folder: str,
+                 loop: asyncio.AbstractEventLoop = None,
+                 start_args: dict = None,
+                 exit_return: int = None) -> None:
         """
-
-        :param cfg: Config dictionary
+        :param cfg: config dictionary
+        :param cfg_folder: config folder
         :param loop: asyncio EventLoop
+        :param start_args: start parameters
+        :param exit_return: Shutdown or Restart on stop
         """
         self.cfg = cfg
         self.cfg_folder = cfg_folder
@@ -59,7 +70,8 @@ class Core:
             await self.module_manager.load_folder(folder)
 
         if self.cfg.get("module-manager", {}).get("load-internal-modules", False):
-            internal_module_folder = pkg_resources.resource_filename(homecontrol.__name__, "modules")
+            internal_module_folder = pkg_resources.resource_filename(
+                homecontrol.__name__, "modules")
             await self.module_manager.load_folder(internal_module_folder)
 
         # Create items from config file
@@ -75,11 +87,16 @@ class Core:
         LOGGER.info("Core bootstrap complete")
 
     async def block_until_stop(self) -> int:
+        """Blocking method to keep HomeControl running until Core.block_event is set"""
         with suppress(asyncio.CancelledError):
             await self.block_event.wait()
         return self.exit_return
 
     async def stop(self) -> None:
+        """
+        Stops HomeControl
+        Depending on Core.exit_return HomeControl may also automatically be restarted
+        """
         await self.tick_engine.stop()
         LOGGER.warning("Shutting Down")
 
@@ -93,9 +110,11 @@ class Core:
         self.block_event.set()
 
     async def restart(self) -> None:
+        """Restarts HomeControl"""
         self.exit_return = EXIT_RESTART
         await self.stop()
 
     async def shutdown(self) -> None:
+        """Shuts HomeControl down"""
         self.exit_return = EXIT_SHUTDOWN
         await self.stop()

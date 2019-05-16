@@ -1,6 +1,8 @@
-from homecontrol import const
+"""Setup script to install HomeControl as a package"""
 
 from setuptools import setup, find_namespace_packages
+
+from homecontrol import const
 
 REQUIREMENTS = open("requirements.txt").read().splitlines()
 

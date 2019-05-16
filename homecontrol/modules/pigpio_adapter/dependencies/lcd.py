@@ -1,6 +1,9 @@
-#!/usr/bin/env python
+"""Provides support for an I²C lcd"""
 
 import pigpio
+
+# pylint: disable=invalid-name
+
 
 class LCD:
     """
@@ -55,8 +58,12 @@ class LCD:
 
     _LCD_ROW = [0x80, 0xC0, 0x94, 0xD4]
 
-    def __init__(self, pi: pigpio.pi, bus: int=1, addr: int=0x27, width: int=16, backlight_on: bool=True):
-
+    def __init__(self,
+                 pi: pigpio.pi,
+                 bus: int = 1,
+                 addr: int = 0x27,
+                 width: int = 16,
+                 backlight_on: bool = True):
         self.pi = pi
         self.width = width
         self.backlight_on = backlight_on
@@ -71,9 +78,7 @@ class LCD:
         self._init()
 
     def backlight(self, on: bool):
-        """
-        Switch backlight on (True) or off (False).
-        """
+        """Switch backlight on (True) or off (False)."""
         self.backlight_on = on
         self._data(0x08 if on else 0x00)
 
@@ -96,6 +101,7 @@ class LCD:
                                  [MSb | self.E, MSb & ~self.E, LSb | self.E, LSb & ~self.E])
 
     def instruct(self, bits: int):
+        """Send an instruction"""
 
         MSN = (bits >> 4) & 0x0F
         LSN = bits & 0x0F

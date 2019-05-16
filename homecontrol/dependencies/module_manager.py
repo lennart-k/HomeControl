@@ -1,3 +1,5 @@
+"""ModuleManager module"""
+
 import subprocess
 import sys
 import importlib
@@ -20,8 +22,10 @@ class ModuleManager:
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
-        pip_list = subprocess.check_output([sys.executable, "-m", "pip", "list", "--format=json", "--disable-pip-version-check"])
-        self.installed_requirements = {item["name"]: item["version"] for item in json.loads(pip_list)}
+        pip_list = subprocess.check_output(
+            [sys.executable, "-m", "pip", "list", "--format=json", "--disable-pip-version-check"])
+        self.installed_requirements = {
+            item["name"]: item["version"] for item in json.loads(pip_list)}
 
     async def load_folder(self, path: str) -> [object]:
         """Load every module in a folder"""
@@ -45,15 +49,15 @@ class ModuleManager:
     async def load_file_module(self, mod_path: str, name: str) -> (Module, Exception):
         """
         Loads a module from a file and initialises it
-        
+
         Returns a Module object
         """
         try:
             assert os.path.isfile(mod_path)
-        except AssertionError as e:
-            LOGGER.warning(f"Module could not be loaded: {name} at {mod_path}")
-            self.core.event_engine.broadcast("module_not_loaded", exception=e)
-            return e
+        except AssertionError as error:
+            LOGGER.warning("Module could not be loaded: %s at %s", name, mod_path)
+            self.core.event_engine.broadcast("module_not_loaded", exception=error)
+            return error
 
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
@@ -65,7 +69,8 @@ class ModuleManager:
         else:
             mod.Module = type("Module_"+name, (mod.Module, Module), {})
 
-        cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(mod.SPEC)) if hasattr(mod, "SPEC") else {}
+        cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(
+            mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
         return await self._load_module_object(cfg, name, mod_path, mod)
 
@@ -73,7 +78,7 @@ class ModuleManager:
     async def load_folder_module(self, path: str, name: str) -> (Module, Exception):
         """
         Loads a module from a folder and initialises it
-        
+
         It also takes care of pip requirements
 
         Returns a Module object
@@ -84,13 +89,13 @@ class ModuleManager:
             assert os.path.isdir(path)
             assert os.path.isfile(mod_path)
             assert os.path.isfile(cfg_path)
-        except AssertionError as e:
-            LOGGER.warning(f"Module could not be loaded: {name} at {path}")
-            self.core.event_engine.broadcast("module_not_loaded", exception=e, name=name)
-            return e
+        except AssertionError as error:
+            LOGGER.warning("Module could not be loaded: %s at %s", name, path)
+            self.core.event_engine.broadcast("module_not_loaded", exception=error, name=name)
+            return error
 
         cfg = YAMLLoader.load(open(cfg_path))
-        
+
         unsatisfied_pip_dependencies = set()
         for requirement in cfg.get("pip-requirements", []):
             matcher = NormalizedMatcher(requirement)
@@ -101,10 +106,12 @@ class ModuleManager:
                 unsatisfied_pip_dependencies.add(requirement)
 
         if unsatisfied_pip_dependencies:
-            process = subprocess.Popen([sys.executable, "-m", "pip", "install", *unsatisfied_pip_dependencies])
+            process = subprocess.Popen(
+                [sys.executable, "-m", "pip", "install", *unsatisfied_pip_dependencies])
             if process.wait():
-                LOGGER.warning(f"Module could not be loaded: {name} at {path}")
-                self.core.event_engine.broadcast("module_not_loaded", exception=PipInstallError(), name=name)
+                LOGGER.warning("Module could not be loaded: %s at %s", name, path)
+                self.core.event_engine.broadcast("module_not_loaded",
+                                                 exception=PipInstallError(), name=name)
                 return
 
         spec = importlib.util.spec_from_file_location(name, mod_path)

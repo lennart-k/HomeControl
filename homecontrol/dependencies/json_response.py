@@ -1,8 +1,19 @@
-from homecontrol.dependencies import json
-from aiohttp import web
+"""JSONResponse module"""
 
+from typing import Any
+from aiohttp import web
+from homecontrol.dependencies import json
+
+
+# pylint: disable=too-many-ancestors,too-many-arguments
 class JSONResponse(web.Response):
-    def __init__(self, data=None, error=None, status_code: int = 200, core=None, headers=None):
+    """A HTTP response for JSON data"""
+    def __init__(self,
+                 data: Any = None,
+                 error: Exception = None,
+                 status_code: int = 200,
+                 core: "homecontrol.core.Core" = None,
+                 headers: dict = None):
         response = {
             "success": not error,
             **({"error": error} if error else {}),

@@ -1,3 +1,6 @@
+"""Constants used by HomeControl"""
+
+import voluptuous as vol
 
 MINIMUM_PYTHON_VERSION = (3, 6, 5)
 
@@ -14,8 +17,6 @@ ITEM_STATE_NOT_FOUND = "error-item-state-not-found"
 ITEM_ACTION_NOT_FOUND = "error-item-action-not-found"
 ERROR_INVALID_ITEM_STATES = "error-invalid-item-states"
 ERROR_INVALID_ITEM_STATE = "error-invalid-item-state"
-
-import voluptuous as vol
 
 STATE_COMMIT_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
 

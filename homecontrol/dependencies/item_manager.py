@@ -1,3 +1,5 @@
+"""ItemManager for HomeControl"""
+
 import asyncio
 import logging
 import voluptuous as vol
@@ -52,8 +54,10 @@ class ItemManager:
             await asyncio.gather(*[
                 self.core.loop.create_task(dependant_item.stop()) for dependant_item
                 in list(item.dependant_items)+[item]
-                if hasattr(dependant_item, "stop") and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
-        except Exception as e:
+                if hasattr(dependant_item, "stop")
+                and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
+        # pylint: disable=broad-except
+        except Exception:
             LOGGER.warning(
                 "An error occured when removing an item", exc_info=True)
 
@@ -63,11 +67,12 @@ class ItemManager:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
 
+    # pylint: disable=too-many-arguments
     async def create_item(self,
                           identifier: str,
                           item_type: str,
                           cfg: dict = None,
-                          state_defaults: dict = {},
+                          state_defaults: dict = None,
                           name: str = None) -> Item:
         """
         Creates a HomeControl item
@@ -81,7 +86,9 @@ class ItemManager:
         name: str
             How your item should be displayed in the frontend
         """
-        assert item_type in self.item_specs, ItemTypeNotFound(item_type)
+        if not item_type in self.item_specs:
+            LOGGER.error("Item type not found: %s", item_type)
+            return
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
@@ -116,23 +123,24 @@ class ItemManager:
 
         item.cfg = config
         item.states = StateEngine(
-            item, self.core, state_defaults=state_defaults)
+            item, self.core, state_defaults=state_defaults or {})
         item.actions = ActionEngine(item, self.core)
         item.__init__()
 
         if not item.status == NOT_WORKING:
-            init_result = await item.init() if hasattr(item, "init") else None
+            init_result = await item.init()
 
+            # pylint: disable=singleton-comparison
             if init_result == False:
                 item.status = NOT_WORKING
 
         self.items[identifier] = item
         spec["module"].items[identifier] = item
         self.core.event_engine.broadcast("item_created", item=item)
-        LOGGER.debug(f"Item created: {item.identifier}")
+        LOGGER.debug("Item created: %s", item.identifier)
         if item.status == NOT_WORKING:
             LOGGER.warning(
-                f"Item could not be initialised: {identifier} [{item_type}]")
+                "Item could not be initialised: %s [%s]", identifier, item_type)
             self.core.event_engine.broadcast("item_not_working", item=item)
 
         return item

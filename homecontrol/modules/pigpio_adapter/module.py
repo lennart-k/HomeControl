@@ -21,12 +21,12 @@ class PiGPIOAdapter:
         """Initialise the adapter"""
         done, pending = await asyncio.wait(
             {self.core.loop.run_in_executor(None, self.init_pigpio)}, timeout=2)
-        if pending:
+        if pending or not self.pigpio.connected:
             return False
 
     def init_pigpio(self):
         """Initialise PiGPIO"""
-        self.pigpio = pigpio.pi(self.cfg["host"], self.cfg["port"])
+        self.pigpio = pigpio.pi(self.cfg["host"], self.cfg["port"], show_errors=False)
 
     async def stop(self):
         """Stop the adapter"""

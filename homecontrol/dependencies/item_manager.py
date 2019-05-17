@@ -41,16 +41,12 @@ class ItemManager:
     async def init(self) -> None:
         """Initialise the items from configuration"""
         self.cfg = await self.core.cfg.register_domain("items",
+                                                       handler=self,
                                                        schema=CONFIG_SCHEMA,
-                                                       allow_reload=False)
+                                                       allow_reload=True)
 
-        for item in self.cfg:
-            await self.create_item(
-                identifier=item["id"],
-                name=item.get("name"),
-                item_type=item["type"],
-                cfg=item.get("cfg"),
-                state_defaults=item.get("states", {}))
+        for raw_cfg in self.cfg:
+            await self.create_from_raw_cfg(raw_cfg)
 
     async def add_from_module(self, mod_obj) -> None:
         """
@@ -88,11 +84,25 @@ class ItemManager:
         for dependency in item.depends_on:
             dependency.dependant_items.remove(item)
         del self.items[identifier]
+        LOGGER.info("Item %s has been removed", identifier)
+
+    async def create_from_raw_cfg(self,
+                                  raw_cfg: dict) -> Item:
+        """Creates an Item from raw_cfg"""
+        return await self.create_item(
+            identifier=raw_cfg["id"],
+            name=raw_cfg.get("name"),
+            item_type=raw_cfg["type"],
+            raw_cfg=raw_cfg,
+            cfg=raw_cfg["cfg"],
+            state_defaults=raw_cfg["states"]
+        )
 
     # pylint: disable=too-many-arguments
     async def create_item(self,
                           identifier: str,
                           item_type: str,
+                          raw_cfg: dict,
                           cfg: dict = None,
                           state_defaults: dict = None,
                           name: str = None) -> Item:
@@ -102,6 +112,9 @@ class ItemManager:
         identifier: str
         item_type: str
             The type of your item consisting of MODULE.CLASS
+        raw_cfg: dict
+            Raw configuration to check whether the item has to be recreated
+            when updating the configuration
         cfg: dict
         state_defaults: dict
             If the initial state cannot be polled on init you can pass a default
@@ -115,6 +128,7 @@ class ItemManager:
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
         item.core = self.core
+        item._raw_cfg = raw_cfg
         item.spec = spec
         item.module = spec["module"]
         item.status = WORKING
@@ -166,3 +180,17 @@ class ItemManager:
             self.core.event_engine.broadcast("item_not_working", item=item)
 
         return item
+
+    async def apply_new_configuration(self, domain, config):
+        """Applies a new configuration"""
+        self.cfg = config
+
+        for item in config:
+            if item["id"] in self.items and self.items[item["id"]]._raw_cfg == item:
+                continue  # Item is unchanged
+            if item["id"] in self.items:
+                await self.remove_item(item["id"])
+
+            await self.create_from_raw_cfg(item)
+        
+        LOGGER.info("Applied new item configuration")

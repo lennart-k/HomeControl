@@ -30,21 +30,21 @@ class Core:
     # pylint: disable=too-many-arguments
     def __init__(self,
                  cfg: dict,
-                 cfg_folder: str,
+                 cfg_path: str,
                  loop: asyncio.AbstractEventLoop = None,
                  start_args: dict = None,
                  exit_return: int = None) -> None:
         """
         :param cfg: config dictionary
-        :param cfg_folder: config folder
+        :param cfg_path: configuration file
         :param loop: asyncio EventLoop
         :param start_args: start parameters
         :param exit_return: Shutdown or Restart on stop
         """
         self.cfg = cfg
-        self.cfg_folder = cfg_folder
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
+        self.cfg_path = cfg_path
         self.block_event = asyncio.Event()
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)

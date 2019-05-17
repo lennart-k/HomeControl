@@ -88,15 +88,14 @@ def validate_python_version():
                         ".".join(MINIMUM_PYTHON_VERSION))
         sys.exit(1)
 
-def run_homecontrol(config: dict, config_folder: str, start_args: dict):
+def run_homecontrol(config: dict, config_path: str, start_args: dict):
     """
     Runs HomeControl
 
     config: dict
         The loaded config file
-    config_folder: str
-        The folder containing the config file
-        This is where logfiles for example will be placed by default
+    config_path: str
+        Path to the config file
     start_args: dict
         The commandline arguments by ArgumentParser
     """
@@ -107,7 +106,7 @@ def run_homecontrol(config: dict, config_folder: str, start_args: dict):
             loop.call_later(0.1, windows_wakeup)
         # https://stackoverflow.com/questions/24774980/why-cant-i-catch-sigint-when-asyncio-event-loop-is-running/24775107#answer-24775107
         windows_wakeup()
-    core = Core(cfg=config, cfg_folder=config_folder, loop=loop, start_args=start_args)
+    core = Core(cfg=config, cfg_path=config_path, loop=loop, start_args=start_args)
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
@@ -255,6 +254,6 @@ def main():
     if args["clearport"] and cfg.get("http-server", {}).get("port"):
         clear_port(cfg["http-server"]["port"])
 
-    run_homecontrol(config=cfg, config_folder=os.path.dirname(args["cfgfile"]), start_args=args)
+    run_homecontrol(config=cfg, config_path=args["cfgfile"], start_args=args)
 
 main()

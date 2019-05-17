@@ -12,9 +12,6 @@ from homecontrol.const import (
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.exceptions import (
-    ItemTypeNotFound
-)
 
 LOGGER = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ from aiohttp import web
 from homecontrol.dependencies import json
 
 
-# pylint: disable=too-many-ancestors,too-many-arguments
+# pylint: disable=too-many-ancestors,too-many-arguments,too-few-public-methods
 class JSONResponse(web.Response):
     """A HTTP response for JSON data"""
     def __init__(self,

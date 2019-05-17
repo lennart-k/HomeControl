@@ -199,6 +199,7 @@ def setup_logging(verbose: bool = False,
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
 
     fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    console_datefmt = '%H:%M:%S'
     datefmt = '%Y-%m-%d %H:%M:%S'
 
     if color:
@@ -210,7 +211,7 @@ def setup_logging(verbose: bool = False,
             colorfmt = "%(log_color)s{}%(reset)s".format(fmt)
             logging.getLogger().handlers[0].setFormatter(ColoredFormatter(
                 colorfmt,
-                datefmt=datefmt,
+                datefmt=console_datefmt,
                 reset=True,
                 log_colors={
                     'DEBUG': 'cyan',

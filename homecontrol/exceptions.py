@@ -20,3 +20,9 @@ class PipInstallError(HomeControlException):
 
 class ItemTypeNotFound(HomeControlException):
     """There is no spec for the item type"""
+
+class ConfigDomainAlreadyRegistered(HomeControlException):
+    """The configuration domain is already registered"""
+
+class ConfigurationNotApproved(HomeControlException):
+    """Configuration has not been approved"""

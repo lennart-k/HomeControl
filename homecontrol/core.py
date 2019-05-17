@@ -11,7 +11,7 @@ from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
 from homecontrol.dependencies.item_manager import ItemManager
 from homecontrol.dependencies.tick_engine import TickEngine
-import homecontrol
+from homecontrol.dependencies.config_manager import ConfigManager
 
 from homecontrol.const import (
     EXIT_SHUTDOWN,
@@ -41,9 +41,9 @@ class Core:
         :param start_args: start parameters
         :param exit_return: Shutdown or Restart on stop
         """
-        self.cfg = cfg
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
+        self.cfg = ConfigManager(cfg, cfg_path)
         self.cfg_path = cfg_path
         self.block_event = asyncio.Event()
         self.tick_engine = TickEngine(core=self)

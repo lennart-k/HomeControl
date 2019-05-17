@@ -12,3 +12,4 @@ homecontrol.lock
 dist
 build
 homecontrol.egg-info
+docs

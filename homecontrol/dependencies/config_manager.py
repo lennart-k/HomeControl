@@ -128,7 +128,7 @@ class ConfigManager:
         # If no handler given then prevent every reloading
         if handler:
             self.registered_handlers[domain] = handler
-            self.domain_reloadable[domain] = True
+        self.domain_reloadable[domain] = allow_reload
         if schema:
             self.domain_schemas[domain] = schema
 

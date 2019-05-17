@@ -8,17 +8,28 @@ import os
 import json
 import logging
 
+import pkg_resources
 from pip._vendor.distlib.version import NormalizedMatcher
+import voluptuous as vol
 
+import homecontrol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.dependencies.entity_types import Module
 from homecontrol.exceptions import PipInstallError
 
 LOGGER = logging.getLogger(__name__)
 
+CONFIG_SCHEMA = vol.Schema({
+    vol.Required("folders", default=[]): [str],
+    vol.Required("blacklist", default=[]): [str],
+    vol.Required("install-pip-requirements", default=True): bool,
+    vol.Required("load-internal-modules", default=True): bool
+})
 
 class ModuleManager:
     """Manages your modules"""
+
+    cfg: dict
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
@@ -27,10 +38,22 @@ class ModuleManager:
         self.installed_requirements = {
             item["name"]: item["version"] for item in json.loads(pip_list)}
 
+    async def init(self) -> None:
+        """Initialise the modules"""
+        self.cfg = await self.core.cfg.register_domain("module-manager", allow_reload=False)
+        
+        for folder in self.cfg["folders"]:
+            await self.load_folder(folder)
+
+        if self.cfg["load-internal-modules"]:
+            internal_module_folder = pkg_resources.resource_filename(
+                homecontrol.__name__, "modules")
+            await self.load_folder(internal_module_folder)
+
     async def load_folder(self, path: str) -> [object]:
         """Load every module in a folder"""
         out = []
-        blacklist = self.core.cfg.get("module-manager", {}).get("blacklist", [])
+        blacklist = self.cfg.get("blacklist", [])
         for node in os.listdir(path):
             if node == "__pycache__":
                 continue

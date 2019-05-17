@@ -5,7 +5,6 @@ from contextlib import suppress
 import signal
 import asyncio
 import logging
-import pkg_resources
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
@@ -66,22 +65,11 @@ class Core:
             signal.signal(signal.SIGINT, lambda *args: self.loop.create_task(self.stop()))
             signal.signal(signal.SIGTERM, lambda *args: self.loop.create_task(self.stop()))
 
-        for folder in self.cfg.get("module-manager", {}).get("folders", {}):
-            await self.module_manager.load_folder(folder)
+        # Load modules
+        await self.module_manager.init()
 
-        if self.cfg.get("module-manager", {}).get("load-internal-modules", False):
-            internal_module_folder = pkg_resources.resource_filename(
-                homecontrol.__name__, "modules")
-            await self.module_manager.load_folder(internal_module_folder)
-
-        # Create items from config file
-        for item in self.cfg["items"]:
-            await self.item_manager.create_item(
-                identifier=item["id"],
-                name=item.get("name"),
-                item_type=item["type"],
-                cfg=item.get("cfg"),
-                state_defaults=item.get("states", {}))
+        # Init items
+        await self.item_manager.init()
 
         self.event_engine.broadcast("core_bootstrap_complete")
         LOGGER.info("Core bootstrap complete")

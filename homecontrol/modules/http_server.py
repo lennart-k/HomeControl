@@ -1,9 +1,9 @@
 """The http server"""
 
-import asyncio
 import os
 import logging
 
+import voluptuous as vol
 from aiohttp import web
 
 
@@ -11,6 +11,11 @@ SPEC = """
 meta:
   name: HTTP Server
 """
+
+CONFIG_SCHEMA = vol.Schema({
+    vol.Required("host", default=None): vol.Any(str, None),
+    vol.Required("port", default=8080): vol.Coerce(int)
+})
 
 LOGGER = logging.getLogger(__name__)
 logging.getLogger("aiohttp").setLevel(logging.WARNING)
@@ -27,7 +32,7 @@ class Module:
 
     async def init(self):
         """Sets up an HTTPServer"""
-
+        self.cfg = await self.core.cfg.register_domain("http-server", self, schema=CONFIG_SCHEMA)
         event("core_bootstrap_complete")(self.start)
 
     async def start(self, *args):
@@ -45,17 +50,24 @@ class Module:
         # Windows doesn't support reuse_port
         self.server = await self.core.loop.create_server(
             self.handler,
-            self.core.cfg["http-server"]["host"],
-            self.core.cfg["http-server"]["port"],
+            self.cfg["host"],
+            self.cfg["port"],
             reuse_address=True, reuse_port=os.name != "nt")
         LOGGER.info("Started the HTTP server")
 
     async def stop(self):
         """Stop the HTTP server"""
-        LOGGER.info("Stopping the HTTP server on %s:%s",
-                    self.core.cfg["http-server"]["host"],
-                    self.core.cfg["http-server"]["port"])
-        if self.main_app.frozen:
-            await self.main_app.cleanup()
-            self.server.close()
-            await self.server.wait_closed()
+        LOGGER.info("Stopping the HTTP server on %s:%s", self.cfg["host"], self.cfg["port"])
+        try:
+            if self.main_app.frozen:
+                await self.main_app.cleanup()
+                self.server.close()
+                await self.server.wait_closed()
+        except AttributeError:
+            return
+
+    async def apply_new_configuration(self, domain, new_config) -> None:
+        """Applies new configuration"""
+        await self.stop()
+        self.cfg = new_config
+        await self.start()

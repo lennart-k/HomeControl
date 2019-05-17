@@ -12,8 +12,19 @@ from homecontrol.const import (
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.validators import ConsistsOf
 
 LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = vol.Schema(
+    ConsistsOf({
+        vol.Required("id"): str,
+        vol.Required("type"): str,
+        vol.Optional("name"): str,
+        vol.Required("cfg", default={}): dict,
+        vol.Required("states", default={}): dict
+    })
+)
 
 
 class ItemManager:
@@ -26,6 +37,20 @@ class ItemManager:
         self.core = core
         self.items = {}
         self.item_specs = {}
+
+    async def init(self) -> None:
+        """Initialise the items from configuration"""
+        self.cfg = await self.core.cfg.register_domain("items",
+                                                       schema=CONFIG_SCHEMA,
+                                                       allow_reload=False)
+
+        for item in self.cfg:
+            await self.create_item(
+                identifier=item["id"],
+                name=item.get("name"),
+                item_type=item["type"],
+                cfg=item.get("cfg"),
+                state_defaults=item.get("states", {}))
 
     async def add_from_module(self, mod_obj) -> None:
         """

@@ -20,6 +20,10 @@ from homecontrol.const import (
 
 LOGGER = logging.getLogger(__name__)
 
+CONFIG_SCHEMA = vol.Schema({
+    vol.Required("headers", default={}): {vol.Coerce(str): vol.Coerce(str)}
+})
+
 
 class Module:
     """The API app module"""
@@ -29,6 +33,9 @@ class Module:
         """Initialise the API app"""
         self.event_sockets = set()
         self.api_app = None
+
+        # Prohibit reloading of the configuration
+        self.cfg = await self.core.cfg.register_domain("api-server", schema=CONFIG_SCHEMA)
 
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
@@ -48,8 +55,7 @@ class Module:
         @web.middleware
         async def config_headers(request, handler):
             response = await handler(request)
-            response.headers.update(self.core.cfg.get(
-                "api-server", {}).get("headers", {}))
+            response.headers.update(self.cfg.get("headers", {}))
             return response
 
         return middlewares
@@ -118,6 +124,11 @@ class Module:
         async def restart(request: web.Request) -> JSONResponse:
             self.core.loop.create_task(self.core.restart())
             return JSONResponse("Restarting")
+
+        @r.post("/core/config/reload")  # TODO IMPLEMENTATION
+        async def reload_config(request: web.Request) -> JSONResponse:
+            await self.core.cfg.reload_config()
+            return JSONResponse("Reloaded configuration")
 
         @r.get("/items")
         async def get_items(request: web.Request) -> JSONResponse:

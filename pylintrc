@@ -34,6 +34,8 @@ min-public-methods=1
 generated-members=states,cfg,core,identifier
 
 [MESSAGES CONTROL]
+enable=print-statement,
+
 disable=unused-argument,
         unused-variable,
 

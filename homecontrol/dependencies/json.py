@@ -3,6 +3,7 @@
 # pylint: disable=invalid-name,too-few-public-methods,import-self
 import json
 from functools import partial
+from enum import Enum
 
 from homecontrol.core import Core
 from homecontrol.dependencies.data_types import types
@@ -42,18 +43,22 @@ class JSONEncoder(json.JSONEncoder):
                 "name": obj.name,
                 "meta": obj.meta
             }
-        if isinstance(obj, Exception):
+        if isinstance(obj, (BaseException, Exception)):
             return {
                 "!type": "Exception",
                 "type": type(obj).__name__,
                 "message": str(obj)
             }
+        if isinstance(obj, Enum):
+            return obj.value
+
         # pylint: disable=unidiomatic-typecheck
-        if type(obj) in types.values():
+        if isinstance(obj, types.values()):
             return {
                 "!type": type(obj).__name__,
                 "data": obj.dump()
             }
+
         return obj
 
 

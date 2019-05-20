@@ -34,24 +34,29 @@ class Color:
     @staticmethod
     def from_rgb(rgb: tuple):
         """RGB constructor"""
-        hls = colorsys.rgb_to_hls(*(i/255 for i in rgb))
-        return Color(int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
+        hls = colorsys.rgb_to_hls(*(i / 255 for i in rgb))
+        return Color(int(hls[0] * 360), int(hls[2] * 255), int(hls[1] * 255))
 
     @staticmethod
     def from_data(hsl: tuple):
-        """Constructor from the data received through the API or configuration"""
+        """
+        Constructor from the data received through the API or configuration
+        """
         return Color.from_hsl(hsl)
 
     @property
     def rgb(self) -> (int, int, int):
         """RGB"""
-        return tuple(int(i*255) for i in
-                     colorsys.hls_to_rgb(self.hsl[0]/360, self.hsl[2]/255, self.hsl[1]/255))
+        return tuple(int(i * 255) for i in
+                     colorsys.hls_to_rgb(
+                         self.hsl[0] / 360,
+                         self.hsl[2] / 255,
+                         self.hsl[1] / 255))
 
     @rgb.setter
     def rgb(self, rgb: tuple):
-        hls = colorsys.rgb_to_hls(*(i/255 for i in rgb))
-        self.hsl = (int(hls[0]*360), int(hls[2]*255), int(hls[1]*255))
+        hls = colorsys.rgb_to_hls(*(i / 255 for i in rgb))
+        self.hsl = (int(hls[0] * 360), int(hls[2] * 255), int(hls[1] * 255))
 
     @property
     def h(self) -> int:

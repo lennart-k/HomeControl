@@ -97,8 +97,9 @@ class LCD:
             MSb |= self.BL
             LSb |= self.BL
 
-        self.pi.i2c_write_device(self._h,
-                                 [MSb | self.E, MSb & ~self.E, LSb | self.E, LSb & ~self.E])
+        self.pi.i2c_write_device(
+            self._h,
+            [MSb | self.E, MSb & ~self.E, LSb | self.E, LSb & ~self.E])
 
     def instruct(self, bits: int):
         """Send an instruction"""

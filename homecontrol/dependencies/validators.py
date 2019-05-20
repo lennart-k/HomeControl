@@ -4,7 +4,9 @@ import voluptuous as vol
 
 
 class ConsistsOf(object):
-    """Validate that the given schema element applies to every element in a sequence.
+    """
+    Validate that the given schema element applies
+    to every element in a sequence.
 
     >>> s = ConsistsOf({"a": int})
     >>> s([{"a": 1}, {"a": 2}, {"a": 3}])

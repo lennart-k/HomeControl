@@ -37,6 +37,7 @@ TYPES = {
     "Module": Module,
 }
 
+
 def resolve_path(path: str, config_dir: str) -> str:
     """
     Resolves a path:
@@ -60,10 +61,13 @@ class Constructor(SafeConstructor):
     def __init__(self):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
-        self.add_constructor("!include", self.__class__.include_file_constructor)
-        self.add_constructor("!include_merge", self.__class__.include_merge_constructor)
-        self.add_constructor("!include_dir_file_mapped",
-                             self.__class__.include_dir_file_mapped_constructor)
+        self.add_constructor(
+            "!include", self.__class__.include_file_constructor)
+        self.add_constructor(
+            "!include_merge", self.__class__.include_merge_constructor)
+        self.add_constructor(
+            "!include_dir_file_mapped",
+            self.__class__.include_dir_file_mapped_constructor)
         self.add_constructor("!env_var", self.__class__.env_var_constructor)
         self.add_constructor("!path", self.__class__.path_constructor)
 
@@ -73,7 +77,7 @@ class Constructor(SafeConstructor):
         if not node:
             return cls
 
-        value = getattr(self, "construct_"+node.id)(node)
+        value = getattr(self, "construct_" + node.id)(node)
 
         if node.value == "":
             return cls
@@ -99,11 +103,13 @@ class Constructor(SafeConstructor):
 
         return self.__class__.load(open(path, "r"))
 
-    def include_dir_file_mapped_constructor(self, node: yaml.Node = None) -> dict:
+    def include_dir_file_mapped_constructor(self,
+                                            node: yaml.Node = None) -> dict:
         """
         !include_dir_file_mapped <folder>
 
-        Loads multiple files from a folder and maps their contents to their filenames
+        Loads multiple files from a folder and maps their contents
+        to their filenames
         """
         if not isinstance(node.value, str):
             raise TypeError(f"folder must be of type str")
@@ -112,11 +118,13 @@ class Constructor(SafeConstructor):
             raise FileNotFoundError(folder)
 
         return {
-            os.path.splitext(file)[0]: self.__class__.load(open(os.path.join(folder, file), "r"))
+            os.path.splitext(file)[0]: self.__class__.load(
+                open(os.path.join(folder, file), "r"))
             for file in os.listdir(folder) if file.endswith(".yaml")
         }
 
-    def include_merge_constructor(self, node: yaml.Node = None) -> (list, dict):
+    def include_merge_constructor(self,
+                                  node: yaml.Node = None) -> (list, dict):
         """
         !include <file|folder> ...
 
@@ -130,7 +138,8 @@ class Constructor(SafeConstructor):
             paths = paths.split(" ")
         elif not isinstance(paths, list):
             raise TypeError(f"paths must be either of type str or list")
-        paths = [resolve_path(path, os.path.dirname(self.name)) for path in paths]
+        paths = [resolve_path(path, os.path.dirname(self.name))
+                 for path in paths]
         files = set()
         for path in paths:
             if os.path.isfile(path):
@@ -142,15 +151,19 @@ class Constructor(SafeConstructor):
 
         loaded_files = [self.__class__.load(open(file, "r")) for file in files]
 
-        if not all(isinstance(loaded_file, type(loaded_files[0])) for loaded_file in loaded_files):
+        if not all(isinstance(loaded_file, type(loaded_files[0]))
+                   for loaded_file in loaded_files):
             raise yaml.YAMLError(
-                f"Cannot join {files}, they are not all of type {type(loaded_files[0]).__name__}")
+                f"Cannot join {files}, they are not all "
+                f"of type {type(loaded_files[0]).__name__}")
 
         if isinstance(loaded_files[0], list):
             return list(itertools.chain(*loaded_files))
         if isinstance(loaded_files[0], dict):
-            return dict(itertools.chain(*[loaded_file.items() for loaded_file in loaded_files]))
-        raise yaml.YAMLError(f"Unmergable type: {type(loaded_files[0]).__name__}")
+            return dict(itertools.chain(
+                *[loaded_file.items() for loaded_file in loaded_files]))
+        raise yaml.YAMLError(
+            f"Unmergable type: {type(loaded_files[0]).__name__}")
 
     def path_constructor(self, node: yaml.Node) -> str:
         """
@@ -173,7 +186,9 @@ class Constructor(SafeConstructor):
 
         return os.environ[args[0]]
 
-    def vol_constructor(self, suffix: str, node: yaml.Node = None) -> vol.Schema:
+    def vol_constructor(self,
+                        suffix: str,
+                        node: yaml.Node = None) -> vol.Schema:
         """Construct a voluptuous object"""
         return self._obj(getattr(vol, suffix), node)
 
@@ -187,6 +202,7 @@ class Constructor(SafeConstructor):
 # pylint: disable=too-many-ancestors
 class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
     """Loads YAML with custom constructors"""
+
     def __init__(self, stream):
         Reader.__init__(self, stream)
         Scanner.__init__(self)

@@ -10,23 +10,28 @@ class Chromecast:
     async def init(self):
         """Initialises the Chromecast item"""
         try:
-            self.chromecast = pychromecast.Chromecast(host=self.cfg["host"], port=self.cfg["port"])
+            self.chromecast = pychromecast.Chromecast(
+                host=self.cfg["host"], port=self.cfg["port"])
         except pychromecast.error.ChromecastConnectionError:
             return False
 
         self.media_controller = self.chromecast.media_controller
-        self.last_time_jump = vars(self.media_controller).get("current_time", 0)
-        await self.states.update("playing",
-                                 vars(self.media_controller).get("player_state") == "PLAYING")
-        await self.states.update("cast_state", self.media_controller.status)
-        await self.states.update("content_type", self.media_controller.status.content_type)
-        await self.states.update("metadata", self.media_controller.status.media_metadata)
-        await self.states.update("volume", int(self.media_controller.status.volume_level * 100))
+        self.last_time_jump = vars(
+            self.media_controller).get("current_time", 0)
+        await self.states.bulk_update(
+            playing=vars(
+                self.media_controller).get("player_state") == "PLAYING",
+            cast_state=self.media_controller.status,
+            content_type=self.media_controller.status.content_type,
+            metadata=self.media_controller.status.media_metadata,
+            volume=int(self.media_controller.status.volume_level * 100)
+        )
         self.media_controller.register_status_listener(self)
 
     async def get_playtime(self):
         """Getter for playtime"""
-        await self.states.update("playtime", vars(self.media_controller).get("current_time"))
+        await self.states.update(
+            "playtime", vars(self.media_controller).get("current_time"))
         return vars(self.media_controller).get("current_time")
 
     async def set_playtime(self, value):
@@ -38,26 +43,7 @@ class Chromecast:
 
     async def get_cast_state(self):
         """Get information about what's currently playing"""
-        return {
-            'metadata_type': self.media_controller.status.metadata_type,
-            'title': self.media_controller.status.title,
-            'series_title': self.media_controller.status.series_title,
-            'season': self.media_controller.status.season,
-            'episode': self.media_controller.status.episode,
-            'artist': self.media_controller.status.artist,
-            'album_name': self.media_controller.status.album_name,
-            'album_artist': self.media_controller.status.album_artist,
-            'track': self.media_controller.status.track,
-            'subtitle_tracks': self.media_controller.status.subtitle_tracks,
-            'images': self.media_controller.status.images,
-            'supports_pause': self.media_controller.status.supports_pause,
-            'supports_seek': self.media_controller.status.supports_seek,
-            'supports_stream_volume': self.media_controller.status.supports_stream_volume,
-            'supports_stream_mute': self.media_controller.status.supports_stream_mute,
-            'supports_skip_forward': self.media_controller.status.supports_skip_forward,
-            'supports_skip_backward': self.media_controller.status.supports_skip_backward,
-            **vars(self.media_controller.status)
-        }
+        return vars(self.media_controller.status)
 
     async def action_pause(self):
         """Action: Pause"""
@@ -109,12 +95,16 @@ class Chromecast:
     async def set_volume(self, value):
         """Setter for volume"""
         self.chromecast.set_volume(value / 100)
-        return {"volume": value} if await self.states.update("volume", value) else {}
+        return ({"volume": value}
+                if await self.states.update("volume", value)
+                else {})
 
     async def set_muted(self, value):
         """Setter for muted"""
         self.chromecast.set_volume_muted(bool(value))
-        return {"muted": value} if await self.states.update("muted", value) else {}
+        return ({"muted": value}
+                if await self.states.update("muted", value)
+                else {})
 
     async def action_toggle_muted(self):
         """Action: Toggle muted"""
@@ -127,7 +117,8 @@ class Chromecast:
 
     def new_cast_status(self, status):
         """Handle new cast status"""
-        self.core.event_engine.broadcast("chromecast_cast_status", status=status)
+        self.core.event_engine.broadcast(
+            "chromecast_cast_status", status=status)
 
     def new_media_status(self, status) -> None:
         """Handle new media status"""
@@ -136,10 +127,13 @@ class Chromecast:
     async def update_media_status(self, status) -> None:
         """Update media status"""
         self.last_time_jump = status.current_time
-        await self.states.update("playtime", status.current_time)
-        await self.states.update("playing", vars(status).get("player_state") == "PLAYING")
-        await self.states.update("metadata", status.media_metadata)
-        await self.states.update("content_type", status.content_type)
-        await self.states.update("cast_state", status)
-        await self.states.update("volume", int(status.volume_level * 100))
-        await self.states.update("duration", status.duration)
+
+        await self.states.bulk_update(
+            playtime=status.current_time,
+            playing=vars(status).get("player_state") == "PLAYING",
+            cast_state=status,
+            content_type=status.content_type,
+            metadata=status.media_metadata,
+            volume=int(status.volume_level * 100),
+            duration=status.duration
+        )

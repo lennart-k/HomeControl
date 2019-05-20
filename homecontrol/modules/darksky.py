@@ -12,14 +12,17 @@ items:
     config_schema:
       !vol/Required {schema: token}:
         !type/str
-      
+
       !vol/Required {schema: location}:
         !type/str
-      
+
       !vol/Required {schema: language}:
         !vol/All
           - !type/str
-          - !vol/Any [ar, az, be, bg, bs, ca, cs, da, de, el, en, es, et, fi, fr, he, hr, hu, id, is, it, ja, ka, ko, kw, lv, nb, nl, no, pl, pt, ro, ru, sk, sl, sr, sv, tet, tr, uk, x-pig-latin, zh, zh-tw]
+          - !vol/Any [ar, az, be, bg, bs, ca, cs, da, de, el, en, es, et, fi,
+                      fr, he, hr, hu, id, is, it, ja, ka, ko, kw, lv, nb, nl,
+                      no, pl, pt, ro, ru, sk, sl, sr, sv, tet, tr, uk,
+                      x-pig-latin, zh, zh-tw]
 
       !vol/Required {schema: units, default: auto}:
         !vol/All
@@ -28,7 +31,7 @@ items:
 
       !vol/Required {schema: update_interval, default: 300}:
         !type/int
-      
+
 
     states:
       weather_data:
@@ -38,7 +41,7 @@ items:
 """
 
 EXCLUDE = ["minutely", "hourly"]
-URL = "https://api.darksky.net/forecast/{token}/{location}?lang={lang}&units={units}&exclude={exclude}"
+URL = "https://api.darksky.net/forecast/{token}/{location}"
 
 
 class WeatherProvider:
@@ -49,19 +52,26 @@ class WeatherProvider:
 
     async def fetch_weather(self):
         """Fetch the weather from the DarkSky API"""
-        request = requests.get(URL.format(token=self.cfg["token"],
-                                          lang=self.cfg["language"],
-                                          units=self.cfg["units"],
-                                          exclude=",".join(EXCLUDE),
-                                          location=self.cfg["location"]))
+        request = requests.get(
+            URL.format(
+                token=self.cfg["token"],
+                location=self.cfg["location"]
+            ),
+            params=dict(
+                lang=self.cfg["language"],
+                units=self.cfg["units"],
+                exclude=",".join(EXCLUDE)
+            ))
         data = request.json()
         if not data.get("flags", {}).get("darksky-unavailable"):
             await self.states.update(
-                "weather_data", WeatherData(data, "DarkSky", self.cfg["location"]))
+                "weather_data", WeatherData(
+                    data, "DarkSky", self.cfg["location"]))
 
 
 class WeatherData:
     """A class holding the weather data"""
+
     def __init__(self, data, provider, location):
         self.data = data
         self.provider = provider

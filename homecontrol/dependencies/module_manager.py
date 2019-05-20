@@ -26,22 +26,26 @@ CONFIG_SCHEMA = vol.Schema({
     vol.Required("load-internal-modules", default=True): bool
 })
 
+
 class ModuleManager:
     """Manages your modules"""
 
     cfg: dict
+
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
         pip_list = subprocess.check_output(
-            [sys.executable, "-m", "pip", "list", "--format=json", "--disable-pip-version-check"])
+            [sys.executable, "-m", "pip", "list",
+             "--format=json", "--disable-pip-version-check"])
         self.installed_requirements = {
             item["name"]: item["version"] for item in json.loads(pip_list)}
 
     async def init(self) -> None:
         """Initialise the modules"""
-        self.cfg = await self.core.cfg.register_domain("module-manager", allow_reload=False)
-        
+        self.cfg = await self.core.cfg.register_domain(
+            "module-manager", allow_reload=False)
+
         for folder in self.cfg["folders"]:
             await self.load_folder(folder)
 
@@ -58,18 +62,23 @@ class ModuleManager:
             if node == "__pycache__":
                 continue
             mod_path = os.path.join(path, node)
-            mod_name = node if os.path.isdir(node) else ".".join(os.path.splitext(node)[:-1])
+            mod_name = node if os.path.isdir(
+                node) else ".".join(os.path.splitext(node)[:-1])
 
-            if not mod_name in blacklist:
+            if mod_name not in blacklist:
                 if os.path.isdir(mod_path):
-                    out.append(await self.load_folder_module(mod_path, mod_name))
+                    out.append(
+                        await self.load_folder_module(mod_path, mod_name))
 
                 elif os.path.isfile(mod_path) and node.endswith(".py"):
-                    out.append(await self.load_file_module(mod_path, mod_name))
+                    out.append(
+                        await self.load_file_module(mod_path, mod_name))
 
         return out
 
-    async def load_file_module(self, mod_path: str, name: str) -> (Module, Exception):
+    async def load_file_module(self,
+                               mod_path: str,
+                               name: str) -> (Module, Exception):
         """
         Loads a module from a file and initialises it
 
@@ -78,8 +87,10 @@ class ModuleManager:
         try:
             assert os.path.isfile(mod_path)
         except AssertionError as error:
-            LOGGER.warning("Module could not be loaded: %s at %s", name, mod_path)
-            self.core.event_engine.broadcast("module_not_loaded", exception=error)
+            LOGGER.warning(
+                "Module could not be loaded: %s at %s", name, mod_path)
+            self.core.event_engine.broadcast(
+                "module_not_loaded", exception=error)
             return error
 
         spec = importlib.util.spec_from_file_location(name, mod_path)
@@ -88,17 +99,18 @@ class ModuleManager:
         mod.tick = self.core.tick_engine.tick
         spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
-            mod.Module = type("Module_"+name, (Module,), {})
+            mod.Module = type("Module_" + name, (Module,), {})
         else:
-            mod.Module = type("Module_"+name, (mod.Module, Module), {})
+            mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
         cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(
             mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
         return await self._load_module_object(cfg, name, mod_path, mod)
 
-
-    async def load_folder_module(self, path: str, name: str) -> (Module, Exception):
+    async def load_folder_module(self,
+                                 path: str,
+                                 name: str) -> (Module, Exception):
         """
         Loads a module from a folder and initialises it
 
@@ -114,7 +126,8 @@ class ModuleManager:
             assert os.path.isfile(cfg_path)
         except AssertionError as error:
             LOGGER.warning("Module could not be loaded: %s at %s", name, path)
-            self.core.event_engine.broadcast("module_not_loaded", exception=error, name=name)
+            self.core.event_engine.broadcast(
+                "module_not_loaded", exception=error, name=name)
             return error
 
         cfg = YAMLLoader.load(open(cfg_path))
@@ -122,7 +135,7 @@ class ModuleManager:
         unsatisfied_pip_dependencies = set()
         for requirement in cfg.get("pip-requirements", []):
             matcher = NormalizedMatcher(requirement)
-            if not matcher.name in self.installed_requirements:
+            if matcher.name not in self.installed_requirements:
                 unsatisfied_pip_dependencies.add(requirement)
                 continue
             if not matcher.match(self.installed_requirements[matcher.name]):
@@ -130,11 +143,15 @@ class ModuleManager:
 
         if unsatisfied_pip_dependencies:
             process = subprocess.Popen(
-                [sys.executable, "-m", "pip", "install", *unsatisfied_pip_dependencies])
+                [sys.executable, "-m", "pip", "install",
+                 *unsatisfied_pip_dependencies])
             if process.wait():
-                LOGGER.warning("Module could not be loaded: %s at %s", name, path)
-                self.core.event_engine.broadcast("module_not_loaded",
-                                                 exception=PipInstallError(), name=name)
+                LOGGER.warning(
+                    "Module could not be loaded: %s at %s", name, path)
+                self.core.event_engine.broadcast(
+                    "module_not_loaded",
+                    exception=PipInstallError(),
+                    name=name)
                 return
 
         spec = importlib.util.spec_from_file_location(name, mod_path)
@@ -146,15 +163,19 @@ class ModuleManager:
         sys.path.remove(path)
         return await self._load_module_object(cfg, name, path, mod)
 
-    async def _load_module_object(self, cfg: dict, name: str, path: str, mod) -> Module:
+    async def _load_module_object(self,
+                                  cfg: dict,
+                                  name: str,
+                                  path: str,
+                                  mod) -> Module:
         """
         Initialises a module object
         This method should only be invoked by ModuleManager
         """
         if not hasattr(mod, "Module"):
-            mod.Module = type("Module_"+name, (Module,), {})
+            mod.Module = type("Module_" + name, (Module,), {})
         else:
-            mod.Module = type("Module_"+name, (mod.Module, Module), {})
+            mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
         mod_obj = mod.Module.__new__(mod.Module)
 

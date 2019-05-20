@@ -14,8 +14,9 @@ class Module:
             if length == 12:
                 it_code = from_code(code)
                 if it_code:
-                    self.core.event_engine.broadcast("intertechno_code_received",
-                                                     **dict(zip(("house", "id", "state"), it_code)))
+                    self.core.event_engine.broadcast(
+                        "intertechno_code_received",
+                        **dict(zip(("house", "id", "state"), it_code)))
 
 
 class IntertechnoSwitch:
@@ -27,14 +28,15 @@ class IntertechnoSwitch:
 
         @event("intertechno_code_received")
         async def on_it_code(event, house, identifier, state):
-            if (self.cfg["house"].lower(), self.cfg["id"]) == (house, identifier):
+            if (self.cfg["house"].lower(), self.cfg["id"]) \
+                    == (house, identifier):
                 await self.states.update("on", state)
 
     # pylint: disable=invalid-name
     async def switch(self, on):
         """Setter for on"""
-        await self.cfg["433mhz_tx_adapter"].send_code(to_code(self.cfg["house"],
-                                                              self.cfg["id"], on))
+        await self.cfg["433mhz_tx_adapter"].send_code(
+            to_code(self.cfg["house"], self.cfg["id"], on))
         return {"on": on}
 
     async def toggle_on(self):

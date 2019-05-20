@@ -5,6 +5,7 @@ import pigpio
 
 # pylint: disable=invalid-name,too-many-instance-attributes
 
+
 class RX:
     """Receiver"""
 
@@ -28,8 +29,8 @@ class RX:
         self.pi = pi
         self.gpio = gpio
         self.cb = callback
-        self.min_bits = min_bits*2
-        self.max_bits = max_bits*2
+        self.min_bits = min_bits * 2
+        self.max_bits = max_bits * 2
         self.glitch = glitch
 
         self._in_code = False
@@ -83,11 +84,11 @@ class RX:
     def _test_bit(self, e0, e1):
         self._timings(e0, e1)
 
-        if ((self._min_0 < e0 < self._max_0) and
-                (self._min_1 < e1 < self._max_1)):
+        if ((self._min_0 < e0 < self._max_0)
+                and (self._min_1 < e1 < self._max_1)):
             return 0
-        if ((self._min_0 < e1 < self._max_0) and
-                (self._min_1 < e0 < self._max_1)):
+        if ((self._min_0 < e1 < self._max_0)
+                and (self._min_1 < e0 < self._max_1)):
             return 1
         return 2
 
@@ -104,7 +105,8 @@ class RX:
                     self._lt_1 = int(self._t_1 / self._bits)
                     self._ready = True
                     if self.cb is not None:
-                        self.cb(int(bin(self._lcode)[2::2], 2), int(self._lbits/2),
+                        self.cb(int(bin(self._lcode)[2::2], 2),
+                                int(self._lbits / 2),
                                 self._lgap, self._lt_0, self._lt_1)
             self._in_code = True
             self._gap = edge_len
@@ -144,7 +146,14 @@ class RX:
 class TX:
     """Transmitter"""
 
-    def __init__(self, pi, gpio, repeats=6, bits=12, gap=9000, t_0=300, t_1=900):
+    def __init__(self,
+                 pi: pigpio.pi,
+                 gpio: int,
+                 repeats: int = 6,
+                 bits: int = 12,
+                 gap: int = 9000,
+                 t_0: int = 300,
+                 t_1: int = 900) -> None:
         self.pi = pi
         self.gpio = gpio
         self.repeats = repeats

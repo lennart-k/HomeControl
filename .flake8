@@ -1,0 +1,14 @@
+[flake8]
+exclude=.git,
+        __pycache__,
+        build,
+        scripts,
+        dist,
+        homecontrol.egg-info
+
+ignore=F821,
+       W503,
+       E741,
+       E743,
+       E226,  # Missing whitespace around arithmetic operator
+       E228   # Missing whitespace around modulo operator

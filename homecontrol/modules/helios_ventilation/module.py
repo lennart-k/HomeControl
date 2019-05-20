@@ -15,9 +15,13 @@ class HeliosVentilation:
             That means to keep the requests working
             we just need to send a login request every ten minutes.
             """
-            requests.post(f"http://{self.cfg['host']}/info.htm", data={'v00402': 'helios'})
+            requests.post(
+                f"http://{self.cfg['host']}/info.htm",
+                data={'v00402': 'helios'})
 
-    async def start_party(self, duration: int = None, party_level: int = None) -> None:
+    async def start_party(self,
+                          duration: int = None,
+                          party_level: int = None) -> None:
         """Action: Start party mode"""
         duration = duration or self.cfg["default_party_duration"]
         party_level = party_level or self.cfg["default_party_level"]

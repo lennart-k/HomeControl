@@ -2,6 +2,7 @@
 
 from homecontrol.dependencies.entity_types import Item
 
+
 # pylint: disable=too-few-public-methods
 class ActionEngine:
     """Holds available actions for an item"""

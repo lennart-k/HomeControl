@@ -9,7 +9,10 @@ class NECIRReceiver:
     async def init(self):
         """Initialise the receiver"""
         self.ir_receiver = Receiver(
-            self.cfg["pigpio_adapter"].pigpio, self.cfg["pin"], self.on_code, 10)
+            self.cfg["pigpio_adapter"].pigpio,
+            self.cfg["pin"],
+            self.on_code,
+            10)
 
     def on_code(self, address, data, bits):
         """Handler for new code"""

@@ -40,8 +40,9 @@ class Timer:
 
     async def add_time(self, seconds: int):
         """Add time to the timer"""
-        await self.states.update("time_remaining",
-                                 (await self.states.get("time_remaining"))+seconds)
+        await self.states.update(
+            "time_remaining",
+            (await self.states.get("time_remaining"))+seconds)
         self.float_remaining = self.remaining()+seconds
         self.last_time = (time.time(), self.float_remaining)
 
@@ -57,13 +58,15 @@ class Timer:
         """Update the time"""
         if await self.states.get("running"):
             now_remaining = self.remaining()
-            await self.states.update("time_remaining", math.ceil(now_remaining))
+            await self.states.update(
+                "time_remaining", math.ceil(now_remaining))
             if now_remaining <= 0:
                 self.core.event_engine.broadcast("timer_over", timer=self)
                 await self.reset()
             else:
                 await asyncio.sleep(now_remaining%1)
-                asyncio.run_coroutine_threadsafe(self.tick(), loop=self.core.loop)
+                asyncio.run_coroutine_threadsafe(
+                    self.tick(), loop=self.core.loop)
 
     async def stop(self):
         """Stop the timer item"""

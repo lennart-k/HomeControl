@@ -49,23 +49,29 @@ class ConfigManager:
                         "Configuration domain %s is not reloadable", domain)
                     continue
                 try:
-                    domain_config = await self.approve_domain_config(domain,
-                                                                     domain_config,
-                                                                     initial=False)
+                    domain_config = await self.approve_domain_config(
+                        domain,
+                        domain_config,
+                        initial=False)
                 except (vol.Error, ConfigurationNotApproved):
                     continue
 
                 self.cfg[domain] = domain_config
 
-                if hasattr(self.registered_handlers.get(domain, None), "apply_new_configuration"):
-                    await self.registered_handlers[domain].apply_new_configuration(domain,
-                                                                                   domain_config)
+                if hasattr(self.registered_handlers.get(domain, None),
+                           "apply_new_configuration"):
+                    handler = self.registered_handlers[domain]
+                    await handler.apply_new_configuration(
+                        domain, domain_config)
 
                 LOGGER.info("Configuration for domain %s updated", domain)
 
         LOGGER.info("Completed updating the configuration")
 
-    async def approve_domain_config(self, domain: str, config: dict, initial: bool = True) -> dict:
+    async def approve_domain_config(self,
+                                    domain: str,
+                                    config: dict,
+                                    initial: bool = True) -> dict:
         """
         Returns an approved and validated version of config for a domain
         """
@@ -74,15 +80,19 @@ class ConfigManager:
                 config = self.domain_schemas[domain](config)
             except vol.Error as e:
                 LOGGER.error(
-                    "Configuration for domain %s is invalid", domain, exc_info=True)
+                    "Configuration for domain %s is invalid",
+                    domain,
+                    exc_info=True)
                 raise e
 
         # Check if the domain owner approves
-        if hasattr(self.registered_handlers.get(domain, None), "approve_configuration"):
-            result = await self.registered_handlers[domain].approve_configuration(config)
+        if hasattr(self.registered_handlers.get(domain, None),
+                   "approve_configuration"):
+            handler = self.registered_handlers[domain]
+            result = await handler.approve_configuration(config)
             # pylint: disable=singleton-comparison
             # None should be accepted
-            if result == False:
+            if result == False:  # noqa: E712
                 LOGGER.warning(
                     "Configuration for domain %s not approved", domain)
                 raise ConfigurationNotApproved(domain)
@@ -97,8 +107,8 @@ class ConfigManager:
         """
         Registers a configuration domain
 
-        Objects can register themselves to their own configuration domain and subscribe
-        to changes in the configuration
+        Objects can register themselves to their own configuration domain and
+        subscribe to changes in the configuration
 
         domain: str
             The configuration domain (A top-level key in config.yaml)
@@ -106,12 +116,14 @@ class ConfigManager:
             The object subscribing to this domain.
             Methods it can implement are:
                 approve_configuration(domain, config) -> bool
-                    This method is an objects veto right for domain configuration
+                    This method is an objects veto right for
+                    domain configuration.
                     If it returns `False` the configuration will not be applied
-                    If the initial configuration is denied an exception will be raised
+                    If the initial configuration is denied an exception
+                    will be raised.
                 apply_new_configuration(domain, config) -> None
-                    In this method the object has to handle the new configuration
-                    e.g. by initialising again
+                    In this method the object has to handle the
+                    new configuration e.g. by initialising again
             If not specified this configuration domain will not be reloadable
         allow_reload: bool
             Allow reloading this configuration domain
@@ -132,4 +144,5 @@ class ConfigManager:
         if schema:
             self.domain_schemas[domain] = schema
 
-        return await self.approve_domain_config(domain, self.cfg.get(domain, {}), initial=True)
+        return await self.approve_domain_config(
+            domain, self.cfg.get(domain, {}), initial=True)

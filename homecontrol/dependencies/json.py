@@ -74,15 +74,17 @@ class JSONDecoder(json.JSONDecoder):
             if obj["!type"] == "Item":
                 ITEM_SCHEMA(obj)  # Check if obj has needed attributes
                 # Check if item exists
-                assert obj["id"] in self.core.item_manager.items, ItemNotFoundException(
-                    f"There's no item with id {obj['id']}")
+                if not obj["id"] in self.core.item_manager.items:
+                    raise ItemNotFoundException(
+                        f"There's no item with id {obj['id']}")
                 return self.core.item_manager.items[obj["id"]]
 
             if obj["!type"] == "Module":
                 MODULE_SCHEMA(obj)  # Check if obj has needed attributes
                 # Check if module exists
                 if not obj["name"] in self.core.module_manager.loaded_modules:
-                    raise ModuleNotFoundException(f"There's no module with name {obj['name']}")
+                    raise ModuleNotFoundException(
+                        f"There's no module with name {obj['name']}")
                 return self.core.module_manager.loaded_modules[obj["name"]]
 
             if obj["!type"] in types:
@@ -94,7 +96,8 @@ def loads(s, *, encoding=None, parse_float=None,
           parse_int=None, parse_constant=None,
           object_pairs_hook=None, core: Core = None, **kw):
     """
-    Loads a JSON string with a custom JSONDecoder that supports HomeControl's data types.
+    Loads a JSON string with a custom JSONDecoder
+    that supports HomeControl's data types.
     Note that for items you need to specify the core parameter
     """
     return json.loads(s=s, encoding=encoding, parse_float=parse_float,
@@ -104,34 +107,43 @@ def loads(s, *, encoding=None, parse_float=None,
 
 
 def load(fp, *, parse_float=None,
-         parse_int=None, parse_constant=None, object_pairs_hook=None, core: Core = None, **kw):
+         parse_int=None, parse_constant=None, object_pairs_hook=None,
+         core: Core = None, **kw):
     """
-    Loads a Reader with a custom JSONDecoder that supports HomeControl's data types.
+    Loads a Reader with a custom JSONDecoder
+    that supports HomeControl's data types.
     Note that for items you need to specify the core parameter
     """
     return loads(fp.read(),
-                 parse_float=parse_float, parse_int=parse_int, cls=partial(JSONDecoder, core=core),
-                 parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+                 parse_float=parse_float, parse_int=parse_int,
+                 cls=partial(JSONDecoder, core=core),
+                 parse_constant=parse_constant,
+                 object_pairs_hook=object_pairs_hook, **kw)
 
 
 def dumps(obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,
-          allow_nan=True, indent=None, separators=None, sort_keys=False, core: Core = None, **kw):
+          allow_nan=True, indent=None, separators=None, sort_keys=False,
+          core: Core = None, **kw):
     """
-    Dumps an object into a JSON string with support for HomeControl's data types
+    Dumps an object into a JSON string with support
+    for HomeControl's data types
     """
     return json.dumps(obj, skipkeys=skipkeys, ensure_ascii=ensure_ascii,
-                      check_circular=check_circular, cls=partial(JSONEncoder, core=core),
+                      check_circular=check_circular,
+                      cls=partial(JSONEncoder, core=core),
                       allow_nan=allow_nan, indent=indent,
                       separators=separators, sort_keys=sort_keys, **kw)
 
 
 def dump(obj, fp, *, skipkeys=False, ensure_ascii=True, check_circular=True,
-         allow_nan=True, indent=None, separators=None, sort_keys=False, core: Core = None, **kw):
+         allow_nan=True, indent=None, separators=None, sort_keys=False,
+         core: Core = None, **kw):
     """
     Dumps an object into a Writer with support for HomeControl's data types
     """
     return json.dump(obj, fp, skipkeys=skipkeys, ensure_ascii=ensure_ascii,
-                     check_circular=check_circular, cls=partial(JSONEncoder, core=core),
+                     check_circular=check_circular,
+                     cls=partial(JSONEncoder, core=core),
                      allow_nan=allow_nan, indent=indent,
                      separators=separators, sort_keys=sort_keys, **kw)
 

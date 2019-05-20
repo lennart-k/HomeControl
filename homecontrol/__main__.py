@@ -23,29 +23,54 @@ from homecontrol.const import (
 
 LOGGER = logging.getLogger(__name__)
 
+
 def get_arguments() -> dict:
     """Parse commandline arguments"""
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="HomeControl")
-    parser.add_argument("-cfgfile", "-cf", default=os.path.expanduser("~/.homecontrol/config.yaml"),
-                        help="File storing the HomeControl configuration")
-    parser.add_argument("-pid-file", default=None,
-                        help="Location of the PID file when running as a daemon. Ensures that only one session is running")
-    parser.add_argument("-clearport", action="store_true", default=None,
-                        help="Frees the port for the API server using fuser. Therefore only available on Linux")
-    parser.add_argument("-verbose", action="store_true", default=None,
-                        help="Sets the loglevel for the logfile to INFO")
-    parser.add_argument("-nocolor", action="store_true", default=False,
-                        help="Disables colored console output")
-    parser.add_argument("-logfile", default=None,
-                        help="Logfile location")
-    parser.add_argument("-killprev", "-kp", action="store_true", default=None,
-                        help="Kills the previous HomeControl instance")
+    parser.add_argument(
+        "-cfgfile", "-cf",
+        default=os.path.expanduser("~/.homecontrol/config.yaml"),
+        help="File storing the HomeControl configuration")
+    parser.add_argument(
+        "-pid-file",
+        default=None,
+        help=("Location of the PID file when running as a daemon."
+              " Ensures that only one session is running"))
+    parser.add_argument(
+        "-clearport",
+        action="store_true",
+        default=None,
+        help=("Frees the port for the API server using fuser."
+              "Therefore only available on Linux"))
+    parser.add_argument(
+        "-verbose",
+        action="store_true",
+        default=None,
+        help="Sets the loglevel for the logfile to INFO")
+    parser.add_argument(
+        "-nocolor",
+        action="store_true",
+        default=False,
+        help="Disables colored console output")
+    parser.add_argument(
+        "-logfile",
+        default=None,
+        help="Logfile location")
+    parser.add_argument(
+        "-killprev", "-kp",
+        action="store_true",
+        default=None,
+        help="Kills the previous HomeControl instance")
     if os.name == "posix":
-        parser.add_argument("-daemon", "-d", action="store_true", default=None,
-                            help="Start HomeControl as a daemon process [posix only]")
+        parser.add_argument(
+            "-daemon", "-d",
+            action="store_true",
+            default=None,
+            help="Start HomeControl as a daemon process [posix only]")
 
     return vars(parser.parse_args())
+
 
 def get_config(path: str) -> dict:
     """
@@ -56,12 +81,16 @@ def get_config(path: str) -> dict:
     if not os.path.isfile(path):
         LOGGER.critical("Config file does not exist: %s", path)
         create_new_config = input(
-            f"Shall a default config folder be created at {os.path.dirname(path)}? [Y/n]")
+            (f"Shall a default config folder be created "
+             f"at {os.path.dirname(path)}? [Y/n]"))
 
         if not create_new_config or create_new_config.lower()[0] == "y":
-            LOGGER.info("Installing the default configuration to %s", os.path.dirname(path))
+            LOGGER.info(
+                "Installing the default configuration to %s",
+                os.path.dirname(path))
             import homecontrol
-            source = pkg_resources.resource_filename(homecontrol.__name__, "default_config")
+            source = pkg_resources.resource_filename(
+                homecontrol.__name__, "default_config")
             shutil.copytree(source, os.path.dirname(path))
             LOGGER.info("Running HomeControl with default config")
             return get_config(path=path)
@@ -75,6 +104,7 @@ def get_config(path: str) -> dict:
         sys.exit(1)
     return cfg
 
+
 def clear_port(port: int):
     """Clears a TCP port, only works on posix as it depends on fuser"""
     if os.name == "posix":
@@ -84,9 +114,11 @@ def clear_port(port: int):
 def validate_python_version():
     """Checks if the Python version is high enough"""
     if sys.version_info[:3] < MINIMUM_PYTHON_VERSION:
-        LOGGER.critical("The minimum Python version for HomeControl to work is %s",
-                        ".".join(MINIMUM_PYTHON_VERSION))
+        LOGGER.critical(
+            "The minimum Python version for HomeControl to work is %s",
+            ".".join(MINIMUM_PYTHON_VERSION))
         sys.exit(1)
+
 
 def run_homecontrol(config: dict, config_path: str, start_args: dict):
     """
@@ -102,18 +134,20 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
     loop = asyncio.get_event_loop()
     if os.name == "nt":
         def windows_wakeup():
-            # This seems to be a workaround so that SIGINT signals also work on Windows
+            # This seems to be a workaround so that
+            # SIGINT signals also work on Windows
             loop.call_later(0.1, windows_wakeup)
         # https://stackoverflow.com/questions/24774980/why-cant-i-catch-sigint-when-asyncio-event-loop-is-running/24775107#answer-24775107
         windows_wakeup()
-    core = Core(cfg=config, cfg_path=config_path, loop=loop, start_args=start_args)
+    core = Core(
+        cfg=config, cfg_path=config_path, loop=loop, start_args=start_args)
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
     loop.stop()
     loop.close()
     if exit_return == EXIT_RESTART:
-        LOGGER.warning("Restarting now%s", 4*"\n")
+        LOGGER.warning("Restarting now%s", 4 * "\n")
         args = start_command()
         os.execv(args[0], args)
     elif start_args["pid_file"]:
@@ -122,18 +156,24 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
         except FileNotFoundError:
             pass
 
+
 def start_command():
     """
     Returns a command to re-execute HomeControlwith the same parameters
     except the daemon parameter
     """
     # pylint: disable=line-too-long
-    if os.path.basename(sys.argv[0]) == "__main__.py" or (os.path.split(sys.argv[0])[-1] == "homecontrol" and os.path.isdir(sys.argv[0])):
+    if (os.path.basename(sys.argv[0]) == "__main__.py"
+            or (os.path.split(sys.argv[0])[-1] == "homecontrol"
+                and os.path.isdir(sys.argv[0]))):
 
-        os.environ["PYTHONPATH"] = os.path.dirname(os.path.dirname(sys.argv[0]))
-        return [sys.executable] + [arg for arg in sys.argv if not arg in ("-d", "-daemon")]
+        os.environ["PYTHONPATH"] = os.path.dirname(
+            os.path.dirname(sys.argv[0]))
 
-    return [arg for arg in sys.argv if not arg in ("-d", "-daemon")]
+        return ([sys.executable]
+                + [arg for arg in sys.argv if arg not in ("-d", "-daemon")])
+
+    return [arg for arg in sys.argv if arg not in ("-d", "-daemon")]
 
 
 def daemonize() -> None:
@@ -154,6 +194,7 @@ def daemonize() -> None:
     os.dup2(infd.fileno(), sys.stdin.fileno())
     os.dup2(outfd.fileno(), sys.stdout.fileno())
     os.dup2(outfd.fileno(), sys.stderr.fileno())
+
 
 def check_pid_file(pid_file: str, kill: bool = False) -> None:
     """Checks if another instance of HomeControl is already running"""
@@ -227,15 +268,19 @@ def setup_logging(verbose: bool = False,
         file_handler.setFormatter(logging.Formatter(fmt, datefmt=datefmt))
         logging.getLogger().addHandler(file_handler)
 
+
 def main():
     """The main function"""
     validate_python_version()
 
     args = get_arguments()
-    logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]), "homecontrol.log")
+    logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]),
+                                              "homecontrol.log")
     cfg = get_config(args["cfgfile"])
 
-    setup_logging(verbose=args["verbose"], color=not args["nocolor"], logfile=logfile)
+    setup_logging(verbose=args["verbose"],
+                  color=not args["nocolor"],
+                  logfile=logfile)
 
     if args["pid_file"]:
         check_pid_file(args["pid_file"], kill=args["killprev"])
@@ -255,5 +300,6 @@ def main():
         clear_port(cfg["http-server"]["port"])
 
     run_homecontrol(config=cfg, config_path=args["cfgfile"], start_args=args)
+
 
 main()

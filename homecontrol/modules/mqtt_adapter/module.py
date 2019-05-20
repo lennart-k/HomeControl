@@ -26,12 +26,14 @@ class MQTTAdapter:
         """Stop the mqtt session"""
         if self.connected:
             self.client.disconnect()
-        self.core.loop.call_soon(self.core.loop.run_in_executor(None, self.client.loop_stop))
+        self.core.loop.call_soon(
+            self.core.loop.run_in_executor(None, self.client.loop_stop))
 
     def on_connect(self, _, userdata, flags, result):
         """Handle a connection"""
         self.connected.set()
-        self.core.event_engine.broadcast_threaded("mqtt_connected", mqtt_adapter=self)
+        self.core.event_engine.broadcast_threaded(
+            "mqtt_connected", mqtt_adapter=self)
 
     def on_disconnect(self, _, userdata, mid) -> None:
         """Handle on_disconnect"""
@@ -39,5 +41,7 @@ class MQTTAdapter:
 
     def on_message(self, _, userdata, msg):
         """Handle a message"""
-        self.core.event_engine.broadcast_threaded("mqtt_message_received",
-                                                  mqtt_adapter=self, message=msg)
+        self.core.event_engine.broadcast_threaded(
+            "mqtt_message_received",
+            mqtt_adapter=self,
+            message=msg)

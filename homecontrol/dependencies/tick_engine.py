@@ -26,7 +26,7 @@ class TickEngine:
         def _tick(coro) -> Callable:
             self.intervals[interval].add(coro)
 
-            if not interval in self.futures:
+            if interval not in self.futures:
                 self.futures[interval] = asyncio.run_coroutine_threadsafe(
                     self._do_tick(interval), self.core.loop)
             return coro

@@ -32,14 +32,18 @@ class Event:
 
 class EventEngine:
     """Dispatcher for events"""
-    def __init__(self, core: "homecontrol.Core") -> None:
+    def __init__(self, core) -> None:
         self.core = core
         self.handlers = defaultdict(set)
 
-    def broadcast(self, event_type: str, data: dict = None, **kwargs) -> List[asyncio.Future]:
+    def broadcast(self,
+                  event_type: str,
+                  data: dict = None,
+                  **kwargs) -> List[asyncio.Future]:
         """
         Broadcast an event and return the futures
-        Every listener is a coroutine that will simply receive event and **kwargs
+        Every listener is a coroutine that will simply
+        receive event and **kwargs
         Example:
 
         async def on_event(event: Event, *args, **kwargs):
@@ -57,8 +61,9 @@ class EventEngine:
             + list(self.handlers.get(event_type, list()))
         )
 
-        return [asyncio.ensure_future(handler(event, **kwargs),
-                                      loop=self.core.loop) for handler in handlers]
+        return [asyncio.ensure_future(
+            handler(event, **kwargs),
+            loop=self.core.loop) for handler in handlers]
 
     def broadcast_threaded(self,
                            event_type: str,
@@ -80,15 +85,19 @@ class EventEngine:
             + list(self.handlers.get(event_type, list()))
         )
 
-        return [asyncio.run_coroutine_threadsafe(handler(event, **kwargs),
-                                                 loop=self.core.loop) for handler in handlers]
+        return [asyncio.run_coroutine_threadsafe(
+            handler(event, **kwargs),
+            loop=self.core.loop) for handler in handlers]
 
-
-    async def gather(self, event_type: str, data: dict = None, **kwargs) -> List[Any]:
+    async def gather(self,
+                     event_type: str,
+                     data: dict = None,
+                     **kwargs) -> List[Any]:
         """
         Broadcast an event and return the results
         """
-        return await asyncio.gather(*self.broadcast(event_type, data, **kwargs))
+        return await asyncio.gather(
+            *self.broadcast(event_type, data, **kwargs))
 
     def register(self, event: str) -> Callable:
         """

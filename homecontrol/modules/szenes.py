@@ -6,6 +6,7 @@ meta:
   description: Provides szene functionality
 """
 
+
 class Module:
     """The Szene module holding the szene settings"""
     async def init(self):
@@ -25,7 +26,8 @@ class Module:
 
 class Szene:
     """
-    A Szene is a set of states that should be set and actions that should be executed when invoked
+    A Szene is a set of states that should be set
+    of triggers and actions that should be executed when invoked
     """
     def __init__(self, module, data):
         self.core = module.core
@@ -40,8 +42,9 @@ class Szene:
                 await item.states.set(state_name, value)
 
             for action_instruction in data.get("action", []):
-                await item.actions.execute(action_instruction["name"],
-                                           **action_instruction.get("data", {}))
+                await item.actions.execute(
+                    action_instruction["name"],
+                    **action_instruction.get("data", {}))
 
     async def on_trigger(self, data):
         """Implement an automation action provider"""

@@ -14,7 +14,8 @@ class Item:
     status: ItemStatus = ItemStatus.OFFLINE
 
     def __repr__(self) -> str:
-        return f"<Item {self.type} identifier={self.identifier} name={self.name}>"
+        return (f"<Item {self.type} identifier={self.identifier}"
+                f"name={self.name}>")
 
     async def init(self) -> None:
         """Default init method"""

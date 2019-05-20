@@ -20,18 +20,20 @@ class PiGPIOAdapter:
     async def init(self):
         """Initialise the adapter"""
         done, pending = await asyncio.wait(
-            {self.core.loop.run_in_executor(None, self.init_pigpio)}, timeout=2)
+            {self.core.loop.run_in_executor(None, self.init_pigpio)},
+            timeout=2)
         if pending or not self.pigpio.connected:
             return False
 
     def init_pigpio(self):
         """Initialise PiGPIO"""
-        self.pigpio = pigpio.pi(self.cfg["host"], self.cfg["port"], show_errors=False)
+        self.pigpio = pigpio.pi(
+            self.cfg["host"], self.cfg["port"], show_errors=False)
 
     async def stop(self):
         """Stop the adapter"""
-        await asyncio.gather(*self.core.event_engine.broadcast("pigpio_closing",
-                                                               pigpio=self.pigpio))
+        await asyncio.gather(*self.core.event_engine.broadcast(
+            "pigpio_closing", pigpio=self.pigpio))
         self.pigpio.stop()
 
 
@@ -44,11 +46,13 @@ class BinaryOutput:
         """Initialise the output"""
         self.pigpio: pigpio.pi = self.cfg["pigpio_adapter"].pigpio
         self.pigpio.set_mode(self.cfg["pin"], 1)
-        self.pigpio.write(self.cfg["pin"], not (await self.states.get("on")) ^ self.cfg["on_state"])
+        self.pigpio.write(
+            self.cfg["pin"],
+            not (await self.states.get("on")) ^ self.cfg["on_state"])
 
     async def set_on(self, value: bool) -> dict:
         """Setter for value"""
-        self.pigpio.write(self.cfg["pin"], not value^self.cfg["on_state"])
+        self.pigpio.write(self.cfg["pin"], not value ^ self.cfg["on_state"])
 
         return {"on": value}
 
@@ -66,27 +70,31 @@ class Button:
         """Initialise the button"""
         self.pigpio: pigpio.pi = self.cfg["pigpio_adapter"].pigpio
         self.pigpio.set_mode(self.cfg["pin"], pigpio.INPUT)
-        self._cb = self.pigpio.callback(self.cfg["pin"], pigpio.EITHER_EDGE, self.callback)
+        self._cb = self.pigpio.callback(
+            self.cfg["pin"], pigpio.EITHER_EDGE, self.callback)
 
     @throttle(s=0.05)
     def callback(self, pin, reading, timestamp) -> None:
         """Callback that updates the on state"""
         async def _async_callback() -> bool:
             if not self.cfg["toggle"]:
-                value = not self.cfg["pull_up"]^reading
+                value = not self.cfg["pull_up"] ^ reading
                 if not value == await self.states.get("value"):
                     await self.states.update("value", value)
                     return True
             else:
-                if not self.cfg["pull_up"]^reading:
-                    await self.states.update("value", not await self.states.get("value"))
+                if not self.cfg["pull_up"] ^ reading:
+                    await self.states.update(
+                        "value", not await self.states.get("value"))
                     return True
 
-        asyncio.run_coroutine_threadsafe(_async_callback(), loop=self.core.loop)
+        asyncio.run_coroutine_threadsafe(
+            _async_callback(), loop=self.core.loop)
 
     async def stop(self):
         """Stop listening"""
-        with suppress(AttributeError, ConnectionResetError):  # pigpio socket already closed
+        with suppress(AttributeError, ConnectionResetError):
+            # pigpio socket already closed
             self._cb.cancel()
 
 
@@ -95,7 +103,9 @@ class I2CLCD:
     async def init(self):
         """Initialise the display"""
         self.pigpio: pigpio.pi = self.cfg["pigpio_adapter"].pigpio
-        self.lcd = LCD(pi=self.pigpio, bus=self.cfg["bus"], addr=self.cfg["address"],
+        self.lcd = LCD(pi=self.pigpio,
+                       bus=self.cfg["bus"],
+                       addr=self.cfg["address"],
                        backlight_on=await self.states.get("backlight"))
 
     async def set_backlight(self, value: bool) -> dict:

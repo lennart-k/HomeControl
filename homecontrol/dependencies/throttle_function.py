@@ -5,7 +5,8 @@ import time
 from typing import Callable
 
 
-# pylint: disable=invalid-name,inconsistent-return-statements,too-few-public-methods
+# pylint: disable=invalid-name,inconsistent-return-statements
+# pylint: disable=too-few-public-methods
 class throttle:
     """Throttles a function so it only gets called at a fixed frequency"""
     def __init__(self, s: float = 1):

@@ -53,11 +53,12 @@ class BitcoinStats:
         """Update the current states"""
         try:
             result = RESULT_SCHEMA(requests.get(DATA_URL).json())
-        except vol.SchemaError as e:
+        except vol.SchemaError:
             return
 
-        await self.states.bulk_update(last_update=result["timestamp"],
-                                      market_price_usd=result["market_price_usd"],
-                                      hash_rate=result["hash_rate"],
-                                      n_btc_mined=result["n_btc_mined"],
-                                      block_interval=result["minutes_between_blocks"])
+        await self.states.bulk_update(
+            last_update=result["timestamp"],
+            market_price_usd=result["market_price_usd"],
+            hash_rate=result["hash_rate"],
+            n_btc_mined=result["n_btc_mined"],
+            block_interval=result["minutes_between_blocks"])

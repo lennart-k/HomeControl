@@ -6,7 +6,7 @@ import pigpio
 
 # https://techdocs.altium.com/display/FPGA/NEC+Infrared+Transmission+Protocol
 PULSE_LENGTH = 562.5
-HALF_PULSE_LENGTH = PULSE_LENGTH/2
+HALF_PULSE_LENGTH = PULSE_LENGTH / 2
 
 LEADING_BURST = 16
 
@@ -15,7 +15,11 @@ class NECIRReceiver:
     """Receives IR codes using the NEC protocol"""
 
     # pylint: disable=invalid-name
-    def __init__(self, rpi: pigpio.pi, gpio: int, callback: callable, timeout: int = 5):
+    def __init__(self,
+                 rpi: pigpio.pi,
+                 gpio: int,
+                 callback: callable,
+                 timeout: int = 5) -> None:
         self.pi = rpi
         self.gpio = gpio
         self.code_timeout = timeout

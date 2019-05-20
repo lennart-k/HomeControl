@@ -20,9 +20,9 @@ class MCP3008ADC:
 
     def get_value(self, channel: int) -> int:
         """Get the value for one channel"""
-        adc = self.cfg["pigpio_adapter"].pigpio.spi_xfer(self.handle, [1, (8 + channel) << 4, 0])[1]
+        adc = self.cfg["pigpio_adapter"].pigpio.spi_xfer(
+            self.handle, [1, (8 + channel) << 4, 0])[1]
         return ((adc[1] & 3) << 8) + adc[2]
-
 
     async def stop(self):
         """Stop the item"""
@@ -30,7 +30,8 @@ class MCP3008ADC:
             try:
                 self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
             except BrokenPipeError:
-                LOGGER.warning("SPI transport not properly closed for %s", self.identifier)
+                LOGGER.warning("SPI transport not properly closed for %s",
+                               self.identifier)
 
 
 class AnalogInput:
@@ -56,5 +57,12 @@ class AnalogInput:
         await self.states.update("value", self.value(raw_val))
 
     def value(self, raw_val) -> int:
-        """Translate the raw reading to a range defined in the item's configuration"""
-        return int(self.cfg["min"]+raw_val*(self.cfg["max"]-self.cfg["min"])/1023+0.5)
+        """
+        Translate the raw reading
+        to a range defined in the item's configuration
+        """
+        return int(
+            self.cfg["min"]
+            + raw_val * (self.cfg["max"]
+                         - self.cfg["min"]) / 1023
+            + 0.5)

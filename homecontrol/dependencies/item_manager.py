@@ -36,10 +36,11 @@ class ItemManager:
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
-        self.cfg = await self.core.cfg.register_domain("items",
-                                                       handler=self,
-                                                       schema=CONFIG_SCHEMA,
-                                                       allow_reload=True)
+        self.cfg = await self.core.cfg.register_domain(
+            "items",
+            handler=self,
+            schema=CONFIG_SCHEMA,
+            allow_reload=True)
 
         for raw_cfg in self.cfg:
             await self.create_from_raw_cfg(raw_cfg)
@@ -62,7 +63,9 @@ class ItemManager:
             if identifier in self.items:
                 yield self.items[identifier]
 
-    async def stop_item(self, item: Item, status: ItemStatus = ItemStatus.STOPPED) -> None:
+    async def stop_item(self,
+                        item: Item,
+                        status: ItemStatus = ItemStatus.STOPPED) -> None:
         """Stops an item"""
         print("YIKEASD")
         await item.stop()
@@ -87,9 +90,10 @@ class ItemManager:
         identifier: str
             The item's identifier
         """
-        if not identifier in self.items:
+        if identifier not in self.items:
             LOGGER.info(
-                "Item %s does not exist so it could not be removed", identifier)
+                "Item %s does not exist so it could not be removed",
+                identifier)
             return
 
         item = self.items[identifier]
@@ -132,7 +136,7 @@ class ItemManager:
         init_result = await item.init()
         print(init_result, item.identifier, item.status, item.dependant_items)
         # pylint: disable=singleton-comparison
-        if init_result == False:
+        if init_result == False:  # noqa: E712
             item.status = ItemStatus.OFFLINE
             return
         else:
@@ -142,7 +146,8 @@ class ItemManager:
             if (dependant_item.status == ItemStatus.WAITING_FOR_DEPENDENCY
                     and all([dependency.status == ItemStatus.ONLINE
                              for dependency
-                             in self.iter_items_by_id(dependant_item.dependencies)])):
+                             in self.iter_items_by_id(
+                                 dependant_item.dependencies)])):
                 await self.init_item(dependant_item)
 
     # pylint: disable=too-many-arguments
@@ -165,7 +170,8 @@ class ItemManager:
             when updating the configuration
         cfg: dict
         state_defaults: dict
-            If the initial state cannot be polled on init you can pass a default
+            If the initial state cannot be polled on init
+            you can pass a default
         name: str
             How your item should be displayed in the frontend
         """
@@ -205,8 +211,9 @@ class ItemManager:
                         if dependency.status != ItemStatus.ONLINE:
                             item.status = ItemStatus.WAITING_FOR_DEPENDENCY
                     else:
-                        LOGGER.error("Item %s depends on item %s which does not exist",
-                                     item.identifier, value[2:])
+                        LOGGER.error(
+                            "Item %s depends on item %s which does not exist",
+                            item.identifier, value[2:])
                         item.status = ItemStatus.WAITING_FOR_DEPENDENCY
 
         item.cfg = config
@@ -225,7 +232,8 @@ class ItemManager:
         LOGGER.debug("Item created: %s", item.identifier)
         if item.status != ItemStatus.ONLINE:
             LOGGER.warning(
-                "Item could not be initialised: %s [%s]", identifier, item_type)
+                "Item could not be initialised: %s [%s]",
+                identifier, item_type)
             self.core.event_engine.broadcast("item_not_working", item=item)
 
         return item
@@ -236,7 +244,8 @@ class ItemManager:
 
         for raw_cfg in config:
             # pylint: disable=protected-access
-            if raw_cfg["id"] in self.items and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg:
+            if (raw_cfg["id"] in self.items
+                    and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg):
                 continue  # Item is unchanged
             if raw_cfg["id"] in self.items:
                 await self.recreate_item(self.items[raw_cfg["id"]], raw_cfg)

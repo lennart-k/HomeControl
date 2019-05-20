@@ -5,7 +5,6 @@ from lxml import html
 
 LOOKUP_URL = "https://bastet.socialblade.com/{platform}/lookup"
 
-# NAME_PATH = '//body/div[@id="profile"]/div[@id="sub-profile"]/div/div/div/p[@id="rawUser"]/text()'
 NAME_PATH = '//*[@id="rawUser"]/text()'
 NAME_URL = "https://socialblade.com/{platform}/user/{name}/realtime"
 
@@ -22,7 +21,8 @@ class TwitchFollowers:
     async def update_followers(self):
         """Update the current state"""
         await self.states.update("followers", int(requests.get(
-            LOOKUP_URL.format(platform="twitch"), params={"query": self.cfg["rawname"]}).content))
+            LOOKUP_URL.format(platform="twitch"),
+            params={"query": self.cfg["rawname"]}).content))
 
     def _get_rawname(self):
         content = html.fromstring(requests.get(NAME_URL.format(
@@ -45,7 +45,8 @@ class YouTubeFollowers:
     async def update_followers(self):
         """Update the current state"""
         await self.states.update("followers", int(requests.get(
-            LOOKUP_URL.format(platform="youtube"), params={"query": self.cfg["rawname"]}).content))
+            LOOKUP_URL.format(platform="youtube"),
+            params={"query": self.cfg["rawname"]}).content))
 
     def _get_rawname(self):
         content = html.fromstring(requests.get(NAME_URL.format(
@@ -66,4 +67,5 @@ class TwitterFollowers:
         """Update the current state"""
         await self.states.update(
             "followers", int(requests.get(
-                LOOKUP_URL.format(platform="twitter"), params={"query": self.cfg["name"]}).content))
+                LOOKUP_URL.format(platform="twitter"),
+                params={"query": self.cfg["name"]}).content))

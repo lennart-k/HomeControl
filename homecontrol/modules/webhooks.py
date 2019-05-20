@@ -8,6 +8,7 @@ meta:
   name: WebHook
 """
 
+
 class Module:
     """The WebHook module"""
     async def init(self):
@@ -20,10 +21,13 @@ class Module:
             @router.get("/webhook/{target}")
             @router.post("/webhook/{target}")
             async def webhook_route(request):
-                self.core.event_engine.broadcast("webhook_event",
-                                                 target=request.match_info["target"], params={})
+                self.core.event_engine.broadcast(
+                    "webhook_event",
+                    target=request.match_info["target"], params={})
                 return web.Response(
-                    body=json.dumps({"msg": "Webhook triggered"}, indent=4, sort_keys=True),
+                    body=json.dumps(
+                        {"msg": "Webhook triggered"},
+                        indent=4, sort_keys=True),
                     content_type="application/json")
 
         @event("gather_automation_providers")

@@ -25,17 +25,15 @@ class StateEngine:
             default_state = state_defaults.get(
                 state_name, details.get("default", None))
 
-            self.states[state_name] = State(self,
-                                            default=default_state,
-                                            getter=getattr(
-                                                item, details.get("getter", ""), None),
-                                            setter=getattr(
-                                                item, details.get("setter", ""), None),
-                                            schema=details.get("schema", None),
-                                            state_type=types.get(
-                                                details.get("type", ""), None),
-                                            name=state_name,
-                                            )
+            self.states[state_name] = State(
+                self,
+                default=default_state,
+                getter=getattr(item, details.get("getter", ""), None),
+                setter=getattr(item, details.get("setter", ""), None),
+                schema=details.get("schema", None),
+                state_type=types.get(details.get("type", ""), None),
+                name=state_name
+            )
 
     async def get(self, state: str):
         """Gets an item's state"""
@@ -112,7 +110,8 @@ class State:
                 self.state_engine.states[state].value = change
             self.state_engine.core.event_engine.broadcast(
                 "state_change", item=self.state_engine.item, changes=result)
-            LOGGER.debug("State change: %s %s", self.state_engine.item.identifier, result)
+            LOGGER.debug("State change: %s %s",
+                         self.state_engine.item.identifier, result)
             return result
         return {}
 

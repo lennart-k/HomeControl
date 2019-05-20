@@ -32,7 +32,8 @@ class Module:
 
     async def init(self):
         """Sets up an HTTPServer"""
-        self.cfg = await self.core.cfg.register_domain("http-server", self, schema=CONFIG_SCHEMA)
+        self.cfg = await self.core.cfg.register_domain(
+            "http-server", self, schema=CONFIG_SCHEMA)
         event("core_bootstrap_complete")(self.start)
 
     async def start(self, *args):
@@ -41,8 +42,12 @@ class Module:
 
         self.route_table_def = web.RouteTableDef()
 
-        await self.core.event_engine.gather("http_add_main_routes", router=self.route_table_def)
-        await self.core.event_engine.gather("http_add_main_subapps", main_app=self.main_app)
+        await self.core.event_engine.gather(
+            "http_add_main_routes",
+            router=self.route_table_def)
+        await self.core.event_engine.gather(
+            "http_add_main_subapps",
+            main_app=self.main_app)
 
         self.main_app.add_routes(self.route_table_def)
         self.handler = self.main_app.make_handler(loop=self.core.loop)
@@ -57,7 +62,8 @@ class Module:
 
     async def stop(self):
         """Stop the HTTP server"""
-        LOGGER.info("Stopping the HTTP server on %s:%s", self.cfg["host"], self.cfg["port"])
+        LOGGER.info("Stopping the HTTP server on %s:%s",
+                    self.cfg["host"], self.cfg["port"])
         try:
             if self.main_app.frozen:
                 await self.main_app.cleanup()

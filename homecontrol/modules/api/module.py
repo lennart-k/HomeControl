@@ -39,15 +39,18 @@ class Module:
         self.api_app = None
 
         # Prohibit reloading of the configuration
-        self.cfg = await self.core.cfg.register_domain("api-server", schema=CONFIG_SCHEMA)
+        self.cfg = await self.core.cfg.register_domain(
+            "api-server", schema=CONFIG_SCHEMA)
 
         @event("http_add_main_subapps")
         async def add_subapp(event, main_app):
             middlewares = self.middlewares()
-            await self.core.event_engine.gather("http_add_api_middlewares", middlewares=middlewares)
+            await self.core.event_engine.gather(
+                "http_add_api_middlewares", middlewares=middlewares)
             self.api_app = web.Application(middlewares=middlewares)
             route_table = self.routes()
-            await self.core.event_engine.gather("http_add_api_routes", router=route_table)
+            await self.core.event_engine.gather(
+                "http_add_api_routes", router=route_table)
             self.api_app.add_routes(route_table)
             main_app.add_subapp("/api", self.api_app)
 
@@ -87,13 +90,15 @@ class Module:
                     }, dumps=json.dumps)
 
                 # pylint: disable=broad-except
-                except Exception as e:
+                except Exception:
                     LOGGER.debug(
-                        "An error occured when sending a state update over WebSocket",
+                        "An error occured when sending"
+                        "a state update over WebSocket",
                         exc_info=True)
 
         @r.get("/websocket")
-        async def events_websockets(request: web.Request) -> web.WebSocketResponse:
+        async def events_websockets(
+                request: web.Request) -> web.WebSocketResponse:
             """The WebSocket route"""
             websocket = web.WebSocketResponse()
             await websocket.prepare(request)
@@ -101,7 +106,8 @@ class Module:
 
             async for msg in websocket:
                 try:
-                    data = json.loads(msg.data)
+                    continue
+                    data = json.loads(msg.data)  # noqa
                 # pylint: disable=broad-except
                 except Exception:
                     continue
@@ -111,7 +117,6 @@ class Module:
 
             self.event_sockets.remove(websocket)
             return websocket
-
 
         @r.get("/ping")
         async def ping(request: web.Request) -> JSONResponse:
@@ -206,16 +211,19 @@ class Module:
             if not commit.keys() & item.states.states.keys() == commit.keys():
                 return JSONResponse(error={
                     "type": ERROR_INVALID_ITEM_STATES,
-                    "message": f"The given states {set(commit.keys())} do not comply"
-                               f"with accepted states {set(item.states.states.keys())}"
+                    "message": f"The given states {set(commit.keys())} do not"
+                               f"comply with accepted states "
+                               f"{set(item.states.states.keys())}"
                 })
 
             if not item.status == ItemStatus.ONLINE:
                 return JSONResponse(
-                    error=ItemNotOnlineError(f"The item {item.identifier} is not online"))
+                    error=ItemNotOnlineError(
+                        f"The item {item.identifier} is not online"))
 
             return JSONResponse(dict(ChainMap(
-                *[await item.states.set(state, value) for state, value in commit.items()])))
+                *[await item.states.set(state, value)
+                  for state, value in commit.items()])))
 
         @r.post("/item/{id}/states/{state_name}")
         async def set_item_state(request: web.Request) -> JSONResponse:
@@ -230,7 +238,7 @@ class Module:
 
             state_name = request.match_info["state_name"]
 
-            if not state_name in item.states.states.keys():
+            if state_name not in item.states.states.keys():
                 return JSONResponse(error={
                     "type": ERROR_INVALID_ITEM_STATE,
                     "message": f"The given state '{state_name}' does not exist"
@@ -238,7 +246,8 @@ class Module:
 
             if not item.status == ItemStatus.ONLINE:
                 return JSONResponse(
-                    error=ItemNotOnlineError(f"The item {item.identifier} is not online"))
+                    error=ItemNotOnlineError(
+                        f"The item {item.identifier} is not online"))
 
             try:
                 content = (await request.content.read()).decode()
@@ -265,7 +274,8 @@ class Module:
             if state_name not in item.states.states:
                 return JSONResponse(error={
                     "type": ITEM_STATE_NOT_FOUND,
-                    "message": f"Couldn't get state {state_name} from item {identifier}"
+                    "message": f"Couldn't get state {state_name}"
+                               f"from item {identifier}"
                 })
 
             return JSONResponse({
@@ -292,8 +302,9 @@ class Module:
         @r.get("/item/{id}/action/{action_name}")
         async def execute_action(request: web.Request) -> JSONResponse:
             """
-            Executes an item's action and returns a boolean indicating the success of the action.
-            Changed states or other events can be handled through the websocket endpoint /events
+            Executes an item's action and returns a boolean indicating the
+            success of the action. Changed states or other events can be
+            handled through the websocket endpoint /events
             """
 
             identifier = request.match_info["id"]
@@ -314,8 +325,8 @@ class Module:
             if action_name not in item.actions.actions:
                 return JSONResponse(error={
                     "type": ITEM_ACTION_NOT_FOUND,
-                    "message": f"Item {identifier} of type"
-                               f"{item.type} does not have an action {action_name}"
+                    "message": f"Item {identifier} of type {item.type} "
+                               f"does not have an action {action_name}"
                 })
 
             try:
@@ -332,7 +343,8 @@ class Module:
         # async def not_found(request: web.Request) -> JSONResponse:
         #     return JSONResponse(error={
         #         "type": "404",
-        #         "message": f"Could not find route {request.method} {request.path}"
+        #         "message": (f"Could not find route "
+        #                     f"{request.method} {request.path}")
         #     }, status_code=404)
 
         return r

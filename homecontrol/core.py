@@ -62,8 +62,10 @@ class Core:
                 signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
         else:
             # Windows needs its special signal handling
-            signal.signal(signal.SIGINT, lambda *args: self.loop.create_task(self.stop()))
-            signal.signal(signal.SIGTERM, lambda *args: self.loop.create_task(self.stop()))
+            signal.signal(signal.SIGINT,
+                          lambda *args: self.loop.create_task(self.stop()))
+            signal.signal(signal.SIGTERM,
+                          lambda *args: self.loop.create_task(self.stop()))
 
         # Load modules
         await self.module_manager.init()
@@ -75,7 +77,10 @@ class Core:
         LOGGER.info("Core bootstrap complete")
 
     async def block_until_stop(self) -> int:
-        """Blocking method to keep HomeControl running until Core.block_event is set"""
+        """
+        Blocking method to keep HomeControl running
+        until Core.block_event is set
+        """
         with suppress(asyncio.CancelledError):
             await self.block_event.wait()
         return self.exit_return
@@ -83,7 +88,8 @@ class Core:
     async def stop(self) -> None:
         """
         Stops HomeControl
-        Depending on Core.exit_return HomeControl may also automatically be restarted
+        Depending on Core.exit_return
+        HomeControl may also automatically be restarted
         """
         await self.tick_engine.stop()
         LOGGER.warning("Shutting Down")

@@ -139,8 +139,8 @@ class ItemManager:
         if init_result == False:  # noqa: E712
             item.status = ItemStatus.OFFLINE
             return
-        else:
-            item.status = ItemStatus.ONLINE
+
+        item.status = ItemStatus.ONLINE
 
         for dependant_item in self.iter_items_by_id(item.dependant_items):
             if (dependant_item.status == ItemStatus.WAITING_FOR_DEPENDENCY

@@ -3,7 +3,7 @@
 import voluptuous as vol
 
 
-class ConsistsOf(object):
+class ConsistsOf:
     """
     Validate that the given schema element applies
     to every element in a sequence.

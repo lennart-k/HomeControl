@@ -26,3 +26,6 @@ class ConfigDomainAlreadyRegistered(HomeControlException):
 
 class ConfigurationNotApproved(HomeControlException):
     """Configuration has not been approved"""
+
+class ItemNotOnlineError(HomeControlException):
+    """Item is not online"""

@@ -5,8 +5,9 @@ from typing import Callable, Any
 import voluptuous as vol
 from homecontrol.dependencies.data_types import types
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.const import (
-    NOT_WORKING
+from homecontrol.const import ItemStatus
+from homecontrol.exceptions import (
+    ItemNotOnlineError
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ class State:
 
     async def get(self):
         """Gets a state"""
-        if self.state_engine.item.status == NOT_WORKING:
+        if self.state_engine.item.status != ItemStatus.ONLINE:
             return None
         if self.getter:
             return await self.getter()
@@ -101,6 +102,8 @@ class State:
 
     async def set(self, value) -> dict:
         """Sets a state"""
+        if self.state_engine.item.status != ItemStatus.ONLINE:
+            raise ItemNotOnlineError(self.state_engine.item.identifier)
         if self.schema:  # Apply schema to new value
             value = self.schema(value)
         if self.setter:

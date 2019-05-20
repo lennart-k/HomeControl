@@ -15,7 +15,11 @@ from homecontrol.const import (
     ITEM_ACTION_NOT_FOUND,
     ERROR_INVALID_ITEM_STATES,
     ERROR_INVALID_ITEM_STATE,
-    STATE_COMMIT_SCHEMA
+    STATE_COMMIT_SCHEMA,
+    ItemStatus
+)
+from homecontrol.exceptions import (
+    ItemNotOnlineError
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -138,7 +142,7 @@ class Module:
                     "name": item.name,
                     "type": item.type,
                     "module": item.module,
-                    "online": item.status,
+                    "status": item.status,
                     "actions": list(item.actions.actions.keys()),
                     "states": await item.states.dump()
                 } for item in self.core.item_manager.items.values()
@@ -160,7 +164,7 @@ class Module:
                 "type": item.type,
                 "module": item.module,
                 "config": item.cfg,
-                "online": item.status
+                "status": item.status
             })
 
         @r.get("/item/{id}/states")
@@ -206,6 +210,10 @@ class Module:
                                f"with accepted states {set(item.states.states.keys())}"
                 })
 
+            if not item.status == ItemStatus.ONLINE:
+                return JSONResponse(
+                    error=ItemNotOnlineError(f"The item {item.identifier} is not online"))
+
             return JSONResponse(dict(ChainMap(
                 *[await item.states.set(state, value) for state, value in commit.items()])))
 
@@ -227,6 +235,10 @@ class Module:
                     "type": ERROR_INVALID_ITEM_STATE,
                     "message": f"The given state '{state_name}' does not exist"
                 })
+
+            if not item.status == ItemStatus.ONLINE:
+                return JSONResponse(
+                    error=ItemNotOnlineError(f"The item {item.identifier} is not online"))
 
             try:
                 content = (await request.content.read()).decode()

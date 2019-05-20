@@ -1,15 +1,12 @@
 """Constants used by HomeControl"""
 
+from enum import Enum
 import voluptuous as vol
 
 MINIMUM_PYTHON_VERSION = (3, 6, 5)
 
 EXIT_SHUTDOWN = 0
 EXIT_RESTART = 1
-
-WORKING = "working"
-NOT_WORKING = "not_working"
-STOPPED = "stopped"
 
 ERROR404 = "error-404"
 ERROR_ITEM_NOT_FOUND = "error-item-not-found"
@@ -30,3 +27,11 @@ MODULE_SCHEMA = vol.Schema({
     vol.Required("name"): str,
     vol.Required("!type"): "Module"
 })
+
+
+class ItemStatus(Enum):
+    """Every status an item can have"""
+    ONLINE = "online"
+    OFFLINE = "offline"
+    STOPPED = "stopped"
+    WAITING_FOR_DEPENDENCY = "waiting-for-dependency"

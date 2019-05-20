@@ -3,11 +3,15 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
+from homecontrol.const import ItemStatus
+
+
 class Item:
     """A dummy Item"""
     type: str
     identifier: str
     name: str
+    status: ItemStatus = ItemStatus.OFFLINE
 
     def __repr__(self) -> str:
         return f"<Item {self.type} identifier={self.identifier} name={self.name}>"

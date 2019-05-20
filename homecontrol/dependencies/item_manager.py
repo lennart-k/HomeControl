@@ -4,11 +4,7 @@ import asyncio
 import logging
 import voluptuous as vol
 
-from homecontrol.const import (
-    WORKING,
-    NOT_WORKING,
-    STOPPED
-)
+from homecontrol.const import ItemStatus
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.entity_types import Item
@@ -60,6 +56,30 @@ class ItemManager:
             self.item_specs[f"{mod_obj.name}.{name}"] = spec
             mod_obj.item_specs[name] = spec
 
+    def iter_items_by_id(self, iterable) -> [Item]:
+        """Translates item identifiers into item instances"""
+        for identifier in iterable:
+            if identifier in self.items:
+                yield self.items[identifier]
+
+    async def stop_item(self, item: Item, status: ItemStatus = ItemStatus.STOPPED) -> None:
+        """Stops an item"""
+        print("YIKEASD")
+        await item.stop()
+        print("YO")
+        LOGGER.info("Item %s has been stopped with status %s",
+                    item.identifier, status)
+        item.status = status
+        for dependant_item in self.iter_items_by_id(item.dependant_items):
+            item.status = status
+        await asyncio.gather(*[
+            self.stop_item(dependant_item, ItemStatus.WAITING_FOR_DEPENDENCY)
+            for dependant_item
+            in self.iter_items_by_id(item.dependant_items)
+            if hasattr(dependant_item, "stop")
+            and dependant_item.status == ItemStatus.ONLINE
+        ], return_exceptions=False)
+
     async def remove_item(self, identifier: str) -> None:
         """
         Removes a HomeControl item and disables dependant items
@@ -67,27 +87,24 @@ class ItemManager:
         identifier: str
             The item's identifier
         """
-        item = self.items[identifier]
-        try:
-            await asyncio.gather(*[
-                self.core.loop.create_task(dependant_item.stop()) for dependant_item
-                in list(item.dependant_items)+[item]
-                if hasattr(dependant_item, "stop")
-                and not getattr(dependant_item, "status") == STOPPED], return_exceptions=False)
-        # pylint: disable=broad-except
-        except Exception:
-            LOGGER.warning(
-                "An error occured when removing an item", exc_info=True)
+        if not identifier in self.items:
+            LOGGER.info(
+                "Item %s does not exist so it could not be removed", identifier)
+            return
 
-        for dependant_item in item.dependant_items:
-            dependant_item.status = STOPPED
-        for dependency in item.depends_on:
-            dependency.dependant_items.remove(item)
+        item = self.items[identifier]
+        await self.stop_item(item)
+
+        for dependency in self.iter_items_by_id(item.dependencies):
+            dependency.dependant_items.remove(item.identifier)
+
         del self.items[identifier]
+        self.core.event_engine.broadcast("item_removed", item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
     async def create_from_raw_cfg(self,
-                                  raw_cfg: dict) -> Item:
+                                  raw_cfg: dict,
+                                  dependant_items=None) -> Item:
         """Creates an Item from raw_cfg"""
         return await self.create_item(
             identifier=raw_cfg["id"],
@@ -95,8 +112,38 @@ class ItemManager:
             item_type=raw_cfg["type"],
             raw_cfg=raw_cfg,
             cfg=raw_cfg["cfg"],
-            state_defaults=raw_cfg["states"]
+            state_defaults=raw_cfg["states"],
+            dependant_items=dependant_items
         )
+
+    async def recreate_item(self, item: Item, raw_cfg: dict = None) -> Item:
+        """Removes and recreates an item"""
+        dependant_items = item.dependant_items
+        print(dependant_items)
+        # pylint: disable=protected-access
+        raw_cfg = raw_cfg or item._raw_cfg
+        await self.remove_item(item.identifier)
+        del item
+        await self.create_from_raw_cfg(raw_cfg, dependant_items)
+
+    async def init_item(self, item: Item) -> None:
+        """Initialises an item and dependants"""
+        LOGGER.debug("Initialising item %s", item.identifier)
+        init_result = await item.init()
+        print(init_result, item.identifier, item.status, item.dependant_items)
+        # pylint: disable=singleton-comparison
+        if init_result == False:
+            item.status = ItemStatus.OFFLINE
+            return
+        else:
+            item.status = ItemStatus.ONLINE
+
+        for dependant_item in self.iter_items_by_id(item.dependant_items):
+            if (dependant_item.status == ItemStatus.WAITING_FOR_DEPENDENCY
+                    and all([dependency.status == ItemStatus.ONLINE
+                             for dependency
+                             in self.iter_items_by_id(dependant_item.dependencies)])):
+                await self.init_item(dependant_item)
 
     # pylint: disable=too-many-arguments
     async def create_item(self,
@@ -105,7 +152,8 @@ class ItemManager:
                           raw_cfg: dict,
                           cfg: dict = None,
                           state_defaults: dict = None,
-                          name: str = None) -> Item:
+                          name: str = None,
+                          dependant_items: set = None) -> Item:
         """
         Creates a HomeControl item
 
@@ -121,21 +169,25 @@ class ItemManager:
         name: str
             How your item should be displayed in the frontend
         """
-        if not item_type in self.item_specs:
+        if item_type not in self.item_specs:
             LOGGER.error("Item type not found: %s", item_type)
             return
+
         spec = self.item_specs[item_type]
         item = spec["class"].__new__(spec["class"])
         item.type = item_type
         item.core = self.core
+        # pylint: disable=protected-access
         item._raw_cfg = raw_cfg
         item.spec = spec
         item.module = spec["module"]
-        item.status = WORKING
+        item.status = ItemStatus.ONLINE
         item.identifier = identifier
         item.name = name or identifier
-        item.dependant_items = set()  # Items that will depend on this one
-        item.depends_on = set()  # Items this new item depends on
+        # Identifiers of items that will depend on this one
+        item.dependant_items = dependant_items or set()
+        # Identifiers of items this new item depends on
+        item.dependencies = set()
         config = {}
 
         if spec.get("config_schema"):
@@ -144,18 +196,18 @@ class ItemManager:
         for key, value in list(config.items()):
             if isinstance(value, str):
                 if value.startswith("i!"):
-                    i = self.items.get(value[2:], None)
-                    config[key] = i
-                    # The new item being created depends on the other item:
-                    # These dependencies matter to remove the items in the correct order
-                    if i:
-                        item.depends_on.add(i)
-                        i.dependant_items.add(item)
+                    dependency = self.items.get(value[2:], None)
+                    config[key] = dependency
+                    if dependency:
+                        item.dependencies.add(dependency.identifier)
+                        dependency.dependant_items.add(item.identifier)
 
-                        if i.status == NOT_WORKING:
-                            item.status = NOT_WORKING
+                        if dependency.status != ItemStatus.ONLINE:
+                            item.status = ItemStatus.WAITING_FOR_DEPENDENCY
                     else:
-                        item.status = NOT_WORKING
+                        LOGGER.error("Item %s depends on item %s which does not exist",
+                                     item.identifier, value[2:])
+                        item.status = ItemStatus.WAITING_FOR_DEPENDENCY
 
         item.cfg = config
         item.states = StateEngine(
@@ -163,18 +215,15 @@ class ItemManager:
         item.actions = ActionEngine(item, self.core)
         item.__init__()
 
-        if not item.status == NOT_WORKING:
-            init_result = await item.init()
-
-            # pylint: disable=singleton-comparison
-            if init_result == False:
-                item.status = NOT_WORKING
-
         self.items[identifier] = item
         spec["module"].items[identifier] = item
+
+        if item.status == ItemStatus.ONLINE:
+            await self.init_item(item)
+
         self.core.event_engine.broadcast("item_created", item=item)
         LOGGER.debug("Item created: %s", item.identifier)
-        if item.status == NOT_WORKING:
+        if item.status != ItemStatus.ONLINE:
             LOGGER.warning(
                 "Item could not be initialised: %s [%s]", identifier, item_type)
             self.core.event_engine.broadcast("item_not_working", item=item)
@@ -185,12 +234,13 @@ class ItemManager:
         """Applies a new configuration"""
         self.cfg = config
 
-        for item in config:
-            if item["id"] in self.items and self.items[item["id"]]._raw_cfg == item:
+        for raw_cfg in config:
+            # pylint: disable=protected-access
+            if raw_cfg["id"] in self.items and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg:
                 continue  # Item is unchanged
-            if item["id"] in self.items:
-                await self.remove_item(item["id"])
+            if raw_cfg["id"] in self.items:
+                await self.recreate_item(self.items[raw_cfg["id"]], raw_cfg)
+            else:
+                await self.create_from_raw_cfg(raw_cfg)
 
-            await self.create_from_raw_cfg(item)
-        
         LOGGER.info("Applied new item configuration")

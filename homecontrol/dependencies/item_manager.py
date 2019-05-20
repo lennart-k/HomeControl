@@ -67,9 +67,7 @@ class ItemManager:
                         item: Item,
                         status: ItemStatus = ItemStatus.STOPPED) -> None:
         """Stops an item"""
-        print("YIKEASD")
         await item.stop()
-        print("YO")
         LOGGER.info("Item %s has been stopped with status %s",
                     item.identifier, status)
         item.status = status
@@ -123,7 +121,6 @@ class ItemManager:
     async def recreate_item(self, item: Item, raw_cfg: dict = None) -> Item:
         """Removes and recreates an item"""
         dependant_items = item.dependant_items
-        print(dependant_items)
         # pylint: disable=protected-access
         raw_cfg = raw_cfg or item._raw_cfg
         await self.remove_item(item.identifier)
@@ -134,7 +131,6 @@ class ItemManager:
         """Initialises an item and dependants"""
         LOGGER.debug("Initialising item %s", item.identifier)
         init_result = await item.init()
-        print(init_result, item.identifier, item.status, item.dependant_items)
         # pylint: disable=singleton-comparison
         if init_result == False:  # noqa: E712
             item.status = ItemStatus.OFFLINE
@@ -245,7 +241,9 @@ class ItemManager:
         for raw_cfg in config:
             # pylint: disable=protected-access
             if (raw_cfg["id"] in self.items
-                    and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg):
+                    and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg
+                    and self.items[raw_cfg["id"]].status != ItemStatus.OFFLINE
+                    ):
                 continue  # Item is unchanged
             if raw_cfg["id"] in self.items:
                 await self.recreate_item(self.items[raw_cfg["id"]], raw_cfg)

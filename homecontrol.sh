@@ -1,12 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 NAME="HomeControl"
 DESC="Home Automation"
-PID_FILE="/tmp/homecontrol.pid"
-START_PARAMS="-clearport -daemon -pid-file $PID_FILE"
-
-# Fill in your path
-HOMECONTROL_PATH="./"
+PID_FILE="$HOME/.homecontrol/homecontrol.pid"
+START_PARAMS="-clearport -daemon -pid-file=$PID_FILE -kp"
 
 #Colors
 RED='\033[1;31m'
@@ -16,57 +13,49 @@ BLUE='\033[1;34m'
 NC='\033[0m' #No Color
 
 start() {
-    case $(cd $HOMECONTROL_PATH && exec python3.7 -m homecontrol $START_PARAMS) in
-        0)
-            echo -e "HomeControl was ${GREEN}successfully${NC} started"
-            ;;
-        1)
-            echo -e "${RED}Failed${NC} to start HomeControl"
-            ;;
-    esac
+    cd $HOMECONTROL_PATH && homecontrol $START_PARAMS
+    if [ $? -eq 0 ]
+    then
+        echo "HomeControl was ${GREEN}successfully${NC} started"
+    else
+        echo "${RED}Failed${NC} to start HomeControl"
+    fi
 }
 
 stop() {
-    case $(/bin/cat $PID_FILE &> /dev/null) in
-        0)
-            case $(kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1) in 
-                0)        
-                    if [ $(timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1) -eq 0 ]
-                        then
-                            echo -e "Service was ${GREEN}successfully${NC} stopped"
-                        else
-                            echo -e "${RED}Failed${NC} to stop HomeControl"
-                        fi
-                        ;;
-                *)
-                    echo -e "HomeControl is ${YELLOW}already${NC} stopped"
-                    ;;
-            esac
-            ;;
-        *)
-            echo -e "HomeControl is ${YELLOW}already${NC} stopped"
-            ;;
-    esac
-    
+    if [ -e $PID_FILE ]
+    then
+        /bin/kill -s SIGINT $(cat $PID_FILE) > /dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+            timeout 10 tail --pid=$(cat $PID_FILE) -f /dev/null > /dev/null 2>&1
+            if [ $? -eq 0 ]
+            then
+                echo "HomeControl was ${GREEN}successfully${NC} stopped"
+            else
+                echo "${RED}Failed${NC} to stop HomeControl"
+            fi
+        else
+            echo "HomeControl is ${YELLOW}already${NC} stopped"
+        fi
+    else
+        echo "HomeControl is ${YELLOW}already${NC} stopped"
+    fi
 }
 
 status() {
-    case $(/bin/cat $PID_FILE &> /dev/null) in
-        0)
-            case $(kill -n 0 $(cat $PID_FILE) > /dev/null 2>&1) in
-                0)
-                    echo -e "Service is ${GREEN}running${NC}"
-                    ;;
-                *)
-                    echo -e "HomeControl is ${RED}stopped${NC}"
-                    ;;
-            esac
-            ;;
-        *)
-            echo -e "HomeControl is ${RED}stopped${NC}"
-            ;;
-    esac
-            
+    if [ -e $PID_FILE ]
+    then
+        /bin/kill -0 $(cat $PID_FILE) > /dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+            echo "Service is ${GREEN}running${NC}"
+        else
+            echo "HomeControl is ${RED}stopped${NC}"
+        fi
+    else
+        echo "HomeControl is ${RED}stopped${NC}"
+    fi
 }
 
 case "$1" in
@@ -84,7 +73,7 @@ case "$1" in
         status
         ;;
     *)
-        echo " Usage: $0 ${BLUE}{ start | stop | status | restart | reload }${NC}"
+        echo "Usage: $0 ${BLUE}{ start | stop | status | restart | reload }${NC}"
         exit 1
         ;;
 esac

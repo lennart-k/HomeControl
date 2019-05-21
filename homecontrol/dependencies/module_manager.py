@@ -95,6 +95,7 @@ class ModuleManager:
 
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
+        mod.resource_folder = None
         mod.event = self.core.event_engine.register
         mod.tick = self.core.tick_engine.tick
         spec.loader.exec_module(mod)
@@ -156,6 +157,7 @@ class ModuleManager:
 
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
+        mod.resource_folder = path
         mod.event = self.core.event_engine.register
         mod.tick = self.core.tick_engine.tick
         sys.path.append(path)
@@ -181,6 +183,7 @@ class ModuleManager:
 
         mod_obj.core = self.core
         mod_obj.meta = cfg.get("meta", {})
+        mod_obj.resource_folder = mod.resource_folder
         mod_obj.name = name
         mod_obj.path = path
         mod_obj.items = {}
@@ -206,3 +209,14 @@ class ModuleManager:
         if hasattr(self.loaded_modules[name], "stop"):
             await self.loaded_modules[name].stop()
         del self.loaded_modules[name]
+
+    def resource_path(self, module: Module, path: str = "") -> str:
+        """
+        Returns the path for a module's resource folder
+        Note that only folder modules can have a resource path
+        """
+        path = os.path.join(module.resource_folder, path)
+        if os.path.exists(path):
+            return path
+        else:
+            raise FileNotFoundError(f"Resource path {path} does not exist")

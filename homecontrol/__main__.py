@@ -276,14 +276,17 @@ def main():
     args = get_arguments()
     logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]),
                                               "homecontrol.log")
+
     cfg = get_config(args["cfgfile"])
 
     setup_logging(verbose=args["verbose"],
                   color=not args["nocolor"],
                   logfile=logfile)
 
-    if args["pid_file"]:
-        check_pid_file(args["pid_file"], kill=args["killprev"])
+    if not args["pid_file"]:
+        args["pid_file"] = os.path.join(os.path.dirname(args["cfgfile"]),
+                                        "homecontrol.pid")
+    check_pid_file(args["pid_file"], kill=args["killprev"])
 
     if args.get("daemon", False):
         LOGGER.info("Running as a daemon")

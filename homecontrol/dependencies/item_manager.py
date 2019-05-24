@@ -71,7 +71,7 @@ class ItemManager:
         LOGGER.info("Item %s has been stopped with status %s",
                     item.identifier, status)
         item.status = status
-        
+
         await asyncio.gather(*[
             self.stop_item(dependant_item, ItemStatus.WAITING_FOR_DEPENDENCY)
             for dependant_item

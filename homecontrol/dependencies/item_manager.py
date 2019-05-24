@@ -95,7 +95,8 @@ class ItemManager:
             return
 
         item = self.items[identifier]
-        await self.stop_item(item)
+        if item.status == ItemStatus.ONLINE:
+            await self.stop_item(item)
 
         for dependency in self.iter_items_by_id(item.dependencies):
             dependency.dependant_items.remove(item.identifier)

@@ -144,17 +144,16 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
-    loop.stop()
+
     loop.close()
+
     if exit_return == EXIT_RESTART:
         LOGGER.warning("Restarting now%s", 4 * "\n")
         args = start_command()
         os.execv(args[0], args)
     elif start_args["pid_file"]:
-        try:
+        with suppress(FileNotFoundError):
             os.remove(start_args["pid_file"])
-        except FileNotFoundError:
-            pass
 
 
 def start_command():

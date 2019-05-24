@@ -83,6 +83,7 @@ class Core:
         """
         with suppress(asyncio.CancelledError):
             await self.block_event.wait()
+        self.loop.call_soon(self.loop.stop)
         return self.exit_return
 
     async def stop(self) -> None:
@@ -91,17 +92,17 @@ class Core:
         Depending on Core.exit_return
         HomeControl may also automatically be restarted
         """
-        await self.tick_engine.stop()
-        LOGGER.warning("Shutting Down")
 
-        for module in list(self.module_manager.loaded_modules.keys()):
-            await self.module_manager.unload_module(module)
+        LOGGER.warning("Shutting Down")
+        await self.tick_engine.stop()
+        await self.module_manager.stop()
+
         pending = asyncio.Task.all_tasks(loop=self.loop)
 
         LOGGER.info("Waiting for pending tasks (1s)")
         await asyncio.wait(pending, loop=self.loop, timeout=1)
         LOGGER.warning("Closing the loop soon")
-        self.block_event.set()
+        self.loop.call_soon(self.block_event.set)
 
     async def restart(self) -> None:
         """Restarts HomeControl"""

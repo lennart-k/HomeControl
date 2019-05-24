@@ -210,6 +210,11 @@ class ModuleManager:
             await self.loaded_modules[name].stop()
         del self.loaded_modules[name]
 
+    async def stop(self) -> None:
+        """Unloads all modules to prepare for a shutdown"""
+        for module in list(self.loaded_modules.keys()):
+            await self.unload_module(module)
+
     def resource_path(self, module: Module, path: str = "") -> str:
         """
         Returns the path for a module's resource folder

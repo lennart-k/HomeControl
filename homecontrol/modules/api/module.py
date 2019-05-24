@@ -35,7 +35,6 @@ class Module:
 
     async def init(self):
         """Initialise the API app"""
-        self.event_sockets = set()
         self.api_app = None
 
         # Prohibit reloading of the configuration
@@ -69,8 +68,6 @@ class Module:
 
     async def stop(self):
         """Stop the API app"""
-        for websocket in list(self.event_sockets):
-            await websocket.close()
         if self.api_app and self.api_app.frozen:
             await self.api_app.cleanup()
 
@@ -78,45 +75,6 @@ class Module:
         """Return the API routes"""
         # pylint: disable=invalid-name,too-many-locals,too-many-statements
         r = web.RouteTableDef()
-
-        @event("state_change")
-        async def on_item_state_change(event, item, changes: dict):
-            for ws in self.event_sockets:
-                try:
-                    await ws.send_json({
-                        "type": "state_change",
-                        "item": item,
-                        "changes": changes
-                    }, dumps=json.dumps)
-
-                # pylint: disable=broad-except
-                except Exception:
-                    LOGGER.debug(
-                        "An error occured when sending"
-                        "a state update over WebSocket",
-                        exc_info=True)
-
-        @r.get("/websocket")
-        async def events_websockets(
-                request: web.Request) -> web.WebSocketResponse:
-            """The WebSocket route"""
-            websocket = web.WebSocketResponse()
-            await websocket.prepare(request)
-            self.event_sockets.add(websocket)
-
-            async for msg in websocket:
-                try:
-                    continue
-                    data = json.loads(msg.data)  # noqa
-                # pylint: disable=broad-except
-                except Exception:
-                    continue
-
-                if msg.data == "close":
-                    await websocket.close()
-
-            self.event_sockets.remove(websocket)
-            return websocket
 
         @r.get("/ping")
         async def ping(request: web.Request) -> JSONResponse:
@@ -134,7 +92,7 @@ class Module:
             self.core.loop.create_task(self.core.restart())
             return JSONResponse("Restarting")
 
-        @r.post("/core/config/reload")  # TODO IMPLEMENTATION
+        @r.post("/core/config/reload")
         async def reload_config(request: web.Request) -> JSONResponse:
             await self.core.cfg.reload_config()
             return JSONResponse("Reloaded configuration")

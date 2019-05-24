@@ -29,6 +29,10 @@ class Item:
 class Module:
     """A dummy Module"""
     name: str
+    folder_location: str = None
+    items: dict
+    spec: dict
+
 
     def __repr__(self) -> str:
         return f"<Module {self.name}>"

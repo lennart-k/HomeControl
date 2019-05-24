@@ -244,7 +244,7 @@ class ItemManager:
             if (raw_cfg["id"] in self.items
                     and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg
                     and self.items[raw_cfg["id"]].status != ItemStatus.OFFLINE
-                    ):
+               ):  # noqa: E124
                 continue  # Item is unchanged
             if raw_cfg["id"] in self.items:
                 await self.recreate_item(self.items[raw_cfg["id"]], raw_cfg)

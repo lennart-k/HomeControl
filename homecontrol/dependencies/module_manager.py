@@ -215,6 +215,7 @@ class ModuleManager:
         for module in list(self.loaded_modules.keys()):
             await self.unload_module(module)
 
+    # pylint: disable=no-self-use
     def resource_path(self, module: Module, path: str = "") -> str:
         """
         Returns the path for a module's resource folder
@@ -223,5 +224,4 @@ class ModuleManager:
         path = os.path.join(module.resource_folder, path)
         if os.path.exists(path):
             return path
-        else:
-            raise FileNotFoundError(f"Resource path {path} does not exist")
+        raise FileNotFoundError(f"Resource path {path} does not exist")

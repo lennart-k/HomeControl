@@ -26,6 +26,7 @@ class TasmotaRFAdapter:
         async def on_mqtt_message_received(event, mqtt_adapter, message):
             """Handle message"""
             if mqtt_adapter == self.cfg["mqtt_adapter"]:
+                # pylint: disable=no-member
                 with suppress(json.decoder.JSONDecodeError):
                     data = json.loads(message.payload)
                     if data.get("RfReceived"):

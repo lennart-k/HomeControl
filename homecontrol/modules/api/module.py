@@ -2,6 +2,7 @@
 
 import logging
 from collections import ChainMap
+# pylint: disable=no-name-in-module
 from json import JSONDecodeError
 
 import voluptuous as vol

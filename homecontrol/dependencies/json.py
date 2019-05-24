@@ -6,7 +6,7 @@ from functools import partial
 from enum import Enum
 
 from homecontrol.core import Core
-from homecontrol.dependencies.data_types import types
+from homecontrol.dependencies.data_types import type_set, types
 from homecontrol.dependencies.entity_types import (
     Item,
     Module
@@ -53,7 +53,7 @@ class JSONEncoder(json.JSONEncoder):
             return obj.value
 
         # pylint: disable=unidiomatic-typecheck
-        if isinstance(obj, types.values()):
+        if isinstance(obj, tuple(type_set)):
             return {
                 "!type": type(obj).__name__,
                 "data": obj.dump()

@@ -131,6 +131,24 @@ class Module:
                 "status": item.status
             })
 
+        @r.post("/item/{id}/reload")
+        async def reload_item(request: web.Request) -> JSONResponse:
+            identifier = request.match_info["id"]
+            item = self.core.item_manager.items.get(identifier)
+
+            if not item:
+                return JSONResponse(error={
+                    "type": ERROR_ITEM_NOT_FOUND,
+                    "message": f"No item found with identifier {identifier}"
+                }, status_code=404)
+
+            await self.core.item_manager.recreate_item(item)
+
+            return JSONResponse({
+                "message": f"Item {identifier} recreated",
+                "status": item.status
+            })
+
         @r.get("/item/{id}/states")
         async def get_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]

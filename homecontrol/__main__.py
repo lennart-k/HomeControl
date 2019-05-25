@@ -10,6 +10,10 @@ import sys
 import argparse
 import os
 
+from typing import (
+    List, Optional
+)
+
 import aiomonitor
 import pkg_resources
 import yaml
@@ -98,25 +102,25 @@ def get_config(path: str) -> dict:
         LOGGER.critical("Terminating")
         sys.exit(1)
     try:
-        cfg = YAMLLoader.load(open(path))
+        cfg: dict = YAMLLoader.load(open(path))
     except yaml.YAMLError:
         LOGGER.error("Error in config file", exc_info=True)
         sys.exit(1)
     return cfg
 
 
-def clear_port(port: int):
+def clear_port(port: int) -> None:
     """Clears a TCP port, only works on posix as it depends on fuser"""
     if os.name == "posix":
         subprocess.call(["/bin/fuser", "-k", "{port}/tcp".format(port=port)])
 
 
-def validate_python_version():
+def validate_python_version() -> None:
     """Checks if the Python version is high enough"""
     if sys.version_info[:3] < MINIMUM_PYTHON_VERSION:
         LOGGER.critical(
             "The minimum Python version for HomeControl to work is %s",
-            ".".join(MINIMUM_PYTHON_VERSION))
+            ".".join(map(str, MINIMUM_PYTHON_VERSION)))
         sys.exit(1)
 
 
@@ -133,7 +137,7 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
     """
     loop = asyncio.get_event_loop()
     if os.name == "nt":
-        def windows_wakeup():
+        def windows_wakeup() -> None:
             # This seems to be a workaround so that
             # SIGINT signals also work on Windows
             loop.call_later(0.1, windows_wakeup)
@@ -156,7 +160,7 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
             os.remove(start_args["pid_file"])
 
 
-def start_command():
+def start_command() -> List[str]:
     """
     Returns a command to re-execute HomeControlwith the same parameters
     except the daemon parameter
@@ -230,8 +234,8 @@ def check_pid_file(pid_file: str, kill: bool = False) -> None:
 
 def setup_logging(verbose: bool = False,
                   color: bool = True,
-                  logfile: str = None
-                  ):
+                  logfile: Optional[str] = None
+                  ) -> None:
     """
     Set up logging
     """
@@ -268,7 +272,7 @@ def setup_logging(verbose: bool = False,
         logging.getLogger().addHandler(file_handler)
 
 
-def main():
+def main() -> None:
     """The main function"""
     validate_python_version()
 

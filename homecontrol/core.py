@@ -6,6 +6,10 @@ import signal
 import asyncio
 import logging
 
+from typing import (
+    Optional, Dict
+)
+
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
 from homecontrol.dependencies.item_manager import ItemManager
@@ -30,9 +34,9 @@ class Core:
     def __init__(self,
                  cfg: dict,
                  cfg_path: str,
-                 loop: asyncio.AbstractEventLoop = None,
-                 start_args: dict = None,
-                 exit_return: int = None) -> None:
+                 loop: Optional[asyncio.AbstractEventLoop] = None,
+                 start_args: Optional[Dict] = None,
+                 exit_return: Optional[int] = None) -> None:
         """
         :param cfg: config dictionary
         :param cfg_path: configuration file

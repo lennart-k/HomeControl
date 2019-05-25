@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# To run HomeControl as a service
+# you would need to run `setup.py install` to install it globally
+
 NAME="HomeControl"
 DESC="Home Automation"
 PID_FILE="$HOME/.homecontrol/homecontrol.pid"

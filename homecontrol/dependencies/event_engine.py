@@ -37,18 +37,19 @@ class EventEngine:
         self.core = core
         self.handlers = defaultdict(set)
 
-    def broadcast(self,
+    def broadcast(self,  # lgtm [py/similar-function]
                   event_type: str,
                   data: dict = None,
                   **kwargs) -> List[asyncio.Future]:
         """
         Broadcast an event and return the futures
-        Every listener is a coroutine that will simply
-        receive event and **kwargs
-        Example:
 
-        async def on_event(event: Event, *args, **kwargs):
-            return
+        Every listener is a coroutine that will simply
+        receive event and `**kwargs`
+
+        Example:
+        >>> async def on_event(event: Event, \*args, \*\*kwargs):
+        >>>     return
         """
 
         data = data or {}
@@ -66,7 +67,7 @@ class EventEngine:
             handler(event, **kwargs),
             loop=self.core.loop) for handler in handlers]
 
-    def broadcast_threaded(self,
+    def broadcast_threaded(self,  # lgtm [py/similar-function]
                            event_type: str,
                            data: dict = None,
                            **kwargs) -> List[asyncio.Task]:

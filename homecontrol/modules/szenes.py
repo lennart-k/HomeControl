@@ -1,27 +1,63 @@
 """Szenes for HomeControl"""
 
+import logging
+
 SPEC = """
 meta:
   name: Szenes
   description: Provides szene functionality
 """
 
+LOGGER = logging.getLogger(__name__)
+
 
 class Module:
     """The Szene module holding the szene settings"""
-    async def init(self):
+    async def init(self) -> None:
         """Initialise the szenes"""
-        data = self.core.cfg.get("szenes", [])
-        self.szenes = {szene["alias"]: Szene(self, szene) for szene in data}
+        self.cfg = await self.core.cfg.register_domain(
+            "szenes",
+            handler=self,
+            allow_reload=True)
+        self.szenes = {szene["alias"]: Szene(self, szene)
+                       for szene in self.cfg}
 
         @event("gather_automation_providers")
         async def on_gather_automation_providers(event, engine, callback):
             callback(action={"szene": self.provider_factory})
 
-    def provider_factory(self, rule, engine):
+    def provider_factory(self, rule, engine) -> "Szene":
         """Returns a szene as an action provider for the automation module"""
-        target = rule.data["action"]["target"]
-        return self.szenes[target]
+        return SzeneActionProvider(
+            name=rule.data["action"]["target"],
+            module=self)
+
+    async def invoke_szene(self, name: str) -> bool:
+        """Invokes a szene by name"""
+        if name in self.szenes:
+            await self.szenes[name].invoke()
+            return True
+        return False
+
+    async def apply_new_configuration(self, domain, config: list) -> None:
+        """Applies a new configuration"""
+
+        self.cfg = config
+        self.szenes = {szene["alias"]: Szene(self, szene) for szene in config}
+        LOGGER.info("Applied new szene configuration")
+
+
+class SzeneActionProvider:
+    """
+    A wrapper for invoke_szene to properly handle config reloads
+    """
+    def __init__(self, name: str, module: Module) -> None:
+        self.name = name
+        self.module = module
+
+    async def on_trigger(self, data: dict) -> bool:
+        """Handles an automation trigger"""
+        return await self.module.invoke_szene(self.name)
 
 
 class Szene:
@@ -45,7 +81,3 @@ class Szene:
                 await item.actions.execute(
                     action_instruction["name"],
                     **action_instruction.get("data", {}))
-
-    async def on_trigger(self, data):
-        """Implement an automation action provider"""
-        return await self.invoke()

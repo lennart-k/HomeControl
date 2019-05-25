@@ -1,5 +1,6 @@
 """EventEngine for HomeControl"""
 
+from contextlib import suppress
 from typing import List, Callable, Any
 import asyncio
 import logging
@@ -110,3 +111,10 @@ class EventEngine:
             self.handlers[event].add(coro)
             return coro
         return _register
+
+    def remove_handler(self, event: str, handler: callable) -> None:
+        """
+        Removes an event handler
+        """
+        with suppress(KeyError):
+            self.handlers[event].remove(handler)

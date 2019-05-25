@@ -110,27 +110,22 @@ class ConfigManager:
         Objects can register themselves to their own configuration domain and
         subscribe to changes in the configuration
 
-        domain: str
-            The configuration domain (A top-level key in config.yaml)
-        handler: object
-            The object subscribing to this domain.
-            Methods it can implement are:
-                approve_configuration(domain, config) -> bool
-                    This method is an objects veto right for
-                    domain configuration.
-                    If it returns `False` the configuration will not be applied
-                    If the initial configuration is denied an exception
-                    will be raised.
-                apply_new_configuration(domain, config) -> None
-                    In this method the object has to handle the
-                    new configuration e.g. by initialising again
-            If not specified this configuration domain will not be reloadable
-        allow_reload: bool
+        Args:
+            domain (str):
+                The configuration domain (A top-level key in config.yaml)
+            handler (object):
+                The object subscribing to this domain.
+                Methods it can implement are:
+                - approve_configuration(domain, config) -> bool:
+                - apply_new_configuration(domain, config) -> None:
+                If not specified then your
+                configuration domain will not be reloadable
+        allow_reload (bool):
             Allow reloading this configuration domain
-        schema: voluptuous.Schema
+        schema (voluptuous.Schema):
             Schema to validate the configuration and to fill in defaults
 
-        Return
+        Returns:
             A validated and approved version of the configuration
         """
         if domain in self.registered_domains:

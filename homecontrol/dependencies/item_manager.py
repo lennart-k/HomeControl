@@ -164,18 +164,21 @@ class ItemManager:
         """
         Creates a HomeControl item
 
-        identifier: str
-        item_type: str
-            The type of your item consisting of MODULE.CLASS
-        raw_cfg: dict
-            Raw configuration to check whether the item has to be recreated
-            when updating the configuration
-        cfg: dict
-        state_defaults: dict
-            If the initial state cannot be polled on init
-            you can pass a default
-        name: str
-            How your item should be displayed in the frontend
+        Args:
+            identifier (str):
+                The item identifier
+            item_type (str):
+                The type of your item consisting of MODULE.CLASS
+            raw_cfg (dict):
+                Raw configuration to check whether the item has to be recreated
+                when updating the configuration
+            cfg (dict):
+            state_defaults (dict):
+                If the initial state cannot be polled on init
+                you can pass a default
+            name (str):
+                How your item should be displayed in the frontend
+
         """
         if item_type not in self.item_specs:
             LOGGER.error("Item type not found: %s", item_type)

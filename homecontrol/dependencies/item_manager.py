@@ -130,7 +130,13 @@ class ItemManager:
     async def init_item(self, item: Item) -> None:
         """Initialises an item and dependants"""
         LOGGER.debug("Initialising item %s", item.identifier)
-        init_result = await item.init()
+        try:
+            init_result = await item.init()
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.warning("An exception was raised when initialising item %s",
+                           item.identifier,
+                           exc_info=True)
+            init_result = False
         # pylint: disable=singleton-comparison
         if init_result == False:  # noqa: E712
             item.status = ItemStatus.OFFLINE

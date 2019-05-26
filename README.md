@@ -3,7 +3,6 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lennart-k/HomeControl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lennart-k/HomeControl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/lennart-k/homecontrol/badge)](https://www.codefactor.io/repository/github/lennart-k/homecontrol)
 [![Docker status](https://img.shields.io/docker/cloud/build/lennartk01/homecontrol.svg)](https://hub.docker.com/r/lennartk01/homecontrol)
-[![Read the Docs](https://img.shields.io/readthedocs/homecontrol.svg)](https://homecontrol.readthedocs.io/en/latest/)
 # HomeControl
 
 Another approach to home automation

@@ -3,7 +3,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lennart-k/HomeControl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lennart-k/HomeControl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/lennart-k/homecontrol/badge)](https://www.codefactor.io/repository/github/lennart-k/homecontrol)
 [![Docker status](https://img.shields.io/docker/cloud/build/lennartk01/homecontrol.svg)](https://hub.docker.com/r/lennartk01/homecontrol)
-
+[![Read the Docs](https://img.shields.io/readthedocs/homecontrol.svg)](https://homecontrol.readthedocs.io/en/latest/)
 # HomeControl
 
 Another approach to home automation
@@ -61,6 +61,11 @@ optional arguments:
   -killprev, -kp        Kills the previous HomeControl instance
   -daemon, -d           Start HomeControl as a daemon process [posix only]
   ```
+
+## Documentation
+
+Documentation is currently in the works.
+You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
 
 
 ## Features

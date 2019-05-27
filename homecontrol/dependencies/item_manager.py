@@ -199,10 +199,14 @@ class ItemManager:
         item.dependant_items = dependant_items or set()
         # Identifiers of items this new item depends on
         item.dependencies = set()
-        config = {}
 
         if spec.get("config_schema"):
-            config = vol.Schema(spec["config_schema"])(cfg or {})
+            schema = spec.get("config_schema")
+            if not isinstance(spec["config_schema"], vol.Schema):
+                schema = vol.Schema(spec["config_schema"])
+            config = schema(cfg or {})
+        else:
+            config = cfg
 
         for key, value in list(config.items()):
             if isinstance(value, str):

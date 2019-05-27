@@ -45,10 +45,10 @@ class EventEngine:
         Broadcast an event and return the futures
 
         Every listener is a coroutine that will simply
-        receive event and `**kwargs`
+        receive event and `kwargs`
 
         Example:
-        >>> async def on_event(event: Event, \*args, \*\*kwargs):
+        >>> async def on_event(event: Event, ...):
         >>>     return
         """
 

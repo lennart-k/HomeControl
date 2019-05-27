@@ -1,6 +1,10 @@
-from requests.exceptions import ConnectionError
-import rxv
+"""Module for Yamaha AV receivers"""
+
 import logging
+
+import rxv
+# pylint: disable=redefined-builtin
+from requests.exceptions import ConnectionError
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("rxv").setLevel(logging.CRITICAL)
@@ -9,86 +13,105 @@ CTRL_URL = "http://{host}/YamahaRemoteControl/ctrl"
 
 
 class YamahaAVReceiver:
+    """The YamahaAVReceiver item"""
     async def init(self):
+        """Initialise the item"""
         self.play_status = None
         try:
-            self.rx = rxv.RXV(CTRL_URL.format(host=self.cfg["host"]))
+            self.av_receiver = rxv.RXV(CTRL_URL.format(host=self.cfg["host"]))
         except (ConnectionError, ConnectionRefusedError):
             return False
 
         tick(2)(self.update)
 
     async def set_on(self, value: bool) -> dict:
-        self.rx.on = value
+        """Setter for on"""
+        self.av_receiver.on = value
         return {"on": value}
 
     async def get_on(self) -> bool:
-        return self.rx.on
+        """Getter for on"""
+        return self.av_receiver.on
 
     async def set_input(self, value: str) -> dict:
-        self.rx.input = value
+        """Setter for input"""
+        self.av_receiver.input = value
         return {"input": value}
 
     async def get_input(self) -> str:
-        return self.rx.input
+        """Getter for input"""
+        return self.av_receiver.input
 
     async def set_volume(self, value: float) -> dict:
-        self.rx.volume = value
+        """Setter for volume"""
+        self.av_receiver.volume = value
         return {"volume": value}
 
     async def get_volume(self) -> float:
-        return self.rx.volume
+        """Getter for volume"""
+        return self.av_receiver.volume
 
     async def set_muted(self, value: bool) -> dict:
-        self.rx.mute = value
+        """Setter for muted"""
+        self.av_receiver.mute = value
         return {"muted": value}
 
     async def get_muted(self) -> bool:
-        return self.rx.mute
+        """Getter for muted"""
+        return self.av_receiver.mute
 
     async def action_play(self):
-        self.rx.play()
+        """Action play"""
+        self.av_receiver.play()
 
     async def action_pause(self):
-        self.rx.pause()
+        """Action pause"""
+        self.av_receiver.pause()
 
     async def action_stop(self):
-        self.rx.stop()
+        """Action stop"""
+        self.av_receiver.stop()
 
     async def action_skip(self):
-        self.rx.next()
+        """Action skip"""
+        self.av_receiver.next()
 
     async def action_rewind(self):
-        self.rx.previous()
+        """Action rewind"""
+        self.av_receiver.previous()
 
     async def action_toggle_muted(self):
-        self.rx.mute = not self.rx.mute
+        """Action toggle mute"""
+        self.av_receiver.mute = not self.av_receiver.mute
 
     async def get_playback_status(self) -> bool:
-        return self.rx.is_playback_supported()
+        """Getter for playback status"""
+        return self.av_receiver.is_playback_supported()
 
     async def update(self):
+        """Updates play_status and inputs"""
         try:
-            self.play_status = self.rx.play_status()
-        except Exception as e:
+            self.play_status = self.av_receiver.play_status()
+        except Exception:  # pylint: disable=broad-except
             self.play_status = None
 
         available_inputs = {
             raw_name or name
             for name, raw_name
-            in self.rx.inputs().get("available_inputs").items()}
+            in self.av_receiver.inputs().get("available_inputs").items()}
         await self.states.update("available_inputs", available_inputs)
 
     async def get_artist(self):
+        """Getter for artist"""
         if self.play_status:
             return self.play_status.artist
 
     async def get_album(self):
+        """Getter for album"""
         if self.play_status:
             return self.play_status.album
 
     async def get_title(self):
+        """Getter for title"""
         if self.play_status:
             return self.play_status.song
-
-    

@@ -69,26 +69,25 @@ You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
 
 ## Features
 
-- [x] Automation
-- [x] Szenes
-- [x] API
-  - [x] Webhooks 
-- [x] API v2
-  - [ ] web interface (in progress)
-- [ ] Tests
-- [x] Docker builds
-  - [ ] Automated ARM builds
-- [ ] Data validation
-  - [x] item config  
-  - [x] item states
-  - [ ] configuration.yaml
+- Automation
+- Szenes
+- API
+  - WebHooks
+  - WebSockets
+- Docker builds
 
+[Homecontrol v1.0.0 Project board](https://github.com/lennart-k/HomeControl/projects/3)
 
-## Compatible Modules
+## Compatible Devices/Protocols
 
 - Chromecast
-  - 433MHz switches
+- 433MHz switches
 - IR devices
 - MQTT
 - Raspberry Pi (GPIO)
+  - MCP3008 ADC
+  - 433MHz adapter
+  - RGB Lights
 - RF devices
+- Yamaha AV receivers
+- Pushbullet (Send message)

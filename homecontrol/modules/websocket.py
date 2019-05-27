@@ -6,10 +6,12 @@ from aiohttp import web
 
 from homecontrol.dependencies import json
 
-SPEC = """
-meta:
-    name: WebSocket API
-"""
+SPEC = {
+    "meta": {
+        "name": "WebSocket API",
+        "description": "Provides events and state updates"
+    }
+}
 
 LOGGER = logging.getLogger(__name__)
 

@@ -7,10 +7,11 @@ import voluptuous as vol
 from aiohttp import web
 
 
-SPEC = """
-meta:
-  name: HTTP Server
-"""
+SPEC = {
+    "meta": {
+        "name": "HTTP Server"
+    }
+}
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("host", default=None): vol.Any(str, None),

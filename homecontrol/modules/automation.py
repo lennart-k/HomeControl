@@ -6,10 +6,11 @@ from homecontrol.core import Core
 
 LOGGER = logging.getLogger(__name__)
 
-SPEC = """
-meta:
-  name: Automation
-"""
+SPEC = {
+    "meta": {
+        "name": "Automation"
+    }
+}
 
 
 class EventTriggerProvider:

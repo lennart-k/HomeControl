@@ -3,34 +3,30 @@
 import voluptuous as vol
 import requests
 
-
-SPEC = """
-meta:
-  name: Bitcoin
-  description: Get statistics about Bitcoin
-
-items:
-  BitcoinStats:
-    config_schema:
-      !vol/Required { schema: update_interval, default: 3600 }:
-        !vol/Coerce { type: !type/int }
-
-    actions:
-      update: update_stats
-
-    states:
-      last_update:
-        type: Float
-      market_price_usd:
-        type: Float
-      hash_rate:
-        type: Float
-      n_btc_mined:
-        type: Integer
-      block_interval:
-        type: Float
-
-"""
+SPEC = {
+    "meta": {
+        "name": "Bitcoin",
+        "description": "Get statistics about Bitcoin"
+    },
+    "items": {
+        "BitcoinStats": {
+            "config_schema": vol.Schema({
+                vol.Required("update_interval", default=3600):
+                vol.Coerce(type=int)
+            }),
+            "actions": {
+                "update": "update_stats"
+            },
+            "states": {
+                "last_update": {"type": float},
+                "market_price_usd": {"type": float},
+                "hash_rate": {"type": "float"},
+                "n_btc_mined": {"type": int},
+                "block_interval": {"type": float}
+            }
+        }
+    }
+}
 
 RESULT_SCHEMA = vol.Schema({
     vol.Required("timestamp"): float,

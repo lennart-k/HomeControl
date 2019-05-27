@@ -3,10 +3,12 @@
 import json
 from aiohttp import web
 
-SPEC = """
-meta:
-  name: WebHook
-"""
+SPEC = {
+    "meta": {
+        "name": "WebHooks",
+        "description": "Provides WebHook endpoints"
+    }
+}
 
 
 class Module:

@@ -1,6 +1,8 @@
 
 [EXCEPTIONS]
-overgeneral-exceptions=BaseException,Exception,HomeControlException
+overgeneral-exceptions=BaseException,
+                       Exception,
+                       HomeControlException
 
 [BASIC]
 good-names=i,
@@ -32,13 +34,16 @@ max-attributes=12
 min-public-methods=1
 
 [TYPECHECK]
-generated-members=states,cfg,core,identifier
+generated-members=states,
+                  cfg,
+                  core,
+                  identifier  # module_manager and item_manager
 
 [MESSAGES CONTROL]
-enable=print-statement,
+enable=print-statement,   # Logging is better than print
 
-disable=unused-argument,
-        unused-variable,
+disable=unused-argument,  # Event handlers might not need every argument
+        unused-variable,  # State getters/setters and actions are unused-variables
 
 [SIMILARITIES]
 min-similarity-lines=6

@@ -3,3 +3,6 @@ pylint:
 
 flake8:
 	flake8
+
+docker:
+	docker build .

@@ -152,7 +152,7 @@ class ItemManager:
                                  dependant_item.dependencies)])):
                 await self.init_item(dependant_item)
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     async def create_item(self,
                           identifier: str,
                           item_type: str,

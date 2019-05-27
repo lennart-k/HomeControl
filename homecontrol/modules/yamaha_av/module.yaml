@@ -1,0 +1,58 @@
+meta:
+  name: Yamaha AV
+  description: Support for Yamaha AV receivers (RX-V473, RX-V573, RX-V673, RX-V773)
+
+pip-requirements:
+  - rxv
+
+items:
+  YamahaAVReceiver:
+    config_schema:
+      !vol/Required {schema: host, default: None}:
+        !vol/Coerce { type: !type/str }
+
+    state:
+      input:
+        setter: set_input
+        getter: get_input
+        schema:
+          !type/str
+      volume:
+        setter: set_volume
+        getter: get_volume
+        schema:
+          !vol/Coerce { type: !type/float }
+      muted:
+        setter: set_muted
+        getter: get_muted
+        schema:
+          !type/bool
+      available_inputs:
+        type: !type/list
+        default: []
+      # zones:
+      # sound_program:
+      playback_status:
+        getter: get_playback_status
+      artist:
+        getter: get_artist
+      title:
+        getter: get_title
+      album:
+        getter: get_album
+      "on":
+        setter: set_on
+        getter: get_on
+        default: false
+        schema:
+          !vol/All
+            - !vol/Any [ !type/int , !type/bool ]
+            - !vol/Coerce { type: !type/bool }
+
+    actions:
+      pause: action_pause
+      play: action_play
+      rewind: action_rewind
+      skip: action_skip
+      stop: action_stop
+      toggle_muted: action_toggle_muted

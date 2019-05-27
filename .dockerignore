@@ -2,14 +2,12 @@ docs
 .pytest_cache
 .idea
 .vscode
-README.md
 homecontrol.sh
 .gitignore
 webapp
-scripts
-config
 .idea/*
 __pycache__/
 .pytest_cache
 homecontrol.lock
 .github
+.git

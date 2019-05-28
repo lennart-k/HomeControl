@@ -2,6 +2,7 @@
 
 # To run HomeControl as a service
 # you would need to run `setup.py install` to install it globally
+# and do cp homecontrol.sh /etc/init.d/homecontrol
 
 NAME="HomeControl"
 DESC="Home Automation"

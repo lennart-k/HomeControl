@@ -76,6 +76,30 @@ def get_arguments() -> dict:
     return vars(parser.parse_args())
 
 
+def copy_folder(src: str, dest: str, merge_folders: bool = False) -> None:
+    """
+    Copies a folder to another path overwriting files
+    and merging folders
+    """
+    for src_root, dirs, files in os.walk(src):
+        dest_root = src_root.replace(src, dest, 1)
+        if not os.path.isdir(dest_root):
+            os.mkdir(dest_root)
+
+        for file in set(files) & set(os.listdir(dest_root)):
+            if os.path.isfile(os.path.join(dest_root, file)):
+                os.remove(os.path.join(dest_root, file))
+        if not merge_folders:
+            for folder in os.listdir(dest_root):
+                if os.path.isdir(os.path.join(dest_root, folder)):
+                    shutil.rmtree(os.path.join(dest_root, folder))
+
+        for file in files:
+            shutil.copy(
+                os.path.join(src_root, file),
+                os.path.join(dest_root, file))
+
+
 def get_config(path: str) -> dict:
     """
     Loads the config file from path
@@ -84,18 +108,19 @@ def get_config(path: str) -> dict:
     """
     if not os.path.isfile(path):
         LOGGER.critical("Config file does not exist: %s", path)
+        folder = os.path.dirname(path)
         create_new_config = input(
             (f"Shall a default config folder be created "
-             f"at {os.path.dirname(path)}? [Y/n]"))
+             f"at {folder}? [Y/n]"))
 
         if not create_new_config or create_new_config.lower()[0] == "y":
             LOGGER.info(
                 "Installing the default configuration to %s",
-                os.path.dirname(path))
+                folder)
             import homecontrol
             source = pkg_resources.resource_filename(
                 homecontrol.__name__, "default_config")
-            shutil.copytree(source, os.path.dirname(path))
+            copy_folder(source, folder)
             LOGGER.info("Running HomeControl with default config")
             return get_config(path=path)
 

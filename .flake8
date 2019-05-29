@@ -6,9 +6,9 @@ exclude=.git,
         dist,
         homecontrol.egg-info
 
-ignore=F821,
-       W503,
-       E741,
-       E743,
+ignore=F821,  # Undefined name name
+       W503,  # Line break occurred before a binary operator
+       E741,  # Do not use variables named 'l', 'o', or 'i'
+       E743,  # Do not define functions named 'l', 'o', or 'i'
        E226,  # Missing whitespace around arithmetic operator
        E228   # Missing whitespace around modulo operator

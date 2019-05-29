@@ -59,3 +59,7 @@ class WebhookTriggerProvider:
         """Handle WebHook event"""
         if target == self.event:
             await self.rule.on_trigger(params)
+
+    async def stop(self) -> None:
+        """Stops the WebhookTriggerProvider"""
+        self.core.event_engine.remove_handler("webhook_event", self.on_webhook)

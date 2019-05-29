@@ -30,7 +30,8 @@ author = 'Lennart K'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.napoleon'
+    'sphinxcontrib.napoleon',
+    'sphinxcontrib.asyncio'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

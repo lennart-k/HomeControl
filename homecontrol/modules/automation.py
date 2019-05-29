@@ -1,6 +1,10 @@
 """Automation functionality"""
 
+import asyncio
 import logging
+
+import voluptuous as vol
+from homecontrol.dependencies.validators import ConsistsOf
 
 from homecontrol.core import Core
 
@@ -11,6 +15,18 @@ SPEC = {
         "name": "Automation"
     }
 }
+
+CONFIG_SCHEMA = vol.Schema(
+    ConsistsOf({
+        "alias": str,
+        "trigger": vol.Schema({
+            "provider": str
+        }, extra=vol.ALLOW_EXTRA),
+        "action": vol.Schema({
+            "provider": str
+        }, extra=vol.ALLOW_EXTRA)
+    })
+)
 
 
 class EventTriggerProvider:
@@ -31,6 +47,10 @@ class EventTriggerProvider:
         """Handle event"""
         if self.event_data.items() <= kwargs.items():
             await self.rule.on_trigger(kwargs)
+
+    async def stop(self) -> None:
+        """Stops the EventTriggerProvider for reload"""
+        self.core.event_engine.remove_handler(self.data["type"], self.on_event)
 
 
 class StateTriggerProvider:
@@ -53,6 +73,10 @@ class StateTriggerProvider:
             await self.rule.on_trigger({
                 self.data["state"]: changes[self.data["state"]]
             })
+
+    async def stop(self) -> None:
+        """Stops the StateTriggerProvider for reload"""
+        self.core.event_engine.remove_handler("state_change", self.on_state)
 
 
 class StateActionProvider:
@@ -120,7 +144,14 @@ class Module:
             "state": StateActionProvider,
             "action": ItemActionProvider
         }
-        self.rules = set()
+        self.rules = {}
+
+        self.cfg = await self.core.cfg.register_domain(
+            "automation",
+            self,
+            schema=CONFIG_SCHEMA,
+            allow_reload=True
+        ) or []
 
         event("core_bootstrap_complete")(self.start)
 
@@ -130,9 +161,12 @@ class Module:
             "gather_automation_providers",
             engine=self,
             callback=self.register_automation_providers)
+        await self.init_rules()
 
-        for rule in self.core.cfg.get("automation", []):
-            self.rules.add(AutomationRule(rule, self))
+    async def init_rules(self) -> None:
+        """Initialises the automation rules"""
+        for rule in self.cfg:
+            self.rules[rule["alias"]] = AutomationRule(rule, self)
 
     def register_automation_providers(self,
                                       trigger: dict = None,
@@ -142,6 +176,27 @@ class Module:
         self.trigger_providers.update(trigger or {})
         self.condition_providers.update(condition or {})
         self.action_providers.update(action or {})
+
+    async def remove_rule(self, alias: str) -> None:
+        """Removes an automation rule"""
+        if alias in self.rules:
+            await self.rules[alias].stop()
+            del self.rules[alias]
+            LOGGER.info("Automation rule '%s' removed", alias)
+
+    async def stop(self) -> None:
+        """Stops the Automation Engine"""
+        LOGGER.info("Stopping the automation engine")
+        await asyncio.gather(*[
+            self.remove_rule(alias) for alias in self.rules
+        ])
+
+    async def apply_new_configuration(self, domain: str, config: list) -> None:
+        """Applies new automation rules"""
+        print("TESTSTETST")
+        await self.stop()
+        self.cfg = config
+        await self.init_rules()
 
 
 class AutomationRule:
@@ -161,3 +216,8 @@ class AutomationRule:
     async def on_trigger(self, data):
         """Handle trigger"""
         await self.action.on_trigger(data)
+
+    async def stop(self) -> None:
+        """Stops an automation rule"""
+        if hasattr(self.trigger, "stop"):
+            await self.trigger.stop()

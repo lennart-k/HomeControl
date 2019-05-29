@@ -25,7 +25,8 @@ setup(
     license="MIT",
     keywords="homecontrol home automation",
     project_urls={
-        "GitHub": "https://github.com/lennart-k/HomeControl"
+        "GitHub": "https://github.com/lennart-k/HomeControl",
+        "Docs": "https://homecontrol.readthedocs.io/en/latest/"
     },
     entry_points={
         "console_scripts": [

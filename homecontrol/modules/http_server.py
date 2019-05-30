@@ -2,10 +2,12 @@
 
 import os
 import logging
+import ssl
 
 import voluptuous as vol
 from aiohttp import web
 
+from homecontrol.dependencies.resolve_path import resolve_path
 
 SPEC = {
     "meta": {
@@ -15,11 +17,24 @@ SPEC = {
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("host", default=None): vol.Any(str, None),
-    vol.Required("port", default=8080): vol.Coerce(int)
+    vol.Required("port", default=8080): vol.Coerce(int),
+    vol.Required("ssl", default=False): vol.Any(
+        bool,
+        {
+            "certificate": str,
+            "key": str,
+        })
 })
 
 LOGGER = logging.getLogger(__name__)
 logging.getLogger("aiohttp").setLevel(logging.WARNING)
+
+
+class SSLLogFilter(logging.Filter):
+    """Filter ssl.SSLError from logs"""
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Filter function"""
+        return not (record.exc_info and record.exc_info[0] == ssl.SSLError)
 
 
 class Module:
@@ -35,6 +50,10 @@ class Module:
         """Sets up an HTTPServer"""
         self.cfg = await self.core.cfg.register_domain(
             "http-server", self, schema=CONFIG_SCHEMA)
+
+        if not self.core.start_args["verbose"]:
+            logging.getLogger("asyncio").addFilter(SSLLogFilter())
+
         event("core_bootstrap_complete")(self.start)
 
     async def start(self, *args):
@@ -53,12 +72,26 @@ class Module:
         self.main_app.add_routes(self.route_table_def)
         self.handler = self.main_app.make_handler(loop=self.core.loop)
 
+        if self.cfg["ssl"]:
+            # context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            context.verify_mode = ssl.CERT_OPTIONAL
+
+            context.load_cert_chain(
+                self.cfg["ssl"]["certificate"],
+                self.cfg["ssl"]["key"]
+            )
+        else:
+            context = None
+
         # Windows doesn't support reuse_port
         self.server = await self.core.loop.create_server(
             self.handler,
             self.cfg["host"],
             self.cfg["port"],
-            reuse_address=True, reuse_port=os.name != "nt")
+            reuse_address=True,
+            reuse_port=os.name != "nt",
+            ssl=context)
         LOGGER.info("Started the HTTP server")
 
     async def stop(self):

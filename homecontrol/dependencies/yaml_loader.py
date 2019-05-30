@@ -13,6 +13,7 @@ from yaml.composer import Composer
 from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
 
+from homecontrol.dependencies.resolve_path import resolve_path
 from homecontrol.dependencies.entity_types import (
     Item,
     Module
@@ -36,20 +37,6 @@ TYPES = {
     "Item": Item,
     "Module": Module,
 }
-
-
-def resolve_path(path: str, config_dir: str) -> str:
-    """
-    Resolves a path:
-    ~/  for paths relative to your home directory
-    /   for absolute paths
-    anything else for paths relative to your config folder
-    """
-    if path.startswith("~"):
-        return os.path.expanduser(path)
-    if path.startswith("/"):
-        return path
-    return os.path.join(config_dir, path)
 
 
 # pylint: disable=no-member,no-self-use

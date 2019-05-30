@@ -81,6 +81,7 @@ You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
 - API
   - WebHooks
   - WebSockets
+  - SSL
 - Docker builds
 
 [Homecontrol v1.0.0 Project board](https://github.com/lennart-k/HomeControl/projects/3)

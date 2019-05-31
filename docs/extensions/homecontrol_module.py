@@ -22,3 +22,7 @@ def setup(app: Sphinx) -> None:
         docs_path = os.path.join(module_path, module, "docs.rst")
         if os.path.isfile(docs_path):
             shutil.copyfile(docs_path, f"_homecontrol/modules/{module}.rst")
+
+        docs_path = os.path.join(module_path, module, "docs.md")
+        if os.path.isfile(docs_path):
+            shutil.copyfile(docs_path, f"_homecontrol/modules/{module}.md")

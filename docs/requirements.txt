@@ -2,3 +2,4 @@ sphinxcontrib-napoleon
 voluptuous
 sphinxcontrib-asyncio
 sphinxcontrib-httpdomain
+recommonmark

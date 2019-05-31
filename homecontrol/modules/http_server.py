@@ -7,8 +7,6 @@ import ssl
 import voluptuous as vol
 from aiohttp import web
 
-from homecontrol.dependencies.resolve_path import resolve_path
-
 SPEC = {
     "meta": {
         "name": "HTTP Server"

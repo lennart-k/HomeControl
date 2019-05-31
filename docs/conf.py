@@ -34,6 +34,7 @@ extensions = [
     'sphinxcontrib.napoleon',
     'sphinxcontrib.asyncio',
     'homecontrol_module',
+    'sphinxcontrib.httpdomain',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

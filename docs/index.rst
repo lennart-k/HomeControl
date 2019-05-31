@@ -14,7 +14,12 @@ pretty messy.
    api
 
 
+.. toctree::
+   :maxdepth: 5
+   :caption: Modules:
+   :glob:
 
+   _homecontrol/modules/*
 
 
 Indices and tables

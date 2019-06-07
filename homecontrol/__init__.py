@@ -1,1 +1,1 @@
-"""Init file"""
+"""Init file for the homecontrol module"""

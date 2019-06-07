@@ -299,6 +299,22 @@ def setup_logging(verbose: bool = False,
         file_handler.setFormatter(logging.Formatter(fmt, datefmt=datefmt))
         logging.getLogger().addHandler(file_handler)
 
+def set_loop_policy() -> None:
+    """
+    Tries to use a ProactorEventLoop on Windows and uvloop elsewhere
+    """
+
+    if (sys.platform == "win32"
+            and hasattr(asyncio, "WindowsProactorEventLoopPolicy")):
+        asyncio.set_event_loop_policy(
+            asyncio.WindowsProactorEventLoopPolicy())
+
+    else:
+        with suppress(ImportError):
+            import uvloop
+            asyncio.set_event_loop_policy(
+                uvloop.EventLoopPolicy())
+
 
 def main() -> None:
     """The main function"""
@@ -332,6 +348,8 @@ def main() -> None:
 
     if args["clearport"] and cfg.get("http-server", {}).get("port"):
         clear_port(cfg["http-server"]["port"])
+
+    set_loop_policy()
 
     run_homecontrol(config=cfg, config_path=args["cfgfile"], start_args=args)
 

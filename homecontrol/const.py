@@ -5,8 +5,8 @@ import voluptuous as vol
 
 MINIMUM_PYTHON_VERSION = (3, 6, 5)
 
-EXIT_SHUTDOWN = 0
-EXIT_RESTART = 1
+EXIT_SHUTDOWN = "EXIT_SHUTDOWN"
+EXIT_RESTART = "EXIT_RESTART"
 
 ERROR404 = "error-404"
 ERROR_ITEM_NOT_FOUND = "error-item-not-found"

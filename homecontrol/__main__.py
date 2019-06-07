@@ -170,10 +170,12 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
         windows_wakeup()
     core = Core(
         cfg=config, cfg_path=config_path, loop=loop, start_args=start_args)
+
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
 
+    loop.stop()
     loop.close()
 
     if exit_return == EXIT_RESTART:
@@ -183,6 +185,7 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
     elif start_args["pid_file"]:
         with suppress(FileNotFoundError):
             os.remove(start_args["pid_file"])
+        exit()
 
 
 def start_command() -> List[str]:

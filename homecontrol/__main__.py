@@ -175,7 +175,6 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
         exit_return = loop.run_until_complete(core.block_until_stop())
 
-    loop.stop()
     loop.close()
 
     if exit_return == EXIT_RESTART:

@@ -6,6 +6,10 @@ module-manager:
 http-server:
   host: null
   port: 8080
+  # Uncomment to use ssl
+  # ssl:
+    # key: !path ssl/private_key.pem
+    # certificate: !path ssl/certificate.pem
 
 api-server:
   headers:

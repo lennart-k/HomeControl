@@ -39,22 +39,11 @@ class AnalogInput:
     async def init(self):
         """Initialise the item"""
         self.adc = self.cfg["adc"]
-        self.raw_val = 0
-        tick(self.cfg["update_interval"])(self.poll_value)
 
     async def get_value(self):
         """Getter for the value"""
-        return self.adc.get_value(self.cfg["channel"])
-
-    async def poll_value(self):
-        """Automatically update the value"""
-        new_raw_val = await self.get_value()
-        if abs(self.raw_val - new_raw_val) >= self.cfg["change_threshold"]:
-            await self._update_raw(new_raw_val)
-
-    async def _update_raw(self, raw_val):
-        self.raw_val = raw_val
-        await self.states.update("value", self.value(raw_val))
+        return self.value(
+            self.adc.get_value(self.cfg["channel"]))
 
     def value(self, raw_val) -> int:
         """

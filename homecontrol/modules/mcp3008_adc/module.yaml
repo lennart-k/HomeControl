@@ -36,15 +36,8 @@ items:
       !vol/Required {schema: max, default: 1023}:
         !vol/Coerce { type: !type/int }
 
-      !vol/Required {schema: update_interval, default: 1}:
-        !vol/Coerce { type: !type/float }
-
-      !vol/Required {schema: change_threshold, default: 0}:
-        !vol/All
-        - !vol/Coerce { type: !type/int }
-        - !vol/Range {min: 0}
-
     states:
       value:
         default: 0
         getter: get_value
+        poll-interval: 0.1

@@ -30,6 +30,8 @@ class StateEngine:
                 default=default_state,
                 getter=getattr(item, details.get("getter", ""), None),
                 setter=getattr(item, details.get("setter", ""), None),
+                poll_function=getattr(
+                    item, details.get("poll-function", ""), None),
                 schema=details.get("schema", None),
                 state_type=types.get(details.get("type", ""), None),
                 poll_interval=details.get("poll-interval", None),
@@ -81,6 +83,7 @@ class State:
                  default,
                  getter: Callable = None,
                  setter: Callable = None,
+                 poll_function: Callable = None,
                  name: str = None,
                  state_type: type = None,
                  schema: dict = None,
@@ -92,6 +95,7 @@ class State:
         self.state_engine = state_engine
         self.schema = vol.Schema(schema) if schema else None
         self.poll_interval = poll_interval
+        self.poll_function = poll_function or self.getter
         if self.poll_interval:
             self.state_engine.core.tick_engine.tick(
                 self.poll_interval)(self.poll_value)
@@ -100,7 +104,7 @@ class State:
         """Polls the current state and updates it"""
         if self.state_engine.item.status != ItemStatus.ONLINE:
             return None
-        await self.update(await self.getter())
+        await self.update(await self.poll_function())
 
     async def get(self):
         """Gets a state"""

@@ -39,11 +39,15 @@ class AnalogInput:
     async def init(self):
         """Initialise the item"""
         self.adc = self.cfg["adc"]
+        self.raw_value = 0
 
-    async def get_value(self):
+    async def get_value(self) -> int:
         """Getter for the value"""
-        return self.value(
-            self.adc.get_value(self.cfg["channel"]))
+        new_raw_value = self.adc.get_value(self.cfg["channel"])
+        if abs(self.raw_value - new_raw_value) >= self.cfg["change_threshold"]:
+            self.raw_value = new_raw_value
+        return self.value(self.raw_value)
+
 
     def value(self, raw_val) -> int:
         """

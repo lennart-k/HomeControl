@@ -7,7 +7,7 @@
 
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 1
    :caption: Modules:
    :glob:
 

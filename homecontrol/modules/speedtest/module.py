@@ -20,12 +20,12 @@ class Speedtest:
         """
         LOGGER.debug("Doing speedtest now")
         s = speedtest.Speedtest()
-        def do():
+        def do_speedtest():
             """Blocking task"""
             s.get_best_server()
             s.download()
             s.upload()
-        await self.core.loop.run_in_executor(None, do)
+        await self.core.loop.run_in_executor(None, do_speedtest)
         await self.states.bulk_update(
             ping=s.results.ping,
             upload_speed=s.results.upload,

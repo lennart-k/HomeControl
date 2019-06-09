@@ -59,6 +59,9 @@ class JSONEncoder(json.JSONEncoder):
                 "data": obj.dump()
             }
 
+        if hasattr(obj, "dump"):
+            return obj.dump()
+
         return obj
 
 

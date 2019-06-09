@@ -3,6 +3,7 @@
 from typing import Callable
 import asyncio
 from collections import defaultdict
+from contextlib import suppress
 
 
 class TickEngine:
@@ -15,7 +16,7 @@ class TickEngine:
         self.intervals = defaultdict(set)
         self.futures = dict()
 
-    def tick(self, interval: int) -> Callable:
+    def tick(self, interval: float) -> Callable:
         """
         Register a tick
 
@@ -31,6 +32,13 @@ class TickEngine:
                     self._do_tick(interval), self.core.loop)
             return coro
         return _tick
+
+    def remove_tick(self, interval: float, coro) -> None:
+        """
+        Removes a tick handler for an interval
+        """
+        with suppress(KeyError):
+            self.intervals[interval].remove(coro)
 
     async def _do_tick(self, interval):
         while interval in self.intervals:

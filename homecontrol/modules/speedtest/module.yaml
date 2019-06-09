@@ -1,0 +1,24 @@
+meta:
+  name: Speedtest
+  description: Checks the internet speed with speedtest.net
+
+pip-requirements:
+  - speedtest-cli
+
+items:
+  Speedtest:
+    states:
+      download_speed:
+        type: !type/float
+
+      upload_speed:
+        type: !type/float
+
+      ping:
+        type: !type/float
+
+    actions:
+      measure: measure
+
+    config_schema:
+      !vol/Required { schema: "update_interval", default: 600 }: !type/int

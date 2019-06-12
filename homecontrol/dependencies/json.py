@@ -4,6 +4,7 @@
 import json
 from functools import partial
 from enum import Enum
+from datetime import datetime
 
 from homecontrol.core import Core
 from homecontrol.dependencies.data_types import type_set, types
@@ -52,6 +53,9 @@ class JSONEncoder(json.JSONEncoder):
             }
         if isinstance(obj, Enum):
             return obj.value
+
+        if isinstance(obj, datetime):
+            return obj.isoformat()
 
         # pylint: disable=unidiomatic-typecheck
         if isinstance(obj, tuple(type_set)):

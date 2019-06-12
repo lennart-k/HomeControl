@@ -21,7 +21,6 @@ class Chromecast:
         await self.states.bulk_update(
             playing=vars(
                 self.media_controller).get("player_state") == "PLAYING",
-            cast_state=self.media_controller.status,
             content_type=self.media_controller.status.content_type,
             metadata=self.media_controller.status.media_metadata,
             volume=int(self.media_controller.status.volume_level * 100)
@@ -40,10 +39,6 @@ class Chromecast:
         self.media_controller.seek(value)
         await self.states.update("playtime", value)
         return {"playtime": value}
-
-    async def get_cast_state(self):
-        """Get information about what's currently playing"""
-        return vars(self.media_controller.status)
 
     async def action_pause(self):
         """Action: Pause"""

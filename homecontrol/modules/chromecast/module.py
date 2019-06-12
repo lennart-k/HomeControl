@@ -131,7 +131,6 @@ class Chromecast:
         await self.states.bulk_update(
             playtime=status.current_time,
             playing=vars(status).get("player_state") == "PLAYING",
-            cast_state=status,
             content_type=status.content_type,
             metadata=status.media_metadata,
             volume=int(status.volume_level * 100),

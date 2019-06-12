@@ -32,10 +32,6 @@ items:
         default: false
         getter: get_active
 
-      cast_state:
-        default: None
-        getter: get_cast_state
-
       metadata:
         default: {}
 

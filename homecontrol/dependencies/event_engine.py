@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
+from datetime import datetime
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class Event:
 
         self.event_type = event_type
         self.data = data or {}
-        self.timestamp = timestamp
+        self.timestamp = timestamp or datetime.now()
         self.kwargs = kwargs or {}
 
     def __repr__(self) -> str:
@@ -54,7 +55,7 @@ class EventEngine:
 
         data = data or {}
         data.update(kwargs)
-        event = Event(event_type, data=data, timestamp=int(time.time()))
+        event = Event(event_type, data=data, timestamp=datetime.now())
 
         LOGGER.debug("Event: %s", event)
 
@@ -78,7 +79,7 @@ class EventEngine:
         """
         data = data or {}
         data.update(kwargs)
-        event = Event(event_type, data=data, timestamp=int(time.time()))
+        event = Event(event_type, data=data, timestamp=datetime.now())
 
         LOGGER.debug("Event: %s", event)
 

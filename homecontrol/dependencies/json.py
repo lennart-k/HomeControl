@@ -62,6 +62,10 @@ class JSONEncoder(json.JSONEncoder):
         if hasattr(obj, "dump"):
             return obj.dump()
 
+        if not isinstance(
+                obj, (type(None), bool, int, float, tuple, list, dict)):
+            return obj.__dict__
+
         return obj
 
 

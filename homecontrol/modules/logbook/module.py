@@ -145,6 +145,8 @@ class Module:
 
     async def stop(self) -> None:
         """Stop the logbook module"""
-        self.core.event_engine.remove_handler("state_change", self.on_state_change)
-        self.core.event_engine.remove_handler("*", self.on_event)
+        self.core.event_engine.remove_handler("state_change",
+            self.on_state_change)
+        self.core.event_engine.remove_handler("*",
+            self.on_event)
         self.engine.close()

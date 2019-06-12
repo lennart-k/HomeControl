@@ -111,11 +111,16 @@ class Module:
         @router.get("/logbook/states/{item}")
         async def get_state_log(request: web.Request) -> JSONResponse:
             identifier = request.match_info["item"]
+            state_name = request.query.get("state", None)
 
             with self.session_context() as session:
                 result = session.query(models.StateLog).filter(
                     models.StateLog.item_identifier == identifier
                 )
+                if state_name:
+                    result = result.filter(
+                        models.StateLog.state_name == state_name
+                    )
 
             return JSONResponse(result.all())
 
@@ -140,8 +145,6 @@ class Module:
 
     async def stop(self) -> None:
         """Stop the logbook module"""
-        self.core.event_engine.remove_handler("state_change")(
-            self.on_state_change)
-        self.core.event_engine.remove_handler("*")(
-            self.on_event)
+        self.core.event_engine.remove_handler("state_change", self.on_state_change)
+        self.core.event_engine.remove_handler("*", self.on_event)
         self.engine.close()

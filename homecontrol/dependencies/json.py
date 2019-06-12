@@ -43,6 +43,7 @@ class JSONEncoder(json.JSONEncoder):
                 "name": obj.name,
                 "meta": obj.meta
             }
+
         if isinstance(obj, (BaseException, Exception)):
             return {
                 "!type": "Exception",
@@ -61,10 +62,6 @@ class JSONEncoder(json.JSONEncoder):
 
         if hasattr(obj, "dump"):
             return obj.dump()
-
-        if not isinstance(
-                obj, (type(None), bool, int, float, tuple, list, dict)):
-            return obj.__dict__
 
         return obj
 

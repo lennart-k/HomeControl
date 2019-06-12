@@ -1,5 +1,4 @@
 """logbook module"""
-import asyncio
 import logging
 from contextlib import contextmanager
 
@@ -15,7 +14,7 @@ from homecontrol.dependencies.json import dumps
 from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.dependencies.validators import ConsistsOf
 
-import models  # pylint: disable=bad-option-value
+import models  # pylint: disable=import-error
 
 
 LOGGER = logging.getLogger(__name__)
@@ -145,8 +144,8 @@ class Module:
 
     async def stop(self) -> None:
         """Stop the logbook module"""
-        self.core.event_engine.remove_handler("state_change",
-            self.on_state_change)
-        self.core.event_engine.remove_handler("*",
-            self.on_event)
+        self.core.event_engine.remove_handler(
+            "state_change", self.on_state_change)
+        self.core.event_engine.remove_handler(
+            "*", self.on_event)
         self.engine.close()

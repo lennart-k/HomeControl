@@ -19,7 +19,7 @@ class Speedtest:
         Gets called by state polling
         """
         LOGGER.debug("Doing speedtest now")
-        s = speedtest.Speedtest()
+        s = speedtest.Speedtest()  # pylint: disable=invalid-name
         def do_speedtest():
             """Blocking task"""
             s.get_best_server()

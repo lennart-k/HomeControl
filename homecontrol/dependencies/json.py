@@ -28,7 +28,7 @@ class JSONEncoder(json.JSONEncoder):
         self.core = core
         super().__init__(*args, **kwargs)
 
-    # pylint: disable=no-self-use
+    # pylint: disable=no-self-use,too-many-return-statements
     def default(self, obj):
         """Parse custom types"""
         if isinstance(obj, Item):
@@ -57,7 +57,6 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(obj, datetime):
             return obj.isoformat()
 
-        # pylint: disable=unidiomatic-typecheck
         if isinstance(obj, tuple(type_set)):
             return {
                 "!type": type(obj).__name__,

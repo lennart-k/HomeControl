@@ -16,13 +16,17 @@ class TwitchFollowers:
         self.cfg.setdefault("rawname", self._get_rawname())
         if not self.cfg["rawname"]:
             return False
-        tick(self.cfg["update_interval"])(self.update_followers)
 
-    async def update_followers(self):
-        """Update the current state"""
-        await self.states.update("followers", int(requests.get(
+    async def poll_followers(self):
+        """Polls the current state"""
+        response = requests.get(
             LOOKUP_URL.format(platform="twitch"),
-            params={"query": self.cfg["rawname"]}).content))
+            params={"query": self.cfg["rawname"]})
+        return int(response.content)
+
+    async def update_followers(self) -> None:
+        """Updates the current state"""
+        await self.states.update("followers", await self.poll_followers())
 
     def _get_rawname(self):
         content = html.fromstring(requests.get(NAME_URL.format(
@@ -40,13 +44,17 @@ class YouTubeFollowers:
         self.cfg.setdefault("rawname", self._get_rawname())
         if not self.cfg["rawname"]:
             return False
-        tick(self.cfg["update_interval"])(self.update_followers)
 
-    async def update_followers(self):
-        """Update the current state"""
-        await self.states.update("followers", int(requests.get(
+    async def poll_followers(self):
+        """Polls the current state"""
+        response = requests.get(
             LOOKUP_URL.format(platform="youtube"),
-            params={"query": self.cfg["rawname"]}).content))
+            params={"query": self.cfg["rawname"]})
+        return int(response.content)
+
+    async def update_followers(self) -> None:
+        """Updates the current state"""
+        await self.states.update("followers", await self.poll_followers())
 
     def _get_rawname(self):
         content = html.fromstring(requests.get(NAME_URL.format(
@@ -61,11 +69,14 @@ class TwitterFollowers:
     """Followers on Twitter"""
     async def init(self) -> bool:
         """Initialise the item"""
-        tick(self.cfg["update_interval"])(self.update_followers)
 
-    async def update_followers(self):
-        """Update the current state"""
-        await self.states.update(
-            "followers", int(requests.get(
-                LOOKUP_URL.format(platform="twitter"),
-                params={"query": self.cfg["name"]}).content))
+    async def poll_followers(self):
+        """Polls the current state"""
+        response = requests.get(
+            LOOKUP_URL.format(platform="twitter"),
+            params={"query": self.cfg["name"]})
+        return int(response.content)
+
+    async def update_followers(self) -> None:
+        """Updates the current state"""
+        await self.states.update("followers", await self.poll_followers())

@@ -79,6 +79,26 @@ class StateTriggerProvider:
         self.core.event_engine.remove_handler("state_change", self.on_state)
 
 
+class TimerTriggerProvider:
+    """A timer as a trigger provider"""
+    def __init__(self, rule, engine) -> None:
+        self.rule = rule
+        self.engine = engine
+        self.core = engine.core
+
+        self.data = rule.data["trigger"]
+
+        self.core.tick_engine.tick(self.data["interval"])(self.trigger)
+
+    async def trigger(self) -> None:
+        """Trigger"""
+        await self.rule.on_trigger({})
+
+    async def stop(self) -> None:
+        """Stop the provider"""
+        self.core.tick_engine.remove_tick(self.data["interval"], self.trigger)
+
+
 class StateActionProvider:
     """Action provider for states"""
 
@@ -135,7 +155,8 @@ class Module:
         """Initialise the module"""
         self.trigger_providers = {
             "event": EventTriggerProvider,
-            "state": StateTriggerProvider
+            "state": StateTriggerProvider,
+            "timer": TimerTriggerProvider
         }
         self.condition_providers = {
 
@@ -193,7 +214,6 @@ class Module:
 
     async def apply_new_configuration(self, domain: str, config: list) -> None:
         """Applies new automation rules"""
-        print("TESTSTETST")
         await self.stop()
         self.cfg = config
         await self.init_rules()

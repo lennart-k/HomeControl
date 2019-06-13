@@ -23,7 +23,7 @@ class Speedtest:
             """Blocking task"""
             s.get_best_server()
             s.download()
-            s.upload()
+            s.upload(pre_allocate=False)
         await self.core.loop.run_in_executor(None, do_speedtest)
         await self.states.bulk_update(
             ping=s.results.ping,

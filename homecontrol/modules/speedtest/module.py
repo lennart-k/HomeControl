@@ -11,7 +11,6 @@ class Speedtest:
     """The Speedtest item"""
     async def init(self) -> None:
         """Init the Speedtest item"""
-        tick(self.cfg["update_interval"])(self.measure)
 
     async def measure(self) -> None:
         """
@@ -31,8 +30,3 @@ class Speedtest:
             upload_speed=s.results.upload,
             download_speed=s.results.download
         )
-
-    async def stop(self) -> None:
-        """Stop the speedtest item"""
-        self.core.tick_engine.remove_tick(
-            self.cfg["update_interval"], self.measure)

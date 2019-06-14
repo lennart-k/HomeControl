@@ -85,12 +85,12 @@ class Module:
         @r.post("/core/shutdown")
         async def shutdown(request: web.Request) -> JSONResponse:
             """Handle /core/shutdown"""
-            self.core.loop.create_task(self.core.shutdown())
+            self.core.loop.call_soon(self.core.shutdown)
             return JSONResponse("Shutting down")
 
         @r.post("/core/restart")
         async def restart(request: web.Request) -> JSONResponse:
-            self.core.loop.create_task(self.core.restart())
+            self.core.loop.call_soon(self.core.restart)
             return JSONResponse("Restarting")
 
         @r.post("/core/config/reload")

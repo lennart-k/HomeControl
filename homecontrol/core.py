@@ -35,41 +35,34 @@ class Core:
                  cfg: dict,
                  cfg_path: str,
                  loop: Optional[asyncio.AbstractEventLoop] = None,
-                 start_args: Optional[Dict] = None,
-                 exit_return: Optional[int] = None) -> None:
+                 start_args: Optional[Dict] = None) -> None:
         """
         :param cfg: config dictionary
         :param cfg_path: configuration file
         :param loop: asyncio EventLoop
         :param start_args: start parameters
-        :param exit_return: Shutdown or Restart on stop
         """
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
         self.cfg = ConfigManager(cfg, cfg_path)
         self.cfg_path = cfg_path
-        self.block_event = asyncio.Event()
+        self.block_future = asyncio.Future()
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
         self.module_manager = ModuleManager(core=self)
         self.item_manager = ItemManager(core=self)
-        self.exit_return = exit_return or EXIT_SHUTDOWN
 
     async def bootstrap(self) -> None:
         """
         Startup coroutine for Core
         """
         if not os.name == "nt":  # Windows does not have signals
-            self.loop.add_signal_handler(
-                signal.SIGINT, lambda: self.loop.create_task(self.stop()))
-            self.loop.add_signal_handler(
-                signal.SIGTERM, lambda: self.loop.create_task(self.stop()))
+            self.loop.add_signal_handler(signal.SIGINT, self.shutdown)
+            self.loop.add_signal_handler(signal.SIGTERM, self.shutdown)
         else:
             # Windows needs its special signal handling
-            signal.signal(signal.SIGINT,
-                          lambda *args: self.loop.create_task(self.stop()))
-            signal.signal(signal.SIGTERM,
-                          lambda *args: self.loop.create_task(self.stop()))
+            signal.signal(signal.SIGINT, self.shutdown)
+            signal.signal(signal.SIGTERM, self.shutdown)
 
         # Load modules
         await self.module_manager.init()
@@ -83,20 +76,16 @@ class Core:
     async def block_until_stop(self) -> int:
         """
         Blocking method to keep HomeControl running
-        until Core.block_event is set
+        until Core.block_future is done
         """
         with suppress(asyncio.CancelledError):
-            await self.block_event.wait()
-        self.loop.call_soon(self.loop.stop)
-        return self.exit_return
+            exit_return = await self.block_future
+
+        await self.stop()
+        return exit_return
 
     async def stop(self) -> None:
-        """
-        Stops HomeControl
-        Depending on Core.exit_return
-        HomeControl may also automatically be restarted
-        """
-
+        """Stops HomeControl"""
         LOGGER.warning("Shutting Down")
         await self.tick_engine.stop()
         await self.module_manager.stop()
@@ -105,15 +94,14 @@ class Core:
 
         LOGGER.info("Waiting for pending tasks (1s)")
         await asyncio.wait(pending, loop=self.loop, timeout=1)
+
         LOGGER.warning("Closing the loop soon")
-        self.loop.call_soon(self.block_event.set)
+        self.loop.call_soon(self.loop.stop)
 
-    async def restart(self) -> None:
+    def restart(self) -> None:
         """Restarts HomeControl"""
-        self.exit_return = EXIT_RESTART
-        await self.stop()
+        self.block_future.set_result(EXIT_RESTART)
 
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """Shuts HomeControl down"""
-        self.exit_return = EXIT_SHUTDOWN
-        await self.stop()
+        self.block_future.set_result(EXIT_SHUTDOWN)

@@ -11,6 +11,7 @@ import logging
 import pkg_resources
 from pip._vendor.distlib.version import NormalizedMatcher
 import voluptuous as vol
+from homecontrol.dependencies.validators import ConsistsOf
 
 import homecontrol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
@@ -20,8 +21,8 @@ from homecontrol.exceptions import PipInstallError
 LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
-    vol.Required("folders", default=[]): [str],
-    vol.Required("blacklist", default=[]): [str],
+    vol.Required("folders", default=[]): ConsistsOf(str),
+    vol.Required("blacklist", default=[]): ConsistsOf(str),
     vol.Required("install-pip-requirements", default=True): bool,
     vol.Required("load-internal-modules", default=True): bool
 })
@@ -44,7 +45,9 @@ class ModuleManager:
     async def init(self) -> None:
         """Initialise the modules"""
         self.cfg = await self.core.cfg.register_domain(
-            "module-manager", allow_reload=False)
+            "module-manager",
+            schema=CONFIG_SCHEMA,
+            allow_reload=False)
 
         for folder in self.cfg["folders"]:
             await self.load_folder(folder)
@@ -57,7 +60,7 @@ class ModuleManager:
     async def load_folder(self, path: str) -> [object]:
         """Load every module in a folder"""
         out = []
-        blacklist = self.cfg.get("blacklist", [])
+        blacklist = self.cfg["blacklist"]
         for node in os.listdir(path):
             if node == "__pycache__":
                 continue

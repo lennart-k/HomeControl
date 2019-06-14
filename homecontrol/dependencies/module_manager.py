@@ -23,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("folders", default=[]): ConsistsOf(str),
     vol.Required("blacklist", default=[]): ConsistsOf(str),
+    vol.Required("whitelist", default=[]): ConsistsOf(str),
     vol.Required("install-pip-requirements", default=True): bool,
     vol.Required("load-internal-modules", default=True): bool
 })
@@ -61,6 +62,7 @@ class ModuleManager:
         """Load every module in a folder"""
         out = []
         blacklist = self.cfg["blacklist"]
+        whitelist = self.cfg["whitelist"]
         for node in os.listdir(path):
             if node == "__pycache__":
                 continue
@@ -68,7 +70,8 @@ class ModuleManager:
             mod_name = node if os.path.isdir(
                 node) else ".".join(os.path.splitext(node)[:-1])
 
-            if mod_name not in blacklist:
+            if ((mod_name not in blacklist)
+                    and (not whitelist or mod_name in whitelist)):
                 if os.path.isdir(mod_path):
                     out.append(
                         await self.load_folder_module(mod_path, mod_name))

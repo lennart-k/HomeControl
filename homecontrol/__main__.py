@@ -106,9 +106,9 @@ def get_config(path: str) -> dict:
     If the config file does not exist it will ask the user
     if it should initialise with default configuration
     """
+    folder = os.path.dirname(path)
     if not os.path.isfile(path):
         LOGGER.critical("Config file does not exist: %s", path)
-        folder = os.path.dirname(path)
         create_new_config = input(
             (f"Shall a default config folder be created "
              f"at {folder}? [Y/n]"))
@@ -127,7 +127,7 @@ def get_config(path: str) -> dict:
         LOGGER.critical("Terminating")
         sys.exit(1)
     try:
-        cfg: dict = YAMLLoader.load(open(path))
+        cfg: dict = YAMLLoader.load(open(path), cfg_folder=folder)
     except yaml.YAMLError:
         LOGGER.error("Error in config file", exc_info=True)
         sys.exit(1)
@@ -268,7 +268,7 @@ def setup_logging(verbose: bool = False,
     """
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
 
-    fmt = "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    fmt = "%(asctime)s %(levelname)s (%(threadName)s)[%(name)s] %(message)s"
     console_datefmt = '%H:%M:%S'
     datefmt = '%Y-%m-%d %H:%M:%S'
 

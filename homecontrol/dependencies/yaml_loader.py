@@ -84,11 +84,13 @@ class Constructor(SafeConstructor):
         """
         if not isinstance(node.value, str):
             raise TypeError(f"folder must be of type str")
-        path = resolve_path(node.value, os.path.dirname(self.name))
+        path = resolve_path(node.value,
+                            file_path=os.path.dirname(self.name),
+                            config_dir=self.cfg_folder)
         if not os.path.isfile(path):
             raise FileNotFoundError(path)
 
-        return self.__class__.load(open(path, "r"))
+        return self.__class__.load(open(path, "r"), cfg_folder=self.cfg_folder)
 
     def include_dir_file_mapped_constructor(self,
                                             node: yaml.Node = None) -> dict:
@@ -100,13 +102,17 @@ class Constructor(SafeConstructor):
         """
         if not isinstance(node.value, str):
             raise TypeError(f"folder must be of type str")
-        folder = resolve_path(node.value, os.path.dirname(self.name))
+        folder = resolve_path(node.value,
+                              file_path=os.path.dirname(self.name),
+                              config_dir=self.cfg_folder)
         if not os.path.isdir(folder):
             raise FileNotFoundError(folder)
 
         return {
             os.path.splitext(file)[0]: self.__class__.load(
-                open(os.path.join(folder, file), "r"))
+                open(os.path.join(folder, file), "r"),
+                cfg_folder=self.cfg_folder
+                )
             for file in os.listdir(folder) if file.endswith(".yaml")
         }
 
@@ -125,8 +131,12 @@ class Constructor(SafeConstructor):
             paths = paths.split(" ")
         elif not isinstance(paths, list):
             raise TypeError(f"paths must be either of type str or list")
-        paths = [resolve_path(path, os.path.dirname(self.name))
-                 for path in paths]
+
+        paths = [resolve_path(path,
+                              file_path=os.path.dirname(self.name),
+                              config_dir=self.cfg_folder)
+                 for path in paths
+                ]
         files = set()
         for path in paths:
             if os.path.isfile(path):
@@ -136,7 +146,10 @@ class Constructor(SafeConstructor):
                     if file.endswith(".yaml"):
                         files.add(os.path.join(path, file))
 
-        loaded_files = [self.__class__.load(open(file, "r")) for file in files]
+        loaded_files = [
+            self.__class__.load(
+                open(file, "r"),
+                cfg_folder=self.cfg_folder) for file in files]
 
         if not all(isinstance(loaded_file, type(loaded_files[0]))
                    for loaded_file in loaded_files):
@@ -159,7 +172,9 @@ class Constructor(SafeConstructor):
         /   for absolute paths
         anything else for paths relative to your config folder
         """
-        return resolve_path(node.value, os.path.dirname(self.name))
+        return resolve_path(node.value,
+                            file_path=os.path.dirname(self.name),
+                            config_dir=self.cfg_folder)
 
     def env_var_constructor(self, node: yaml.nodes.Node) -> str:
         """
@@ -190,7 +205,8 @@ class Constructor(SafeConstructor):
 class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
     """Loads YAML with custom constructors"""
 
-    def __init__(self, stream):
+    def __init__(self, stream, cfg_folder: str = None):
+        self.cfg_folder = cfg_folder
         Reader.__init__(self, stream)
         Scanner.__init__(self)
         Parser.__init__(self)
@@ -199,9 +215,9 @@ class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
         Resolver.__init__(self)
 
     @classmethod
-    def load(cls, data):
+    def load(cls, data, cfg_folder: str = None):
         """Loads data"""
-        loader = cls(data)
+        loader = cls(data, cfg_folder=cfg_folder)
         try:
             return loader.get_single_data()
         finally:

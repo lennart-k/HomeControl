@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 import logging
+import os
 import voluptuous as vol
 
 from homecontrol.dependencies.yaml_loader import YAMLLoader
@@ -37,7 +38,8 @@ class ConfigManager:
 
     async def reload_config(self) -> None:
         """Reloads the configuration and updates where it can"""
-        cfg = YAMLLoader.load(open(self.cfg_path))
+        cfg = YAMLLoader.load(
+            open(self.cfg_path), cfg_folder=os.path.dirname(self.cfg_path))
 
         LOGGER.info("Updating the configuration")
         for domain, domain_config in cfg.items():

@@ -39,8 +39,9 @@ def get_arguments() -> dict:
     parser.add_argument(
         "-pid-file",
         default=None,
-        help=("Location of the PID file when running as a daemon."
-              " Ensures that only one session is running"))
+        help=("Location of the PID file."
+              "Ensures that only one session is running."
+              "Defaults to the configuration path"))
     parser.add_argument(
         "-clearport",
         action="store_true",
@@ -64,7 +65,7 @@ def get_arguments() -> dict:
     parser.add_argument(
         "-killprev", "-kp",
         action="store_true",
-        default=None,
+        default=True,
         help="Kills the previous HomeControl instance")
     if os.name == "posix":
         parser.add_argument(

@@ -28,8 +28,8 @@ class RGBLight:
     async def set_color(self, color: Color) -> dict:
         """Setter for color"""
         await self.apply_color(color)
-        if not await self.states.get("on"):
-            return {"color": color, "on": True}
+        if await self.states.get("on") != bool(color.l):
+            await self.states.update("on", bool(color.l))
         return {"color": color}
 
     async def apply_color(self, color: Color = None) -> Color:

@@ -299,6 +299,7 @@ def setup_logging(verbose: bool = False,
         file_handler.setFormatter(logging.Formatter(fmt, datefmt=datefmt))
         logging.getLogger().addHandler(file_handler)
 
+
 def set_loop_policy() -> None:
     """
     Tries to use a ProactorEventLoop on Windows and uvloop elsewhere

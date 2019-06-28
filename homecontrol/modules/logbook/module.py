@@ -55,7 +55,7 @@ class Module:
         try:
             yield session
             session.commit()
-        except Exception as e: # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             LOGGER.error("An error occured when executing a query: %s", e)
         finally:
             session.close()
@@ -140,7 +140,6 @@ class Module:
                 )
 
             return JSONResponse(result.all())
-
 
     async def stop(self) -> None:
         """Stop the logbook module"""

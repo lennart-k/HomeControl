@@ -112,7 +112,7 @@ class Constructor(SafeConstructor):
             os.path.splitext(file)[0]: self.__class__.load(
                 open(os.path.join(folder, file), "r"),
                 cfg_folder=self.cfg_folder
-                )
+            )
             for file in os.listdir(folder) if file.endswith(".yaml")
         }
 
@@ -135,8 +135,7 @@ class Constructor(SafeConstructor):
         paths = [resolve_path(path,
                               file_path=os.path.dirname(self.name),
                               config_dir=self.cfg_folder)
-                 for path in paths
-                ]
+                 for path in paths]
         files = set()
         for path in paths:
             if os.path.isfile(path):

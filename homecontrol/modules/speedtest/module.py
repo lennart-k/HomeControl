@@ -19,11 +19,13 @@ class Speedtest:
         """
         LOGGER.debug("Doing speedtest now")
         s = speedtest.Speedtest()  # pylint: disable=invalid-name
+
         def do_speedtest():
             """Blocking task"""
             s.get_best_server()
             s.download()
             s.upload(pre_allocate=False)
+
         await self.core.loop.run_in_executor(None, do_speedtest)
         await self.states.bulk_update(
             ping=s.results.ping,

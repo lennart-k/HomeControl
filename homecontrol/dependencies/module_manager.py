@@ -9,7 +9,8 @@ import json
 import logging
 
 import pkg_resources
-from pip._vendor.distlib.version import NormalizedMatcher  # pylint: disable=no-name-in-module,import-error
+# pylint: disable=no-name-in-module,import-error
+from pip._vendor.distlib.version import NormalizedMatcher
 import voluptuous as vol
 from homecontrol.dependencies.validators import ConsistsOf
 

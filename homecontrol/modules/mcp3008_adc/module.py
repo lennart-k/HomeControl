@@ -48,7 +48,6 @@ class AnalogInput:
             self.raw_value = new_raw_value
         return self.value(self.raw_value)
 
-
     def value(self, raw_val) -> int:
         """
         Translate the raw reading

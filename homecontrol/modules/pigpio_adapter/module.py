@@ -6,6 +6,7 @@ import pigpio
 
 from homecontrol.dependencies.throttle_function import throttle
 from homecontrol.core import Core
+from homecontrol.dependencies.data_types import Color
 
 # pylint: disable=import-error
 from dependencies.lcd import LCD
@@ -126,3 +127,80 @@ class I2CLCD:
     async def stop(self):
         """Stop the LCD"""
         self.lcd.close()
+
+
+class RGBLight:
+    """The RGBLight item"""
+    cfg: dict
+    mode: str
+    gpio: pigpio.pi
+
+    async def init(self):
+        """Initialise RGBLight"""
+        self.gpio = self.cfg["pigpio_adapter"].pigpio
+        with suppress(pigpio.error):  # Pins not used for PWM
+            await self.states.set(
+                "color",
+                Color.from_rgb(
+                    (self.gpio.get_PWM_dutycycle(pin)
+                     for pin in (
+                         self.cfg["pin_r"],
+                         self.cfg["pin_g"],
+                         self.cfg["pin_b"]))))
+        await self.apply_color()
+
+    async def set_color(self, color: Color) -> dict:
+        """Setter for color"""
+        await self.apply_color(color)
+        if await self.states.get("on") != bool(color.l):
+            await self.states.update("on", bool(color.l))
+        return {"color": color}
+
+    async def apply_color(self, color: Color = None) -> Color:
+        """Applies the color without manipulating the state"""
+        color = color or await self.states.get("color")
+        color_tup = color.rgb
+        for pin, val in (
+                (self.cfg["pin_r"], color_tup[0]),
+                (self.cfg["pin_g"], color_tup[1]),
+                (self.cfg["pin_b"], color_tup[2])):
+            self.gpio.set_PWM_dutycycle(pin, val)
+        return color
+
+    async def set_mode(self, mode: str) -> dict:
+        """Set a mode"""
+        if mode == "static":
+            return {"mode": mode, "color": await self.apply_color()}
+        return {"mode": mode}
+
+    async def set_on(self, value: bool) -> dict:
+        """Setter for on"""
+        if value:
+            if not await self.states.get("on"):
+                return {"on": True, "color": await self.apply_color()}
+            return {}
+
+        await self.apply_color(Color(0, 0, 0))
+        return {"on": False}
+
+    async def toggle_on(self):
+        """Action: Toggle"""
+        await self.set_on(not await self.states.get("on"))
+
+    async def set_hue(self, value):
+        """Set Hue"""
+        color = await self.states.get("color")
+        color.h = value
+        await self.states.set("color", color)
+
+    async def set_saturation(self, value):
+        """Set Saturation"""
+        color = await self.states.get("color")
+        color.s = value
+        await self.states.set("color", color)
+
+    async def set_brightness(self, value):
+        """Set Brightness"""
+        color = await self.states.get("color")
+        color.l = value
+        await self.states.set("color", color)

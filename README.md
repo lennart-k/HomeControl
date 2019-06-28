@@ -7,7 +7,7 @@
 
 Another approach to home automation
 
---- 
+---
 
 ## Installation
 
@@ -52,18 +52,22 @@ python -m homecontrol --help
 
 ```
 usage: homecontrol [-h] [-cfgfile CFGFILE] [-pid-file PID_FILE] [-clearport]
-                   [-verbose] [-nocolor] [-killprev] [-daemon]
+                   [-verbose] [-nocolor] [-logfile LOGFILE] [-killprev]
+                   [-daemon]
+
+HomeControl
 
 optional arguments:
   -h, --help            show this help message and exit
   -cfgfile CFGFILE, -cf CFGFILE
                         File storing the HomeControl configuration
-  -pid-file PID_FILE    Location of the PID file when running as a daemon.
-                        Ensures that only one session is running
-  -clearport            Frees the port for the API server using fuser.
-                        Therefore only available on Linux
-  -verbose
+  -pid-file PID_FILE    Location of the PID file.Ensures that only one session
+                        is running.Defaults to the configuration path
+  -clearport            Frees the port for the API server using
+                        fuser.Therefore only available on Linux
+  -verbose              Sets the loglevel for the logfile to INFO
   -nocolor              Disables colored console output
+  -logfile LOGFILE      Logfile location
   -killprev, -kp        Kills the previous HomeControl instance
   -daemon, -d           Start HomeControl as a daemon process [posix only]
   ```

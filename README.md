@@ -103,3 +103,4 @@ You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
 - RF devices
 - Yamaha AV receivers
 - Pushbullet (Send message)
+- Speedtest

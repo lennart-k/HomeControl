@@ -14,7 +14,7 @@ items:
       followers:
         type: Integer
         default: 0
-        poll-function: update_followers
+        poll-function: poll_followers
         poll-interval: 30
 
     actions:
@@ -28,7 +28,7 @@ items:
       followers:
         type: Integer
         default: 0
-        poll-function: update_followers
+        poll-function: poll_followers
         poll-interval: 30
 
     actions:
@@ -42,7 +42,7 @@ items:
       followers:
         type: Integer
         default: 0
-        poll-function: update_followers
+        poll-function: poll_followers
         poll-interval: 30
 
     actions:

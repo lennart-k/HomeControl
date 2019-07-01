@@ -302,7 +302,7 @@ def setup_logging(verbose: bool = False,
 
 def set_loop_policy() -> None:
     """
-    Tries to use a ProactorEventLoop on Windows and uvloop elsewhere
+    Try to use a ProactorEventLoop on Windows and uvloop elsewhere
     """
 
     if (sys.platform == "win32"

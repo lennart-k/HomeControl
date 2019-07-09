@@ -57,6 +57,7 @@ class Constructor(SafeConstructor):
             self.__class__.include_dir_file_mapped_constructor)
         self.add_constructor("!env_var", self.__class__.env_var_constructor)
         self.add_constructor("!path", self.__class__.path_constructor)
+        self.add_constructor("!listdir", self.__class__.listdir_constructor)
 
         SafeConstructor.__init__(self)
 
@@ -174,6 +175,21 @@ class Constructor(SafeConstructor):
         return resolve_path(node.value,
                             file_path=os.path.dirname(self.name),
                             config_dir=self.cfg_folder)
+
+    def listdir_constructor(self, node: yaml.Node) -> list:
+        """
+        !listdir <path>
+
+        Returns the contents of a directory
+        """
+        path = resolve_path(
+            node.value,
+            file_path=os.path.dirname(self.name),
+            config_dir=self.cfg_folder
+        )
+        if os.path.isdir(path):
+            return [os.path.join(path, item) for item in os.listdir(path)]
+        return list()
 
     def env_var_constructor(self, node: yaml.nodes.Node) -> str:
         """

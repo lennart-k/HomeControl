@@ -7,17 +7,17 @@ class HeliosVentilation:
     """The ventilation item"""
     async def init(self):
         """Initialise the HeliosVentilation item"""
+        self.core.tick_engine.tick(30)(self.ensure_login)
 
-        @tick(30)
-        async def ensure_login() -> None:
-            """
-            The Helios easyControls system has a global login management.
-            That means to keep the requests working
-            we just need to send a login request every ten minutes.
-            """
-            requests.post(
-                f"http://{self.cfg['host']}/info.htm",
-                data={'v00402': 'helios'})
+    async def ensure_login(self) -> None:
+        """
+        The Helios easyControls system has a global login management.
+        That means to keep the requests working
+        we just need to send a login request every ten minutes.
+        """
+        requests.post(
+            f"http://{self.cfg['host']}/info.htm",
+            data={'v00402': 'helios'})
 
     async def start_party(self,
                           duration: int = None,
@@ -45,3 +45,7 @@ class HeliosVentilation:
             "v00102": value,  # Speed register
         })
         return {"speed": value}
+
+    async def stop(self) -> None:
+        """Stops the item"""
+        self.core.tick_engine.remove_tick(30, self.ensure_login)

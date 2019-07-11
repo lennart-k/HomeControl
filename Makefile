@@ -6,3 +6,6 @@ flake8:
 
 docker:
 	docker build .
+
+tag:
+	git tag `python3 -c "from homecontrol.const import VERSION_STRING; print(VERSION_STRING)"`

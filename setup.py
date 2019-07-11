@@ -10,6 +10,7 @@ MINIMUM_PYTHON_VERSION = ">="+".".join(map(str, const.MINIMUM_PYTHON_VERSION))
 
 setup(
     name="homecontrol",
+    version=const.VERSION_STRING,
     url="https://github.com/lennart-k/HomeControl",
     author="Lennart K",
     description="Another approach to home automation",

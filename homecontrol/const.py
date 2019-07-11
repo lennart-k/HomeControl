@@ -3,6 +3,11 @@
 from enum import Enum
 import voluptuous as vol
 
+
+VERSION = (0, 1, 0)
+VERSION_STRING = ".".join(map(str, VERSION))
+
+
 MINIMUM_PYTHON_VERSION = (3, 6, 5)
 
 EXIT_SHUTDOWN = "EXIT_SHUTDOWN"

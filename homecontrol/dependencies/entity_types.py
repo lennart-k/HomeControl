@@ -21,7 +21,6 @@ class Item:
     states: "homecontrol.dependencies.state_engine.StateEngine"
     actions: "homecontrol.dependencies.action_engine.ActionEngine"
 
-
     def __repr__(self) -> str:
         return (f"<Item {self.type} identifier={self.identifier}"
                 f"name={self.name}>")
@@ -48,7 +47,6 @@ class Module:
     items: dict
     item_specs: dict
     mod: "module"
-
 
     def __repr__(self) -> str:
         return f"<Module {self.name}>"

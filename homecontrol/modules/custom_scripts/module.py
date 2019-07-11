@@ -57,7 +57,7 @@ class Module:
                     }
                 )
             )
-        except:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-except
             LOGGER.error(
                 "An error occured when executing the script %s", path,
                 exc_info=True)

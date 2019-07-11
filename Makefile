@@ -8,4 +8,4 @@ docker:
 	docker build .
 
 tag:
-	git tag `python3 -c "from homecontrol.const import VERSION_STRING; print(VERSION_STRING)"`
+	git tag v`python3 -c "from homecontrol.const import VERSION_STRING; print(VERSION_STRING)"`

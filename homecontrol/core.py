@@ -45,7 +45,6 @@ class Core:
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
         self.cfg = ConfigManager(cfg, cfg_path)
-        self.cfg_path = cfg_path
         self.block_future = asyncio.Future()
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
@@ -77,6 +76,8 @@ class Core:
         """
         Blocking method to keep HomeControl running
         until Core.block_future is done
+
+        Also triggers the stop coroutine when block_future has a result
         """
         with suppress(asyncio.CancelledError):
             exit_return = await self.block_future

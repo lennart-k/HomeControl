@@ -7,13 +7,7 @@ pip-requirements:
 
 items:
   RFRXAdapter:
-    config_fields:
-      pin:
-        type: Integer
-        default: 20
-      pigpio_adapter:
-        type: pigpio_adapter.PiGPIOAdapter
-
+    config-schema:
     config_schema:
       !vol/Required {schema: pin, default: 20}:
         !vol/All

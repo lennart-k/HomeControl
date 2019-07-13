@@ -37,8 +37,8 @@ class EventEngine:
         self.core = core
         self.handlers = defaultdict(set)
 
-    def create_event(self,
-                     event_type: str,
+    @staticmethod
+    def create_event(event_type: str,
                      data: dict = None,
                      **kwargs) -> Event:
         """
@@ -56,7 +56,6 @@ class EventEngine:
             list(self.handlers.get("*", list()))
             + list(self.handlers.get(event.event_type, list()))
         )
-
 
     def broadcast(self,  # lgtm [py/similar-function]
                   event_type: str,

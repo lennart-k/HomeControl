@@ -14,8 +14,6 @@ LOGGER = logging.getLogger(__name__)
 class Event:
     """Representation for an Event"""
 
-    __slots__ = ["event_type", "data", "timestamp", "kwargs"]
-
     def __init__(self,
                  event_type: str,
                  data: dict = None,
@@ -37,6 +35,27 @@ class EventEngine:
         self.core = core
         self.handlers = defaultdict(set)
 
+    def create_event(self,
+                     event_type: str,
+                     data: dict = None,
+                     **kwargs) -> Event:
+        """
+        Creates an Event to be broadcasted
+        """
+        data = data or {}
+        data.update(kwargs)
+        return Event(event_type, data=data, timestamp=datetime.now())
+
+    def get_event_handlers(self, event: Event) -> List:
+        """
+        Returns a list of handlers for an Event
+        """
+        return (
+            list(self.handlers.get("*", list()))
+            + list(self.handlers.get(event.event_type, list()))
+        )
+
+
     def broadcast(self,  # lgtm [py/similar-function]
                   event_type: str,
                   data: dict = None,
@@ -51,21 +70,13 @@ class EventEngine:
         >>> async def on_event(event: Event, ...):
         >>>     return
         """
-
-        data = data or {}
-        data.update(kwargs)
-        event = Event(event_type, data=data, timestamp=datetime.now())
+        event = self.create_event(event_type, data, **kwargs)
 
         LOGGER.debug("Event: %s", event)
 
-        handlers = (
-            list(self.handlers.get("*", list()))
-            + list(self.handlers.get(event_type, list()))
-        )
-
         return [asyncio.ensure_future(
             handler(event, **kwargs),
-            loop=self.core.loop) for handler in handlers]
+            loop=self.core.loop) for handler in self.get_event_handlers(event)]
 
     def broadcast_threaded(self,  # lgtm [py/similar-function]
                            event_type: str,
@@ -76,20 +87,13 @@ class EventEngine:
         - It returns Futures and not Tasks
         - It uses threads
         """
-        data = data or {}
-        data.update(kwargs)
-        event = Event(event_type, data=data, timestamp=datetime.now())
+        event = self.create_event(event_type, data, **kwargs)
 
         LOGGER.debug("Event: %s", event)
 
-        handlers = (
-            list(self.handlers.get("*", list()))
-            + list(self.handlers.get(event_type, list()))
-        )
-
         return [asyncio.run_coroutine_threadsafe(
             handler(event, **kwargs),
-            loop=self.core.loop) for handler in handlers]
+            loop=self.core.loop) for handler in self.get_event_handlers(event)]
 
     async def gather(self,
                      event_type: str,

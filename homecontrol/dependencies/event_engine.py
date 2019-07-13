@@ -1,7 +1,9 @@
 """EventEngine for HomeControl"""
 
 from contextlib import suppress
-from typing import List, Callable, Any
+from typing import (
+    List, Callable, Any, Union
+)
 import asyncio
 import logging
 from collections import defaultdict
@@ -98,12 +100,15 @@ class EventEngine:
     async def gather(self,
                      event_type: str,
                      data: dict = None,
+                     timeout: Union[float, int, None] = None,
                      **kwargs) -> List[Any]:
         """
         Broadcast an event and return the results
         """
-        return await asyncio.gather(
-            *self.broadcast(event_type, data, **kwargs))
+        return await asyncio.wait(
+            self.broadcast(event_type, data, **kwargs),
+            loop=self.core.loop,
+            timeout=timeout)
 
     def register(self, event: str) -> Callable:
         """

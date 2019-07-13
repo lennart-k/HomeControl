@@ -8,7 +8,7 @@ pip-requirements:
 
 items:
   PiGPIOAdapter:
-    config_schema:
+    config-schema:
       !vol/Required {schema: host, default: localhost}:
         !type/str
 
@@ -16,7 +16,7 @@ items:
         !vol/Coerce { type: !type/int }
 
   BinaryOutput:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pin, default: 16}:
         !vol/All
           - !vol/Coerce { type: !type/int }
@@ -40,7 +40,7 @@ items:
       toggle: toggle_on
 
   Button:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pin, default: 16}:
           !vol/All
             - !vol/Coerce { type: !type/int }
@@ -64,7 +64,7 @@ items:
         default: 0
 
   I2CLCD:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pigpio_adapter}:
         !type/str
 
@@ -91,7 +91,7 @@ items:
         setter: set_line2
 
   RGBLight:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pin_r, default: 22}:
         !vol/All
           - !vol/Coerce { type: !type/int }

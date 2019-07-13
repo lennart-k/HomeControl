@@ -4,7 +4,7 @@ meta:
 
 items:
   HeliosVentilation:
-    config_schema:
+    config-schema:
       !vol/Required {schema: host}:
         !vol/Coerce { type: !type/str }
 

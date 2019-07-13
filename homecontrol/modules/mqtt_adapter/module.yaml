@@ -7,7 +7,7 @@ pip-requirements:
 
 items:
   MQTTAdapter:
-    config_schema:
+    config-schema:
       !vol/Required {schema: host, default: "localhost"}:
         !type/str
 

@@ -5,7 +5,7 @@ meta:
 items:
 
   MCP3008ADC:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pigpio_adapter}:
         !type/str
 
@@ -21,7 +21,7 @@ items:
         !type/int
 
   AnalogInput:
-    config_schema:
+    config-schema:
       !vol/Required {schema: adc}:
         !type/str
 

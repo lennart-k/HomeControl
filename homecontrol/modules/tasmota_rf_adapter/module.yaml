@@ -4,7 +4,7 @@ meta:
 
 items:
   TasmotaRFAdapter:
-    config_schema:
+    config-schema:
       !vol/Required {schema: mqtt_adapter}:
         !type/str
 

@@ -4,7 +4,7 @@ meta:
 
 items:
   NECIRReceiver:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pin, default: 16}:
         !vol/All
           - !vol/Coerce { type: !type/int }

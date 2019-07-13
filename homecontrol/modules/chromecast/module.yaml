@@ -7,7 +7,7 @@ pip-requirements:
 
 items:
   Chromecast:
-    config_schema:
+    config-schema:
       !vol/Required {schema: host, default: None}:
         !vol/Coerce { type: !type/str }
 

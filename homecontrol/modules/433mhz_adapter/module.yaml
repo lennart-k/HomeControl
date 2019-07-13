@@ -8,7 +8,6 @@ pip-requirements:
 items:
   RFRXAdapter:
     config-schema:
-    config_schema:
       !vol/Required {schema: pin, default: 20}:
         !vol/All
           - !vol/Coerce { type: !type/int }
@@ -18,7 +17,7 @@ items:
         !type/str
 
   RFTXAdapter:
-    config_schema:
+    config-schema:
       !vol/Required {schema: pin, default: 20}:
         !vol/All
           - !vol/Coerce { type: !type/int }

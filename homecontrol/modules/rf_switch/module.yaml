@@ -4,7 +4,7 @@ meta:
 
 items:
   IntertechnoSwitch:
-    config_schema:
+    config-schema:
       !vol/Required {schema: house, default: A}:
         !vol/All
           - !vol/Coerce { type: !type/str }

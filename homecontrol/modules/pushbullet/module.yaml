@@ -3,7 +3,7 @@ meta:
 
 items:
   Pushbullet:
-    config_schema:
+    config-schema:
       !vol/Required {schema: access_token}:
         !type/str
 

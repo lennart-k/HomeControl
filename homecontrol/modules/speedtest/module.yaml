@@ -20,4 +20,4 @@ items:
     actions:
       measure: measure
 
-    config_schema: {}
+    config-schema: {}

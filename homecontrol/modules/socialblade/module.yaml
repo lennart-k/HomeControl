@@ -7,7 +7,7 @@ pip-requirements:
 
 items:
   YouTubeFollowers:
-    config_schema:
+    config-schema:
       !vol/Any [rawname, name]: !type/str
 
     states:
@@ -21,7 +21,7 @@ items:
       update_followers: update_followers
 
   TwitchFollowers:
-    config_schema:
+    config-schema:
       !vol/Any [rawname, name]: !type/str
 
     states:
@@ -35,7 +35,7 @@ items:
       update_followers: update_followers
 
   TwitterFollowers:
-    config_schema:
+    config-schema:
       !vol/Required { schema: name }: !type/str
 
     states:

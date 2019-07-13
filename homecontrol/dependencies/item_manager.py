@@ -200,10 +200,10 @@ class ItemManager:
         # Identifiers of items this new item depends on
         item.dependencies = set()
 
-        if spec.get("config_schema"):
-            schema = spec.get("config_schema")
-            if not isinstance(spec["config_schema"], vol.Schema):
-                schema = vol.Schema(spec["config_schema"])
+        if spec.get("config-schema"):
+            schema = spec.get("config-schema")
+            if not isinstance(spec["config-schema"], vol.Schema):
+                schema = vol.Schema(spec["config-schema"])
             config = schema(cfg or {})
         else:
             config = cfg

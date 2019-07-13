@@ -16,7 +16,7 @@ items:
         default: False
         schema: !type/bool
 
-    config_schema:
+    config-schema:
       !vol/Required {schema: seconds, default: 60}:
         !vol/All
           - !vol/Coerce { type: !type/int }

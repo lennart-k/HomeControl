@@ -1,3 +1,8 @@
+
+![logotype](https://raw.githubusercontent.com/zuurw/HomeControl/1e3768856ff9e6667fa56e3f847ab7c84dc988af/logotype/LOGOTYPE%20VERTICAL.png
+)
+
+
 [![](https://readthedocs.org/projects/homecontrol/badge/?version=latest&style=flat)](https://homecontrol.readthedocs.io/en/latest/)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/lennart-k/HomeControl.svg?logo=lgtm&logoWidth=18&style=flat)](https://lgtm.com/projects/g/lennart-k/HomeControl/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/lennart-k/HomeControl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/lennart-k/HomeControl/context:python)

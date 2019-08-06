@@ -1,18 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Creator: CorelDRAW 2018 -->
-<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="210mm" height="297mm" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
-viewBox="0 0 21000 29700"
- xmlns:xlink="http://www.w3.org/1999/xlink">
- <defs>
-  <style type="text/css">
-   <![CDATA[
-    .fil0 {fill:#6439D0}
-   ]]>
-  </style>
- </defs>
- <g id="Layer_x0020_1">
-  <metadata id="CorelCorpID_0Corel-Layer"/>
-  <path class="fil0" d="M18753.23 14873.35c-1783.03,0 -3493.09,708.37 -4753.86,1969.05 -1260.85,1260.85 -1969.13,2970.91 -1969.13,4754.02l2689.23 0c0,-1069.87 424.97,-2095.97 1181.46,-2852.46 756.5,-756.41 1782.52,-1181.29 2852.3,-1181.29l0 -2689.32zm-4832.9 -7255.69l-3234.7 -2156.52 -8067.6 5378.37 0 10756.91 1344.61 0c0,-6305.9 3997.96,-11918.33 9957.69,-13978.76zm3020.67 2013.75c-5916.13,896.1 -10289.21,5981.39 -10289.21,11965.01l2689.23 0c0,-2496.27 991.67,-4890.28 2756.8,-6655.41 1765.12,-1765.21 4159.14,-2756.89 6655.41,-2756.89l0 -1344.61 -1812.23 -1208.1z"/>
- </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate" viewBox="0 0 850.394 850.394" width="850.394pt" height="850.394pt">
+    <defs>
+        <clipPath id="_clipPath_Lyrhqquv7FkGnNz7RmW6zn45ZARmnL8L">
+            <rect width="850.394" height="850.394"/>
+        </clipPath>
+    </defs>
+    <g clip-path="url(#_clipPath_Lyrhqquv7FkGnNz7RmW6zn45ZARmnL8L)">
+        <path d=" M 653.885 463.311 C 603.342 463.311 554.868 483.39 519.13 519.126 C 483.389 554.867 463.312 603.341 463.312 653.886 L 539.542 653.886 C 539.542 623.559 551.588 594.473 573.032 573.029 C 594.476 551.587 623.56 539.543 653.885 539.543 L 653.885 463.311 L 653.885 463.311 Z  M 516.889 257.638 L 425.197 196.508 L 196.509 348.966 L 196.509 653.886 L 234.624 653.886 C 234.624 475.136 347.952 316.043 516.889 257.638 L 516.889 257.638 Z  M 602.514 314.72 C 434.813 340.121 310.852 484.271 310.852 653.886 L 387.082 653.886 C 387.082 583.125 415.192 515.264 465.227 465.229 C 515.262 415.191 583.124 387.081 653.885 387.081 L 653.885 348.966 L 602.514 314.72 L 602.514 314.72 Z " fill-rule="evenodd" fill="rgb(100,57,208)"/>
+    </g>
 </svg>

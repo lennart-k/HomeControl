@@ -154,5 +154,3 @@ def dump(obj, fp, *, skipkeys=False, ensure_ascii=True, check_circular=True,
                      allow_nan=allow_nan, indent=indent,
                      separators=separators, sort_keys=sort_keys, **kw)
 
-
-__all__ = ["loads", "load", "dumps", "dump"]

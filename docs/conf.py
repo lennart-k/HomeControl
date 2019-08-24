@@ -36,7 +36,8 @@ extensions = [
     'sphinxcontrib.asyncio',
     'homecontrol_module',
     'sphinxcontrib.httpdomain',
-    'recommonmark'
+    'recommonmark',
+    'sphinxcontrib_trio',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

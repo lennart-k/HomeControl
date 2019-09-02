@@ -17,9 +17,8 @@ CONFIG_SCHEMA = vol.Schema(
         vol.Required("id"): str,
         vol.Required("type"): str,
         vol.Optional("name"): str,
-        vol.Required("cfg", default={}): dict,
         vol.Required("states", default={}): dict
-    })
+    }, extra=vol.ALLOW_EXTRA)
 )
 
 
@@ -113,7 +112,7 @@ class ItemManager:
             name=raw_cfg.get("name"),
             item_type=raw_cfg["type"],
             raw_cfg=raw_cfg,
-            cfg=raw_cfg["cfg"],
+            cfg=raw_cfg.get("cfg", raw_cfg),
             state_defaults=raw_cfg["states"],
             dependant_items=dependant_items
         )
@@ -203,7 +202,9 @@ class ItemManager:
         if spec.get("config-schema"):
             schema = spec.get("config-schema")
             if not isinstance(spec["config-schema"], vol.Schema):
-                schema = vol.Schema(spec["config-schema"])
+                schema = vol.Schema(
+                    spec["config-schema"], extra=vol.ALLOW_EXTRA)
+
             config = schema(cfg or {})
         else:
             config = cfg

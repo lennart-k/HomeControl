@@ -45,6 +45,8 @@ class Core:
         self.start_args = start_args or {}
         self.loop = loop or asyncio.get_event_loop()
         self.cfg = ConfigManager(cfg, cfg_path)
+        self.cfg_path = cfg_path
+        self.cfg_dir = os.path.dirname(cfg_path)
         self.block_future = asyncio.Future()
         self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)

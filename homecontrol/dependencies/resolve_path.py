@@ -6,7 +6,9 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
-def resolve_path(path: str, file_path: str, config_dir: str = None) -> str:
+def resolve_path(path: str,
+                 file_path: str = None,
+                 config_dir: str = None) -> str:
     """
     Resolves a path:
     ~/  for paths relative to your home directory
@@ -16,6 +18,8 @@ def resolve_path(path: str, file_path: str, config_dir: str = None) -> str:
             only available if config_dir is specified
         for paths relative to the current file
     """
+    file_path = file_path or config_dir
+
     if path.startswith("~"):
         return os.path.expanduser(path)
     if path.startswith("/"):

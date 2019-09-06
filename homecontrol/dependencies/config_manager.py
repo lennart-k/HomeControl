@@ -105,7 +105,8 @@ class ConfigManager:
                               domain: str,
                               handler: object = None,
                               schema: vol.Schema = None,
-                              allow_reload: bool = False) -> object:
+                              allow_reload: bool = False,
+                              default: dict = None) -> object:
         """
         Registers a configuration domain
 
@@ -126,6 +127,8 @@ class ConfigManager:
             Allow reloading this configuration domain
         schema (voluptuous.Schema):
             Schema to validate the configuration and to fill in defaults
+        default (dict):
+            A default configuration
 
         Returns:
             A validated and approved version of the configuration
@@ -142,4 +145,4 @@ class ConfigManager:
             self.domain_schemas[domain] = schema
 
         return await self.approve_domain_config(
-            domain, self.cfg.get(domain, {}), initial=True)
+            domain, self.cfg.get(domain, default or {}), initial=True)

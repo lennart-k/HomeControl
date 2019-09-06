@@ -33,7 +33,7 @@ class Module:
     async def init(self) -> None:
         """Initialise the logbook module"""
         self.cfg = await self.core.cfg.register_domain(
-            "state-logs",
+            "logbook",
             self,
             schema=CONFIG_SCHEMA,
             allow_reload=False

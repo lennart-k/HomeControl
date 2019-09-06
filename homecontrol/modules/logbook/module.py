@@ -7,12 +7,14 @@ import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 import voluptuous as vol
 from aiohttp import web
+from os.path import abspath
 
 from homecontrol.dependencies.event_engine import Event
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.json import dumps
 from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.dependencies.validators import ConsistsOf
+from homecontrol.dependencies.resolve_path import resolve_path
 
 from dependencies import models  # pylint: disable=import-error
 
@@ -26,6 +28,9 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Required("events", default=[]): ConsistsOf(str)
     }
 })
+DEFAULT_CONFIG = {
+    "db-path": "sqlite:///" + abspath(resolve_path('homecontrol.db', config_dir=self.core.cfg_dir))
+}
 
 
 class Module:
@@ -36,7 +41,8 @@ class Module:
             "logbook",
             self,
             schema=CONFIG_SCHEMA,
-            allow_reload=False
+            allow_reload=False,
+            default=DEFAULT_CONFIG
         )
         self.engine = sqlalchemy.create_engine(
             self.cfg["db-path"], strategy="threadlocal")

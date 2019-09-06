@@ -16,7 +16,6 @@ from homecontrol.const import (
     ITEM_ACTION_NOT_FOUND,
     ERROR_INVALID_ITEM_STATES,
     ERROR_INVALID_ITEM_STATE,
-    STATE_COMMIT_SCHEMA,
     ItemStatus
 )
 from homecontrol.exceptions import (
@@ -28,6 +27,7 @@ LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("headers", default={}): {vol.Coerce(str): vol.Coerce(str)}
 })
+STATE_COMMIT_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
 
 
 class Module:

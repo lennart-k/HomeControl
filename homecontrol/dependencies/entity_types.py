@@ -3,7 +3,20 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
+import voluptuous as vol
 from homecontrol.const import ItemStatus
+
+
+ITEM_SCHEMA = vol.Schema({
+    vol.Optional("item_type"): str,
+    vol.Required("id"): str,
+    vol.Required("!type"): "Item"
+})
+MODULE_SCHEMA = vol.Schema({
+    vol.Optional("meta"): str,
+    vol.Required("name"): str,
+    vol.Required("!type"): "Module"
+})
 
 
 class Item:

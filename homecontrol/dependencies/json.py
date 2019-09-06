@@ -16,7 +16,7 @@ from homecontrol.exceptions import (
     ItemNotFoundException,
     ModuleNotFoundException
 )
-from homecontrol.const import (
+from homecontrol.dependencies.entity_types import (
     MODULE_SCHEMA,
     ITEM_SCHEMA
 )

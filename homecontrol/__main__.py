@@ -82,7 +82,7 @@ def copy_folder(src: str, dest: str, merge_folders: bool = False) -> None:
     Copies a folder to another path overwriting files
     and merging folders
     """
-    for src_root, dirs, files in os.walk(src):
+    for src_root, dirs, files in os.walk(src, followlinks=True):
         dest_root = src_root.replace(src, dest, 1)
         if not os.path.isdir(dest_root):
             os.mkdir(dest_root)

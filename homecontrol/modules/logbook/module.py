@@ -1,13 +1,13 @@
 """logbook module"""
 import logging
 from contextlib import contextmanager
+from os.path import abspath
 
 import uuid
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 import voluptuous as vol
 from aiohttp import web
-from os.path import abspath
 
 from homecontrol.dependencies.event_engine import Event
 from homecontrol.dependencies.entity_types import Item
@@ -28,9 +28,6 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Required("events", default=[]): ConsistsOf(str)
     }
 })
-DEFAULT_CONFIG = {
-    "db-path": "sqlite:///" + abspath(resolve_path('homecontrol.db', config_dir=self.core.cfg_dir))
-}
 
 
 class Module:
@@ -42,7 +39,12 @@ class Module:
             self,
             schema=CONFIG_SCHEMA,
             allow_reload=False,
-            default=DEFAULT_CONFIG
+            default={
+                "db-path": (
+                    "sqlite:///"
+                    + abspath(resolve_path('homecontrol.db',
+                                           config_dir=self.core.cfg_dir)))
+            }
         )
         self.engine = sqlalchemy.create_engine(
             self.cfg["db-path"], strategy="threadlocal")

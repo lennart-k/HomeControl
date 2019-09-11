@@ -1,7 +1,7 @@
 FROM python:3.7.2-alpine
 LABEL MAINTAINER="Lennart K"
 
-RUN apk add build-base git
+RUN apk add build-base git musl-dev libffi-dev openssl-dev
 
 RUN pip install uvloop
 

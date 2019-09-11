@@ -43,7 +43,8 @@ class Module:
         name = os.path.splitext(os.path.basename(path))[0]
 
         try:
-            spec = importlib.util.spec_from_file_location(f"scripts.{name}", path)
+            spec = importlib.util.spec_from_file_location(
+                f"scripts.{name}", path)
             mod = importlib.util.module_from_spec(spec)
             mod.__dict__.update({
                 "core": self.core,

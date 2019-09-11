@@ -100,21 +100,21 @@ class ModuleManager:
                 "module_not_loaded", exception=error)
             return error
 
-        spec = importlib.util.spec_from_file_location(name, mod_path)
-        mod = importlib.util.module_from_spec(spec)
+        mod_spec = importlib.util.spec_from_file_location(name, mod_path)
+        mod = importlib.util.module_from_spec(mod_spec)
         mod.resource_folder = None
         mod.event = self.core.event_engine.register
         mod.tick = self.core.tick_engine.tick
-        spec.loader.exec_module(mod)
+        mod_spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
         else:
             mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
-        cfg = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(
+        spec = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(
             mod.SPEC)) if hasattr(mod, "SPEC") else {}
 
-        return await self._load_module_object(cfg, name, mod_path, mod)
+        return await self._load_module_object(spec, name, mod_path, mod)
 
     async def load_folder_module(self,
                                  path: str,
@@ -127,21 +127,21 @@ class ModuleManager:
         Returns a Module object
         """
         mod_path = os.path.join(path, "module.py")
-        cfg_path = os.path.join(path, "module.yaml")
+        spec_path = os.path.join(path, "module.yaml")
         try:
             assert os.path.isdir(path)
             assert os.path.isfile(mod_path)
-            assert os.path.isfile(cfg_path)
+            assert os.path.isfile(spec_path)
         except AssertionError as error:
             LOGGER.warning("Module could not be loaded: %s at %s", name, path)
             self.core.event_engine.broadcast(
                 "module_not_loaded", exception=error, name=name)
             return error
 
-        cfg = YAMLLoader.load(open(cfg_path))
+        spec = YAMLLoader.load(open(spec_path))
 
         unsatisfied_pip_dependencies = set()
-        for requirement in cfg.get("pip-requirements", []):
+        for requirement in spec.get("pip-requirements", []):
             matcher = NormalizedMatcher(requirement)
             if matcher.name not in self.installed_requirements:
                 unsatisfied_pip_dependencies.add(requirement)
@@ -162,16 +162,17 @@ class ModuleManager:
                     name=name)
                 return
 
-        spec = importlib.util.spec_from_file_location(name, mod_path)
-        mod = importlib.util.module_from_spec(spec)
+        mod_spec = importlib.util.spec_from_file_location(name, mod_path)
+        mod = importlib.util.module_from_spec(mod_spec)
+        mod.SPEC = spec
         mod.resource_folder = path
         sys.path.append(path)
-        spec.loader.exec_module(mod)
+        mod_spec.loader.exec_module(mod)
         sys.path.remove(path)
-        return await self._load_module_object(cfg, name, path, mod)
+        return await self._load_module_object(spec, name, path, mod)
 
     async def _load_module_object(self,
-                                  cfg: dict,
+                                  spec: dict,
                                   name: str,
                                   path: str,
                                   mod) -> Module:
@@ -187,14 +188,14 @@ class ModuleManager:
         mod_obj = mod.Module.__new__(mod.Module)
 
         mod_obj.core = self.core
-        mod_obj.meta = cfg.get("meta", {})
+        mod_obj.meta = spec.get("meta", {})
         mod_obj.resource_folder = mod.resource_folder
         mod_obj.name = name
         mod_obj.path = path
         mod_obj.items = {}
         mod_obj.item_specs = {}
         mod_obj.mod = mod
-        mod_obj.spec = cfg
+        mod_obj.spec = spec
         mod_obj.__init__()
 
         self.loaded_modules[name] = mod_obj

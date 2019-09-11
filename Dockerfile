@@ -1,5 +1,9 @@
-FROM python:3.7.2
+FROM python:3.7.2-alpine
 LABEL MAINTAINER="Lennart K"
+
+RUN apk add build-base git
+
+RUN pip install uvloop
 
 VOLUME /config
 

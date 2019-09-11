@@ -22,7 +22,7 @@ class YamahaAVReceiver:
         except (ConnectionError, ConnectionRefusedError):
             return False
 
-        tick(2)(self.update)
+        self.core.tick_engine.tick(2)(self.update)
 
     async def set_on(self, value: bool) -> dict:
         """Setter for on"""

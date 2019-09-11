@@ -23,7 +23,7 @@ class Module:
         self.szenes = {szene["alias"]: Szene(self, szene)
                        for szene in self.cfg}
 
-        @event("gather_automation_providers")
+        @self.core.event_engine.register("gather_automation_providers")
         async def on_gather_automation_providers(event, engine, callback):
             callback(action={"szene": self.provider_factory})
 

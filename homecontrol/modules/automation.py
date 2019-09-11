@@ -41,7 +41,7 @@ class EventTriggerProvider:
         self.event_data = self.data.get("data", {})
 
         # Subscribe to trigger event
-        event(self.data["type"])(self.on_event)
+        self.core.event_engine.register(self.data["type"])(self.on_event)
 
     async def on_event(self, event: str, **kwargs) -> None:
         """Handle event"""
@@ -64,7 +64,7 @@ class StateTriggerProvider:
         self.data = rule.data["trigger"]
 
         # Subscribe to state changes
-        event("state_change")(self.on_state)
+        self.core.event_engine.register("state_change")(self.on_state)
 
     async def on_state(self, event: str, item, changes: dict) -> None:
         """Handle new state"""
@@ -174,7 +174,7 @@ class Module:
             allow_reload=True
         ) or []
 
-        event("core_bootstrap_complete")(self.start)
+        self.core.event_engine.register("core_bootstrap_complete")(self.start)
 
     async def start(self, event: str) -> None:
         """Start when core bootstrap is complete"""

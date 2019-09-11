@@ -23,9 +23,10 @@ class Module:
         """Initialise the WebSocket module"""
         self.event_sockets = set()
         # pylint: disable=undefined-variable
-        event("state_change")(self.on_item_state_change)
+        self.core.event_engine.register("state_change")(
+            self.on_item_state_change)
 
-        @event("http_add_api_routes")
+        @self.core.event_engine.register("http_add_api_routes")
         async def add_route(event, router):
             """Add an API route"""
 

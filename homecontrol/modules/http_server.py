@@ -52,7 +52,7 @@ class Module:
         if not self.core.start_args["verbose"]:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())
 
-        event("core_bootstrap_complete")(self.start)
+        self.core.event_engine.register("core_bootstrap_complete")(self.start)
 
     async def start(self, *args):
         """Start the HTTP server"""

@@ -15,14 +15,14 @@ class TasmotaRFAdapter:
         self.sending = asyncio.Event()
         self.sending.set()
 
-        @event("mqtt_connected")
+        @self.core.event_engine.register("mqtt_connected")
         async def on_mqtt_connected(event, mqtt_adapter):
             """Handle connection"""
             if mqtt_adapter == self.cfg["mqtt_adapter"]:
                 self.cfg["mqtt_adapter"].client.subscribe(
                     self.cfg["topic"] + "/tele/RESULT")
 
-        @event("mqtt_message_received")
+        @self.core.event_engine.register("mqtt_message_received")
         async def on_mqtt_message_received(event, mqtt_adapter, message):
             """Handle message"""
             if mqtt_adapter == self.cfg["mqtt_adapter"]:

@@ -43,7 +43,8 @@ class BitcoinStats:
     """Item holding Bitcoin stats"""
     async def init(self):
         """Initialise the item"""
-        tick(self.cfg["update_interval"])(self.update_stats)
+        self.core.tick_engine.tick(
+            self.cfg["update_interval"])(self.update_stats)
 
     async def update_stats(self):
         """Update the current states"""

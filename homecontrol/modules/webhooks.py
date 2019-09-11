@@ -16,7 +16,7 @@ class Module:
     async def init(self):
         """Initialise the module"""
 
-        @event("http_add_api_routes")
+        @self.core.event_engine.register("http_add_api_routes")
         async def add_route(event, router):
             """Add an API route"""
 
@@ -32,7 +32,7 @@ class Module:
                         indent=4, sort_keys=True),
                     content_type="application/json")
 
-        @event("gather_automation_providers")
+        @self.core.event_engine.register("gather_automation_providers")
         async def on_gather_automation_providers(event, engine, callback):
             """Register as an automation provider"""
             callback(trigger={"webhook": self.provider_factory})
@@ -53,7 +53,7 @@ class WebhookTriggerProvider:
         self.data = rule.data["trigger"]
         self.event = self.data["target"]
 
-        event("webhook_event")(self.on_webhook)
+        self.core.event_engine.register("webhook_event")(self.on_webhook)
 
     async def on_webhook(self, event, target, params):
         """Handle WebHook event"""

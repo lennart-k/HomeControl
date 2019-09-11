@@ -24,7 +24,8 @@ class Module:
             schema=CONFIG_SCHEMA,
             allow_reload=False
         )
-        event("core_bootstrap_complete")(self.execute_scripts)
+        self.core.event_engine.register("core_bootstrap_complete")(
+            self.execute_scripts)
 
     async def execute_scripts(self, event) -> None:
         """Executes all configured scripts"""

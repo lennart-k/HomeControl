@@ -52,9 +52,10 @@ class Module:
 
         self.get_session = sessionmaker(bind=self.engine)
 
-        event("state_change")(self.on_state_change)
-        event("*")(self.on_event)
-        event("http_add_api_routes")(self.add_api_routes)
+        self.core.event_engine.register("state_change")(self.on_state_change)
+        self.core.event_engine.register("*")(self.on_event)
+        self.core.event_engine.register(
+            "http_add_api_routes")(self.add_api_routes)
 
     @contextmanager
     def session_context(self):

@@ -42,7 +42,7 @@ class Module:
         self.cfg = await self.core.cfg.register_domain(
             "api-server", schema=CONFIG_SCHEMA)
 
-        @event("http_add_main_subapps")
+        @self.core.event_engine.register("http_add_main_subapps")
         async def add_subapp(event, main_app):
             middlewares = self.middlewares()
             await self.core.event_engine.gather(

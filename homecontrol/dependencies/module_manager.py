@@ -165,8 +165,6 @@ class ModuleManager:
         spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(spec)
         mod.resource_folder = path
-        mod.event = self.core.event_engine.register
-        mod.tick = self.core.tick_engine.tick
         sys.path.append(path)
         spec.loader.exec_module(mod)
         sys.path.remove(path)

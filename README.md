@@ -35,6 +35,12 @@ python -m pip install git+https://github.com/lennart-k/HomeControl
 homecontrol
 ```
 
+#### Note
+
+- Ensure that `python` refers to Python 3 and not Python 2
+- Run homecontrol as `root` or install it with the `-U` parameter for HomeControl to install pip modules automatically
+
+
 If you want to participate in developing HomeControl consider following techniques:
 ```
 git clone https://github.com/lennart-k/HomeControl

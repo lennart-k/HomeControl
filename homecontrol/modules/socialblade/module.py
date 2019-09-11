@@ -14,11 +14,32 @@ NAME_URL = "https://socialblade.com/{platform}/user/{name}/realtime"
 HEADERS = {"User-Agent": "HomeControl"}
 
 
+def get_rawname(name: str, platform: str) -> str:
+    """
+    Gets a user id from a username
+    """
+    response = requests.get(NAME_URL.format(
+        name=name, platform=platform),
+        headers=HEADERS)
+
+    if response.status_code != 200:
+        LOGGER.error("Could not resolve rawname for %s: HTTP %s",
+                     name, response.status_code)
+        return
+    soup = BeautifulSoup(response.content, "html.parser")
+    result = soup.find(id="rawUser")
+    if result:
+        return result.get_text()
+    return None
+
+
 class TwitchFollowers:
     """Followers on Twitch"""
     async def init(self) -> bool:
         """Initialise the item"""
-        self.cfg.setdefault("rawname", self._get_rawname())
+        self.cfg.setdefault("rawname", get_rawname(
+            self.cfg["name"], "twitch"
+        ))
         if not self.cfg["rawname"]:
             return False
 
@@ -34,27 +55,14 @@ class TwitchFollowers:
         """Updates the current state"""
         await self.states.update("followers", await self.poll_followers())
 
-    def _get_rawname(self):
-        response = requests.get(NAME_URL.format(
-            name=self.cfg["name"], platform="twitch"),
-                                headers=HEADERS)
-
-        if response.status_code != 200:
-            LOGGER.error("Could not resolve rawname for %s: HTTP %s",
-                         self.cfg["name"], response.status_code)
-            return
-        soup = BeautifulSoup(response.content, "html.parser")
-        result = soup.find(id="rawUser")
-        if result:
-            return result.get_text()
-        return None
-
 
 class YouTubeFollowers:
     """Followers on YouTube"""
     async def init(self) -> bool:
         """Initialise the item"""
-        self.cfg.setdefault("rawname", self._get_rawname())
+        self.cfg.setdefault("rawname", get_rawname(
+            self.cfg["name"], "youtube"
+        ))
         if not self.cfg["rawname"]:
             return False
 
@@ -69,21 +77,6 @@ class YouTubeFollowers:
     async def update_followers(self) -> None:
         """Updates the current state"""
         await self.states.update("followers", await self.poll_followers())
-
-    def _get_rawname(self):
-        response = requests.get(NAME_URL.format(
-            name=self.cfg["name"], platform="youtube"),
-                                headers=HEADERS)
-
-        if response.status_code != 200:
-            LOGGER.error("Could not resolve rawname for %s: HTTP %s",
-                         self.cfg["name"], response.status_code)
-            return
-        soup = BeautifulSoup(response.content, "html.parser")
-        result = soup.find(id="rawUser")
-        if result:
-            return result.get_text()
-        return None
 
 
 class TwitterFollowers:

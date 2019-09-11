@@ -2,6 +2,7 @@
 
 import os
 import logging
+import importlib
 
 import voluptuous as vol
 from homecontrol.dependencies.validators import ConsistsOf
@@ -38,25 +39,18 @@ class Module:
         """
         LOGGER.info("Executing script at path '%s'", path)
 
-        code = compile(
-            open(path, "rb").read(),
-            filename=path,
-            mode="exec"
-        )
         name = os.path.splitext(os.path.basename(path))[0]
 
         try:
-            await self.core.loop.run_in_executor(
-                None,
-                lambda: exec(  # pylint: disable=exec-used
-                    code, {},
-                    {
-                        "core": self.core,
-                        "loop": self.core.loop,
-                        "logger": logging.getLogger(f"scripts.{name}")
-                    }
-                )
-            )
+            spec = importlib.util.spec_from_file_location(f"scripts.{name}", path)
+            mod = importlib.util.module_from_spec(spec)
+            mod.__dict__.update({
+                "core": self.core,
+                "loop": self.core.loop,
+                "logger": logging.getLogger(f"scripts.{name}")
+                })
+            spec.loader.exec_module(mod)
+
         except Exception:  # pylint: disable=broad-except
             LOGGER.error(
                 "An error occured when executing the script %s", path,

@@ -1,22 +1,22 @@
 """ModuleManager module"""
 
-import subprocess
 import sys
+import subprocess
 import importlib
 import importlib.util
 import os
-import json
 import logging
 
 import pkg_resources
-# pylint: disable=no-name-in-module,import-error
-from pip._vendor.distlib.version import NormalizedMatcher
 import voluptuous as vol
 from homecontrol.dependencies.validators import ConsistsOf
 
 import homecontrol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.dependencies.entity_types import Module
+from homecontrol.dependencies.ensure_pip_requirements import (
+    ensure_pip_requirements
+)
 from homecontrol.exceptions import PipInstallError
 
 LOGGER = logging.getLogger(__name__)
@@ -38,11 +38,6 @@ class ModuleManager:
     def __init__(self, core):
         self.core = core
         self.loaded_modules = {}
-        pip_list = subprocess.check_output(
-            [sys.executable, "-m", "pip", "list",
-             "--format=json", "--disable-pip-version-check"])
-        self.installed_requirements = {
-            item["name"]: item["version"] for item in json.loads(pip_list)}
 
     async def init(self) -> None:
         """Initialise the modules"""
@@ -140,27 +135,16 @@ class ModuleManager:
 
         spec = YAMLLoader.load(open(spec_path))
 
-        unsatisfied_pip_dependencies = set()
-        for requirement in spec.get("pip-requirements", []):
-            matcher = NormalizedMatcher(requirement)
-            if matcher.name not in self.installed_requirements:
-                unsatisfied_pip_dependencies.add(requirement)
-                continue
-            if not matcher.match(self.installed_requirements[matcher.name]):
-                unsatisfied_pip_dependencies.add(requirement)
-
-        if unsatisfied_pip_dependencies:
-            process = subprocess.Popen(
-                [sys.executable, "-m", "pip", "install",
-                 *unsatisfied_pip_dependencies])
-            if process.wait():
-                LOGGER.warning(
-                    "Module could not be loaded: %s at %s", name, path)
-                self.core.event_engine.broadcast(
-                    "module_not_loaded",
-                    exception=PipInstallError(),
-                    name=name)
-                return
+        try:
+            ensure_pip_requirements(spec.get("pip-requirements", []))
+        except PipInstallError as e:
+            LOGGER.warning(
+                "Module could not be loaded: %s at %s", name, path)
+            self.core.event_engine.broadcast(
+                "module_not_loaded",
+                exception=e,
+                name=name)
+            return
 
         mod_spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(mod_spec)

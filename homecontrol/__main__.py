@@ -67,6 +67,11 @@ def get_arguments() -> dict:
         action="store_true",
         default=True,
         help="Kills the previous HomeControl instance")
+    parser.add_argument(
+        "-skip-pip", "-sp",
+        action="store_true",
+        default=False,
+        help="Skips the installation of configured pip requirements")
     if os.name == "posix":
         parser.add_argument(
             "-daemon", "-d",
@@ -335,6 +340,12 @@ def main() -> None:
         args["pid_file"] = os.path.join(os.path.dirname(args["cfgfile"]),
                                         "homecontrol.pid")
     check_pid_file(args["pid_file"], kill=args["killprev"])
+
+    if not args["skip_pip"] and "pip-requirements" in cfg:
+        from homecontrol.dependencies.ensure_pip_requirements import (
+            ensure_pip_requirements
+        )
+        ensure_pip_requirements(cfg["pip-requirements"])
 
     if args.get("daemon", False):
         LOGGER.info("Running as a daemon")

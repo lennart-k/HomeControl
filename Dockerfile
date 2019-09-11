@@ -1,17 +1,16 @@
-FROM python:3.7.2-stretch
+FROM python:3.7.2
 LABEL MAINTAINER="Lennart K"
 
 VOLUME /config
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-
-COPY requirements.txt requirements.txt
-
-RUN pip3 install -r requirements.txt --no-cache-dir
-
+RUN mkdir -p /usr/src
+WORKDIR /usr/src
 COPY . .
 
-RUN ln -s /config /usr/src/app
+RUN pip install -r requirements.txt --no-cache-dir
+RUN python setup.py install -O2
+RUN pip install $(python -m homecontrol.scripts.module_requirements)
 
-CMD [ "python", "-m", "homecontrol", "-cfgfile", "/config/config.yaml" ]
+WORKDIR /config
+
+CMD [ "homecontrol", "-cfgfile", "/config/config.yaml" ]

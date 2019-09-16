@@ -71,7 +71,6 @@ class Module:
         self.handler = self.main_app.make_handler(loop=self.core.loop)
 
         if self.cfg["ssl"]:
-            # context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.verify_mode = ssl.CERT_OPTIONAL
 

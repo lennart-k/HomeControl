@@ -25,6 +25,8 @@ from homecontrol.const import (
     EXIT_RESTART
 )
 
+CONFIG_FILE_NAME = "configuration.yaml"
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -33,9 +35,9 @@ def get_arguments() -> dict:
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="HomeControl")
     parser.add_argument(
-        "-cfgfile", "-cf",
-        default=os.path.expanduser("~/.homecontrol/config.yaml"),
-        help="File storing the HomeControl configuration")
+        "-cfgdir", "-cd",
+        default=os.path.expanduser("~/.homecontrol/"),
+        help="Directory storing the HomeControl configuration")
     parser.add_argument(
         "-pid-file",
         default=None,
@@ -106,34 +108,34 @@ def copy_folder(src: str, dest: str, merge_folders: bool = False) -> None:
                 os.path.join(dest_root, file))
 
 
-def get_config(path: str) -> dict:
+def get_config(directory: str) -> dict:
     """
-    Loads the config file from path
+    Loads the config from path
     If the config file does not exist it will ask the user
     if it should initialise with default configuration
     """
-    folder = os.path.dirname(path)
-    if not os.path.isfile(path):
-        LOGGER.critical("Config file does not exist: %s", path)
+    file = os.path.join(directory, CONFIG_FILE_NAME)
+    if not os.path.isfile(file):
+        LOGGER.critical("Config file does not exist: %s", file)
         create_new_config = input(
             (f"Shall a default config folder be created "
-             f"at {folder}? [Y/n]"))
+             f"at {directory}? [Y/n]"))
 
         if not create_new_config or create_new_config.lower()[0] == "y":
             LOGGER.info(
                 "Installing the default configuration to %s",
-                folder)
-            import homecontrol
+                directory)
+            from homecontrol import __name__ as package_name
             source = pkg_resources.resource_filename(
-                homecontrol.__name__, "default_config")
-            copy_folder(source, folder)
+                package_name, "default_config")
+            copy_folder(source, directory)
             LOGGER.info("Running HomeControl with default config")
-            return get_config(path=path)
+            return get_config(directory)
 
         LOGGER.critical("Terminating")
         sys.exit(1)
     try:
-        cfg: dict = YAMLLoader.load(open(path), cfg_folder=folder)
+        cfg: dict = YAMLLoader.load(open(file), cfg_folder=directory)
     except yaml.YAMLError:
         LOGGER.error("Error in config file", exc_info=True)
         sys.exit(1)
@@ -155,13 +157,13 @@ def validate_python_version() -> None:
         sys.exit(1)
 
 
-def run_homecontrol(config: dict, config_path: str, start_args: dict):
+def run_homecontrol(config: dict, config_file: str, start_args: dict):
     """
     Runs HomeControl
 
     config: dict
         The loaded config file
-    config_path: str
+    config_file: str
         Path to the config file
     start_args: dict
         The commandline arguments by ArgumentParser
@@ -174,8 +176,10 @@ def run_homecontrol(config: dict, config_path: str, start_args: dict):
             loop.call_later(0.1, windows_wakeup)
         # https://stackoverflow.com/questions/24774980/why-cant-i-catch-sigint-when-asyncio-event-loop-is-running/24775107#answer-24775107
         windows_wakeup()
-    core = Core(
-        cfg=config, cfg_path=config_path, loop=loop, start_args=start_args)
+    core = Core(cfg=config,
+                cfg_file=config_file,
+                loop=loop,
+                start_args=start_args)
 
     with aiomonitor.Monitor(loop=loop, locals={"core": core, "loop": loop}):
         loop.call_soon(lambda: loop.create_task(core.bootstrap()))
@@ -327,18 +331,18 @@ def main() -> None:
     validate_python_version()
 
     args = get_arguments()
-    logfile = args["logfile"] or os.path.join(os.path.dirname(args["cfgfile"]),
-                                              "homecontrol.log")
+    logfile = (args["logfile"]
+               or os.path.join(args["cfgdir"], "homecontrol.log"))
 
-    cfg = get_config(args["cfgfile"])
+    cfg = get_config(args["cfgdir"])
+    cfg_file = os.path.join(args["cfgdir"], CONFIG_FILE_NAME)
 
     setup_logging(verbose=args["verbose"],
                   color=not args["nocolor"],
                   logfile=logfile)
 
     if not args["pid_file"]:
-        args["pid_file"] = os.path.join(os.path.dirname(args["cfgfile"]),
-                                        "homecontrol.pid")
+        args["pid_file"] = os.path.join(args["cfgdir"], "homecontrol.pid")
     check_pid_file(args["pid_file"], kill=args["killprev"])
 
     if not args["skip_pip"] and "pip-requirements" in cfg:
@@ -363,7 +367,7 @@ def main() -> None:
 
     set_loop_policy()
 
-    run_homecontrol(config=cfg, config_path=args["cfgfile"], start_args=args)
+    run_homecontrol(config=cfg, config_file=cfg_file, start_args=args)
 
 
 main()

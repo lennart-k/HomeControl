@@ -57,16 +57,16 @@ python -m homecontrol --help
 ```
 
 ```
-usage: homecontrol [-h] [-cfgfile CFGFILE] [-pid-file PID_FILE] [-clearport]
+usage: homecontrol [-h] [-cfgdir CFGDIR] [-pid-file PID_FILE] [-clearport]
                    [-verbose] [-nocolor] [-logfile LOGFILE] [-killprev]
-                   [-daemon]
+                   [-skip-pip] [-daemon]
 
 HomeControl
 
 optional arguments:
   -h, --help            show this help message and exit
-  -cfgfile CFGFILE, -cf CFGFILE
-                        File storing the HomeControl configuration
+  -cfgdir CFGDIR, -cd CFGDIR
+                        Directory storing the HomeControl configuration
   -pid-file PID_FILE    Location of the PID file.Ensures that only one session
                         is running.Defaults to the configuration path
   -clearport            Frees the port for the API server using
@@ -75,7 +75,9 @@ optional arguments:
   -nocolor              Disables colored console output
   -logfile LOGFILE      Logfile location
   -killprev, -kp        Kills the previous HomeControl instance
+  -skip-pip, -sp        Skips the installation of configured pip requirements
   -daemon, -d           Start HomeControl as a daemon process [posix only]
+
   ```
 
 ## Documentation

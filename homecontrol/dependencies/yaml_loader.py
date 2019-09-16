@@ -38,6 +38,10 @@ TYPES = {
     "Module": Module,
 }
 
+FORMAT_STRING_SCHEMA = vol.Schema({
+    "template": str
+    }, extra=vol.ALLOW_EXTRA)
+
 
 # pylint: disable=no-member,no-self-use
 class Constructor(SafeConstructor):
@@ -48,6 +52,9 @@ class Constructor(SafeConstructor):
     def __init__(self):
         self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
         self.add_multi_constructor("!type/", self.__class__.type_constructor)
+        self.add_constructor(
+            "!format",
+            self.__class__.format_string_constructor)
         self.add_constructor(
             "!include", self.__class__.include_file_constructor)
         self.add_constructor(
@@ -214,6 +221,17 @@ class Constructor(SafeConstructor):
         """Construct a custom object"""
         if suffix in TYPES:
             return self._obj(TYPES.get(suffix), node)
+
+    def format_string_constructor(self,
+                                  node: yaml.Node = None) -> str:
+        """
+        Renders a format string
+        Example:
+            !format { template: "Hello {who}", who: You }
+        """
+        mapping = FORMAT_STRING_SCHEMA(self.construct_mapping(node))
+
+        return mapping["template"].format(**mapping)
 
 
 # pylint: disable=too-many-ancestors

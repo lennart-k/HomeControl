@@ -93,10 +93,14 @@ class Core:
         await self.tick_engine.stop()
         await self.module_manager.stop()
 
-        pending = asyncio.Task.all_tasks(loop=self.loop)
+        pending = [task
+                   for task
+                   in asyncio.all_tasks(loop=self.loop)
+                   if not task is asyncio.current_task(loop=self.loop)]
 
-        LOGGER.info("Waiting for pending tasks (1s)")
-        await asyncio.wait(pending, loop=self.loop, timeout=1)
+        if pending:
+            LOGGER.info("Waiting for pending tasks (1s)")
+            await asyncio.wait(pending, loop=self.loop, timeout=1)
 
         LOGGER.warning("Closing the loop soon")
         self.loop.call_soon(self.loop.stop)

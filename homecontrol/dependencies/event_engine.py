@@ -104,8 +104,11 @@ class EventEngine:
         """
         Broadcast an event and return the results
         """
+        tasks = self.broadcast(event_type, data, **kwargs)
+        if not tasks:
+            return []
         return await asyncio.wait(
-            self.broadcast(event_type, data, **kwargs),
+            tasks,
             loop=self.core.loop,
             timeout=timeout)
 

@@ -16,7 +16,7 @@ from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.dependencies.validators import ConsistsOf
 from homecontrol.dependencies.resolve_path import resolve_path
 
-from dependencies import models  # pylint: disable=import-error
+from .dependencies import models
 
 
 LOGGER = logging.getLogger(__name__)

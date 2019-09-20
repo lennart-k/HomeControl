@@ -1,7 +1,6 @@
 """A module for the old Intertechno switches"""
 
-# pylint: disable=import-error
-from dependencies.intertechno_codes import from_code, to_code
+from .dependencies.intertechno_codes import from_code, to_code
 
 
 class Module:

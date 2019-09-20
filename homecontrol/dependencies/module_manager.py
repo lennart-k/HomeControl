@@ -123,6 +123,8 @@ class ModuleManager:
         """
         mod_path = os.path.join(path, "module.py")
         spec_path = os.path.join(path, "module.yaml")
+        parent_path = os.path.dirname(path)
+
         try:
             assert os.path.isdir(path)
             assert os.path.isfile(mod_path)
@@ -146,13 +148,16 @@ class ModuleManager:
                 name=name)
             return
 
-        mod_spec = importlib.util.spec_from_file_location(name, mod_path)
+
+        mod_name = f"homecontrol_{os.path.basename(parent_path)}.{name}"
+        mod_spec = importlib.util.spec_from_file_location(
+            name, mod_path, submodule_search_locations=[path])
         mod = importlib.util.module_from_spec(mod_spec)
+        mod.__package__ = mod_name
+        sys.modules[mod_name] = mod
         mod.SPEC = spec
         mod.resource_folder = path
-        sys.path.append(path)
         mod_spec.loader.exec_module(mod)
-        sys.path.remove(path)
         return await self._load_module_object(spec, name, path, mod)
 
     async def _load_module_object(self,

@@ -1,7 +1,7 @@
 """Support for 3-pin 433MHz receivers and transmitters using pigpio"""
 
 # pylint: disable=import-error
-from dependencies import rf
+from .dependencies import rf
 
 
 class RFRXAdapter:

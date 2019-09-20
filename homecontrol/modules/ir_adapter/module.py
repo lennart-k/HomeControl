@@ -1,7 +1,7 @@
 """Module providing an IR receiver"""
 
 # pylint: disable=import-error
-from dependencies.ir_receiver import NECIRReceiver as Receiver
+from .dependencies.ir_receiver import NECIRReceiver as Receiver
 
 
 class NECIRReceiver:

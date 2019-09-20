@@ -8,8 +8,7 @@ from homecontrol.dependencies.throttle_function import throttle
 from homecontrol.core import Core
 from homecontrol.dependencies.data_types import Color
 
-# pylint: disable=import-error
-from dependencies.lcd import LCD
+from .dependencies.lcd import LCD
 
 
 class PiGPIOAdapter:

@@ -123,7 +123,6 @@ def load(fp, *, parse_float=None,
     """
     return loads(fp.read(),
                  parse_float=parse_float, parse_int=parse_int,
-                 cls=partial(JSONDecoder, core=core),
                  parse_constant=parse_constant,
                  object_pairs_hook=object_pairs_hook, **kw)
 

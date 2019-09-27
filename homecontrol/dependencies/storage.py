@@ -186,6 +186,9 @@ class DictWrapper(dict):
         del self.dict[key]
         self.storage.schedule_save(self.dict)
 
+    def get(self, key, default):
+        return self.dict.get(key, default)
+
     def clear(self):
         self.dict.clear()
         self.storage.schedule_save(self.dict)

@@ -5,3 +5,6 @@ aiomonitor
 voluptuous
 setuptools
 uvloop
+attr
+jwt
+bcrypt

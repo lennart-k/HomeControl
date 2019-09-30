@@ -30,6 +30,15 @@ CONFIG_SCHEMA = vol.Schema({
 })
 
 
+class ModuleFolder:
+    """
+    module folder representation to create
+    a dummy package in sys.modules
+    """
+    def __init__(self, name: str) -> None:
+        self.__name__ = name
+
+
 class ModuleManager:
     """Manages your modules"""
 
@@ -59,6 +68,10 @@ class ModuleManager:
         out = []
         blacklist = self.cfg["blacklist"]
         whitelist = self.cfg["whitelist"]
+
+        package_name = f"homecontrol_{os.path.basename(path)}"
+        sys.modules[package_name] = ModuleFolder(package_name)
+
         for node in os.listdir(path):
             if node == "__pycache__":
                 continue

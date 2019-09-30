@@ -1,4 +1,4 @@
-FROM python:3.7.2-alpine
+FROM python:3.7.3-alpine
 LABEL MAINTAINER="Lennart K"
 
 RUN apk add build-base git musl-dev libffi-dev openssl-dev

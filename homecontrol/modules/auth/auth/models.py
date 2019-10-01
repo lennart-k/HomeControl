@@ -55,6 +55,7 @@ class User:
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
     salted_password: str = attrib(default=None)
+    system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)
 
     def match_password(self, password: str) -> bool:

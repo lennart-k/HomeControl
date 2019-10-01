@@ -7,6 +7,7 @@ from typing import (
     Optional
 )
 
+import logging
 import time
 import base64
 import voluptuous as vol
@@ -16,7 +17,7 @@ from homecontrol.core import Core
 from homecontrol.dependencies.storage import Storage, DictWrapper
 from .models import AccessToken, RefreshToken, User, AuthorizationCode
 
-
+LOGGER = logging.getLogger(__name__)
 ACCESS_TOKEN_EXPIRATION = timedelta(minutes=30)
 
 
@@ -32,6 +33,7 @@ class AuthManager:
             dumper=self._dump_users
         )
         self.users = DictWrapper(user_storage)
+        user_storage.schedule_save(self.users)
 
         token_storage = Storage.get_storage(
             self.core, "refresh_tokens", 1,
@@ -68,8 +70,19 @@ class AuthManager:
                 id=user_data["id"],
                 salted_password=(
                     base64.b64decode(user_data["salted_password"])
-                    if "salted_password" in user_data else None)
+                    if "salted_password" in user_data else None),
+                system_generated=user_data.get("system_generated", False)
             )
+
+        if "system" not in users:
+            LOGGER.info("No system user defined. Generating a new one")
+            users["system"] = User(
+                name="HomeControl System",
+                owner=True,
+                id="system",
+                system_generated=True
+            )
+
         return users
 
     def _dump_users(self, data: dict) -> dict:
@@ -80,7 +93,8 @@ class AuthManager:
                 "id": user.id,
                 "salted_password": (
                     base64.b64encode(user.salted_password).decode()
-                    if user.salted_password else None)
+                    if user.salted_password else None),
+                "system_generated": user.system_generated
             }
             for user in data.values()
         }
@@ -167,12 +181,14 @@ class AuthManager:
                           name: str,
                           owner: bool = False,
                           salted_password: str = None,
+                          system_generated: bool = False
                           ) -> User:
         """Creates a user"""
         user = User(
             name=name,
             owner=owner,
             salted_password=salted_password,
+            system_generated=system_generated
         )
         self.users[user.id] = user
         return user

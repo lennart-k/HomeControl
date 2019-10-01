@@ -17,6 +17,7 @@ from homecontrol.core import Core
 from .auth import AuthManager
 from .auth.models import RefreshToken
 from .auth.login_flows import FlowManager, FLOW_TYPES
+from .decorator import needs_auth
 
 LOGGER = logging.getLogger(__name__)
 
@@ -177,6 +178,7 @@ class Module:
             return JSONResponse(output)
 
         @router.post("/auth/create_user")
+        @needs_auth(owner_only=True, log_invalid=True)
         async def create_user(request: web.Request) -> JSONResponse:
             """Creates a user"""
             payload_schema = vol.Schema({

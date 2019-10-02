@@ -92,8 +92,8 @@ class AuthManager:
                 "owner": user.owner,
                 "id": user.id,
                 "salted_password": (
-                    base64.b64encode(user.salted_password).decode()
-                    if user.salted_password else None),
+                    user.salted_password
+                    and base64.b64encode(user.salted_password).decode()),
                 "system_generated": user.system_generated
             }
             for user in data.values()
@@ -121,7 +121,7 @@ class AuthManager:
                     refresh_token.access_token_expiration.total_seconds(),
                 "token": refresh_token.token,
                 "id": refresh_token.id,
-                "user": refresh_token.user.id if refresh_token.user else None,
+                "user": refresh_token.user and refresh_token.user.id,
                 "jwt_key": refresh_token.jwt_key
             }
             for refresh_token in data.values()

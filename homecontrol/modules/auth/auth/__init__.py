@@ -69,8 +69,8 @@ class AuthManager:
                 owner=user_data["owner"],
                 id=user_data["id"],
                 salted_password=(
-                    base64.b64decode(user_data["salted_password"])
-                    if "salted_password" in user_data else None),
+                    user_data.get("salted_password")
+                    and base64.b64decode(user_data["salted_password"])),
                 system_generated=user_data.get("system_generated", False)
             )
 

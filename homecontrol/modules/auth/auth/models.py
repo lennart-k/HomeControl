@@ -25,6 +25,7 @@ class AccessToken:
 class RefreshToken:
     """Represents the refresh token"""
     client_id: Optional[str] = attrib()
+    client_name: Optional[str] = attrib()
     user: Optional["User"] = attrib()
     access_token_expiration: timedelta = attrib()
     token: str = attrib(factory=lambda: secrets.token_hex(64))

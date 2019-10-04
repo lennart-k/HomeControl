@@ -109,7 +109,8 @@ class AuthManager:
                 token=token_data["token"],
                 user=self.get_user(token_data.get("user")),
                 id=token_data["id"],
-                jwt_key=token_data["jwt_key"]
+                jwt_key=token_data["jwt_key"],
+                client_name=token_data.get("client_name")
             )
         return refresh_tokens
 
@@ -122,7 +123,8 @@ class AuthManager:
                 "token": refresh_token.token,
                 "id": refresh_token.id,
                 "user": refresh_token.user and refresh_token.user.id,
-                "jwt_key": refresh_token.jwt_key
+                "jwt_key": refresh_token.jwt_key,
+                "client_name": refresh_token.client_name
             }
             for refresh_token in data.values()
         }
@@ -132,13 +134,15 @@ class AuthManager:
             client_id: str,
             user: Optional[User] = None,
             access_token_expiration: Optional[timedelta] = None,
+            client_name: Optional[str] = None
     ) -> RefreshToken:
         """Creates a refresh token"""
         refresh_token = RefreshToken(
             client_id=client_id,
             user=user,
             access_token_expiration=(
-                access_token_expiration or ACCESS_TOKEN_EXPIRATION)
+                access_token_expiration or ACCESS_TOKEN_EXPIRATION),
+            client_name=client_name
         )
         self.refresh_tokens[refresh_token.id] = refresh_token
         return refresh_token

@@ -7,11 +7,13 @@ import logging
 from json import JSONDecodeError
 import hashlib
 import base64
+from socket import gethostbyname
 from aiohttp import web, hdrs
 import voluptuous as vol
 import bcrypt
 from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.dependencies.resolve_path import resolve_path
+from homecontrol.dependencies.validators import ConsistsOf
 from homecontrol.core import Core
 
 from .auth import AuthManager
@@ -49,6 +51,12 @@ REFRESH_TOKEN_SCHEMA = TOKEN_PAYLOAD_SCHEMA.extend({
     vol.Required("refresh_token"): str
 }, extra=vol.PREVENT_EXTRA)
 
+CONFIG_SCHEMA = vol.Schema({
+    vol.Optional("trusted_clients", default=[]): ConsistsOf({
+        vol.Required("address"): str,
+        vol.Required("user", default="system"): str
+    })
+})
 
 class Module:
     """The authentication module"""
@@ -65,6 +73,14 @@ class Module:
 
         self.static_folder = resolve_path(
             "@/www", config_dir=self.core.cfg_dir)
+
+        self.cfg = await self.core.cfg.register_domain(
+            "auth", schema=CONFIG_SCHEMA)
+        self.trusted_clients = {}
+        for trusted_client in self.cfg["trusted_clients"]:
+            self.trusted_clients[gethostbyname(trusted_client["address"])] = {
+                "user": trusted_client["user"]
+            }
 
     def _log_invalid_auth(self, request: web.Request) -> None:
         LOGGER.warning("Unauthorized API request: %s %s from %s "
@@ -84,14 +100,20 @@ class Module:
             if not hasattr(handler, "use_auth"):
                 return await handler(request)
 
+
+
             refresh_token = await self.validate_auth_header(request)
 
-            if not refresh_token:
-                if handler.log_invalid:
-                    self._log_invalid_auth(request)
-                raise web.HTTPUnauthorized()
-
-            user = request.user = refresh_token.user
+            if refresh_token:
+                user = request.user = refresh_token.user
+            else:
+                if request.remote in self.trusted_clients:
+                    user = request.user = self.auth_manager.get_user(
+                        self.trusted_clients[request.remote]["user"])
+                else:
+                    if handler.log_invalid:
+                        self._log_invalid_auth(request)
+                    raise web.HTTPUnauthorized()
 
             # User required
             if not user and handler.require_user:

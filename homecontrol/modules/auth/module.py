@@ -69,6 +69,8 @@ class Module:
         self.auth_manager = AuthManager(self.core)
         self.flow_manager = FlowManager(self.auth_manager)
         self.core.event_engine.register(
+            "http_add_main_middlewares")(self.add_middlewares)
+        self.core.event_engine.register(
             "http_add_api_middlewares")(self.add_middlewares)
         self.core.event_engine.register(
             "http_add_api_routes")(self.add_api_routes)

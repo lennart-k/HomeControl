@@ -5,6 +5,7 @@ from collections import ChainMap
 # pylint: disable=no-name-in-module
 from json import JSONDecodeError
 
+from typing import Callable
 import voluptuous as vol
 from aiohttp import web
 
@@ -21,6 +22,7 @@ from homecontrol.const import (
 from homecontrol.exceptions import (
     ItemNotOnlineError
 )
+from homecontrol.modules.auth.decorator import needs_auth
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,14 +62,15 @@ class Module:
 
         @middlewares.append
         @web.middleware
-        async def config_headers(request, handler):
+        async def config_headers(request: web.Request,
+                                 handler: Callable) -> web.Response:
             response = await handler(request)
             response.headers.update(self.cfg.get("headers", {}))
             return response
 
         return middlewares
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the API app"""
         if self.api_app and self.api_app.frozen:
             await self.api_app.cleanup()
@@ -83,22 +86,26 @@ class Module:
             return JSONResponse("PONG")
 
         @r.post("/core/shutdown")
+        @needs_auth(owner_only=True)
         async def shutdown(request: web.Request) -> JSONResponse:
             """Handle /core/shutdown"""
             self.core.loop.call_soon(self.core.shutdown)
             return JSONResponse("Shutting down")
 
         @r.post("/core/restart")
+        @needs_auth(owner_only=True)
         async def restart(request: web.Request) -> JSONResponse:
             self.core.loop.call_soon(self.core.restart)
             return JSONResponse("Restarting")
 
         @r.post("/core/config/reload")
+        @needs_auth(owner_only=True)
         async def reload_config(request: web.Request) -> JSONResponse:
             await self.core.cfg.reload_config()
             return JSONResponse("Reloaded configuration")
 
         @r.get("/items")
+        @needs_auth()
         async def get_items(request: web.Request) -> JSONResponse:
             return JSONResponse([
                 {
@@ -113,6 +120,7 @@ class Module:
             ])
 
         @r.get("/item/{id}")
+        @needs_auth()
         async def get_item(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -132,6 +140,7 @@ class Module:
             })
 
         @r.post("/item/{id}/reload")
+        @needs_auth()
         async def reload_item(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -150,6 +159,7 @@ class Module:
             })
 
         @r.get("/item/{id}/states")
+        @needs_auth()
         async def get_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -167,6 +177,7 @@ class Module:
             })
 
         @r.post("/item/{id}/states")
+        @needs_auth()
         async def set_item_states(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -203,6 +214,7 @@ class Module:
                   for state, value in commit.items()])))
 
         @r.post("/item/{id}/states/{state_name}")
+        @needs_auth()
         async def set_item_state(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -237,6 +249,7 @@ class Module:
             return JSONResponse(result)
 
         @r.get("/item/{id}/states/{state_name}")
+        @needs_auth()
         async def get_item_state(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             state_name = request.match_info["state_name"]
@@ -264,6 +277,7 @@ class Module:
             })
 
         @r.get("/item/{id}/action")
+        @needs_auth()
         async def get_actions(request: web.Request) -> JSONResponse:
             identifier = request.match_info["id"]
             item = self.core.item_manager.items.get(identifier)
@@ -277,6 +291,7 @@ class Module:
 
         @r.post("/item/{id}/action/{action_name}")
         @r.get("/item/{id}/action/{action_name}")
+        @needs_auth()
         async def execute_action(request: web.Request) -> JSONResponse:
             """
             Executes an item's action and returns a boolean indicating the

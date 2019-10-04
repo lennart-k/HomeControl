@@ -7,6 +7,7 @@ import logging
 from json import JSONDecodeError
 import hashlib
 import base64
+from datetime import timedelta
 from socket import gethostbyname
 from aiohttp import web, hdrs
 import voluptuous as vol
@@ -58,6 +59,7 @@ CONFIG_SCHEMA = vol.Schema({
     })
 })
 
+
 class Module:
     """The authentication module"""
     core: Core
@@ -100,8 +102,6 @@ class Module:
             if not hasattr(handler, "use_auth"):
                 return await handler(request)
 
-
-
             refresh_token = await self.validate_auth_header(request)
 
             if refresh_token:
@@ -133,6 +133,41 @@ class Module:
 
     async def add_api_routes(self, event, router: web.RouteTableDef) -> None:
         """Adds the API routes"""
+        @router.post("/auth/long_lived_token")
+        @needs_auth(owner_only=True, log_invalid=True)
+        async def get_long_lived_token(
+                request: web.Request) -> JSONResponse:
+            """
+            Generates a long-lived access token
+            This token will be valid for 10 years
+            """
+            try:
+                data = vol.Schema({
+                    vol.Required("client_id"): str,
+                    vol.Optional(
+                        "client_name", default=None): vol.Any(str, None)
+                })(await request.json())
+            except (vol.Invalid, JSONDecodeError) as e:
+                return JSONResponse(error=str(e))
+
+            refresh_token = await self.auth_manager.create_refresh_token(
+                client_id=data["client_id"],
+                user=request.user,
+                access_token_expiration=timedelta(days=3650),
+                client_name=data["client_name"]
+            )
+            access_token = await self.auth_manager.create_access_token(
+                refresh_token)
+
+            return JSONResponse({
+                "access_token": access_token.token,
+                "token_type": "bearer",
+                "expires_in": access_token.expiration,
+                "refresh_token": refresh_token.token,
+            }, headers={
+                "Cache-Control": "no-store"
+            })
+
         @router.get("/auth/login_flow_providers")
         async def get_login_flow_providers(
                 request: web.Request) -> JSONResponse:

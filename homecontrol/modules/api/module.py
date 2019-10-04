@@ -331,12 +331,4 @@ class Module:
             except Exception as e:
                 return JSONResponse(error=e)
 
-        # @r.route("*", "/{path:.*}")
-        # async def not_found(request: web.Request) -> JSONResponse:
-        #     return JSONResponse(error={
-        #         "type": "404",
-        #         "message": (f"Could not find route "
-        #                     f"{request.method} {request.path}")
-        #     }, status_code=404)
-
         return r

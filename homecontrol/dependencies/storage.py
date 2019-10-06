@@ -169,9 +169,13 @@ class DictWrapper(dict):
         self.storage = storage
         self.dict = storage.load_data()
 
+    def schedule_save(self) -> asyncio.Task:
+        """Schedules the current data to be saved"""
+        return self.storage.schedule_save(self.dict)
+
     def __setitem__(self, key, item):
         self.dict[key] = item
-        self.storage.schedule_save(self.dict)
+        self.schedule_save()
 
     def __getitem__(self, key):
         return self.dict[key]
@@ -184,21 +188,21 @@ class DictWrapper(dict):
 
     def __delitem__(self, key):
         del self.dict[key]
-        self.storage.schedule_save(self.dict)
+        self.schedule_save()
 
     def get(self, key, default=None):
         return self.dict.get(key, default)
 
     def clear(self):
         self.dict.clear()
-        self.storage.schedule_save(self.dict)
+        self.schedule_save()
 
     def copy(self):
         return self.dict.copy()
 
     def update(self, *args, **kwargs):
         self.dict.update(*args, **kwargs)
-        self.storage.schedule_save(self.dict)
+        self.schedule_save()
 
     def keys(self):
         return self.dict.keys()
@@ -211,7 +215,7 @@ class DictWrapper(dict):
 
     def pop(self, *args):
         result = self.dict.pop(*args)
-        self.storage.schedule_save(self.dict)
+        self.schedule_save()
         return result
 
     def setdefault(self, key, default):

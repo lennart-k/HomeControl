@@ -61,7 +61,7 @@ class AuthManager:
                     return user
         return found_user
 
-    def _load_users(self, data: dict) -> None:
+    def _load_users(self, data: dict) -> dict:
         users = {}
         for id, user_data in data.items():
             users[id] = User(

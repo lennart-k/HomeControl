@@ -6,8 +6,9 @@ import secrets
 from datetime import datetime, timedelta
 
 from typing import (
-    List,
-    Optional
+    Optional,
+    Dict,
+    Any
 )
 import bcrypt
 from attr import attrs, attrib
@@ -56,12 +57,14 @@ class User:
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
     salted_password: str = attrib(default=None)
+    credentials: Dict[str, "Credentials"] = attrib(default={})
     system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)
 
-    def match_password(self, password: str) -> bool:
-        """Match a password against User.salted_password"""
-        hashed = base64.b64encode(
-            hashlib.sha256(password.encode()).digest())
-
-        return bcrypt.checkpw(hashed, self.salted_password)
+@attrs(slots=True)
+class Credentials:
+    """Represents credentials"""
+    user: User = attrib()
+    provider: str = attrib()
+    data: Any = attrib()
+    credential_id: Optional[str] = attrib(factory=lambda: uuid.uuid4().hex)

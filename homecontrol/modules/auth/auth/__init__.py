@@ -15,7 +15,14 @@ import jwt
 
 from homecontrol.core import Core
 from homecontrol.dependencies.storage import Storage, DictWrapper
-from .models import AccessToken, RefreshToken, User, AuthorizationCode
+from .models import (
+    AccessToken,
+    RefreshToken,
+    User,
+    AuthorizationCode,
+    Credentials
+)
+from .credential_provider import CREDENTIAL_PROVIDERS
 
 LOGGER = logging.getLogger(__name__)
 ACCESS_TOKEN_EXPIRATION = timedelta(minutes=30)
@@ -42,6 +49,9 @@ class AuthManager:
             dumper=self._dump_refresh_tokens,)
         self.refresh_tokens = DictWrapper(token_storage)
         self.auth_codes: Dict[str, AuthorizationCode] = {}
+        self.credential_providers = {
+            name: provider(self)
+            for name, provider in CREDENTIAL_PROVIDERS.items()}
 
     # pylint: disable=invalid-name,redefined-builtin
     def get_user(self, id: str) -> Optional[User]:
@@ -68,16 +78,25 @@ class AuthManager:
                 name=user_data["name"],
                 owner=user_data["owner"],
                 id=user_data["id"],
-                salted_password=(
-                    user_data.get("salted_password")
-                    and base64.b64decode(user_data["salted_password"])),
                 system_generated=user_data.get("system_generated", False)
             )
+            users[id].credentials = {
+                provider: {
+                    uuid: Credentials(
+                        user=users[id],
+                        provider=provider,
+                        data=cred_data,
+                        credential_id=uuid
+                    ) for uuid, cred_data in provider_creds.items()
+                }
+                for provider, provider_creds
+                in user_data.get("credentials", {}).items()
+            }
 
         if "system" not in users:
             LOGGER.info("No system user defined. Generating a new one")
             users["system"] = User(
-                name="HomeControl System",
+                name="system",
                 owner=True,
                 id="system",
                 system_generated=True
@@ -91,10 +110,13 @@ class AuthManager:
                 "name": user.name,
                 "owner": user.owner,
                 "id": user.id,
-                "salted_password": (
-                    user.salted_password
-                    and base64.b64encode(user.salted_password).decode()),
-                "system_generated": user.system_generated
+                "system_generated": user.system_generated,
+                "credentials": {
+                    provider: {
+                        uuid: creds.data
+                        for uuid, creds in provider_creds.items()
+                    } for provider, provider_creds in user.credentials.items()
+                }
             }
             for user in data.values()
         }
@@ -184,14 +206,12 @@ class AuthManager:
     async def create_user(self,
                           name: str,
                           owner: bool = False,
-                          salted_password: str = None,
                           system_generated: bool = False
                           ) -> User:
         """Creates a user"""
         user = User(
             name=name,
             owner=owner,
-            salted_password=salted_password,
             system_generated=system_generated
         )
         self.users[user.id] = user

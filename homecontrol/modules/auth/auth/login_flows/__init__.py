@@ -12,6 +12,9 @@ import voluptuous as vol
 
 from .. import AuthManager
 from ..models import User
+from ..credential_provider import (
+    PasswordCredentialProvider, CredentialProvider
+)
 
 
 # pylint: disable=redefined-builtin,invalid-name
@@ -44,18 +47,20 @@ class LoginFlow:
     """Abstract class for a login flow"""
     id: str
     current_step: str = "init"
+    user: Optional[User]
 
     def __init__(
             self,
-            auth_manager: AuthManager,
             flow_manager: "FlowManager",
             id: str,
-            client_id: str) -> None:
+            client_id: str,
+            cfg: dict = None) -> None:
         self.client_id = client_id
         self.id = id
-        self.auth_manager: AuthManager = auth_manager
         self.flow_manager: FlowManager = flow_manager
+        self.auth_manager: AuthManager = self.flow_manager.auth_manager
         self.core = self.auth_manager.core
+        self.cfg = cfg or {}
 
     def get_step(self, step_id: str) -> Optional[Callable]:
         """Returns the coroutine corresponding to a step_id"""
@@ -78,13 +83,29 @@ class LoginFlow:
             **kwargs
         )
 
+    async def return_auth_code(
+            self,
+            user: Optional[User] = None,
+            client_id: Optional[str] = None) -> FlowStep:
+        """Returns the final step with an authorization code"""
+        code = await self.auth_manager.create_authorization_code(
+            user=user or self.user,
+            client_id=client_id or self.client_id
+        )
+        return FlowStep(user=user, type="success", auth_code=code.code)
+
 
 class FlowManager:
     """The FlowManager manages all the login flows"""
 
-    def __init__(self, auth_manager: AuthManager):
+    def __init__(self, auth_manager: AuthManager, cfg: dict):
         self.auth_manager = auth_manager
         self.core = self.auth_manager.core
+        self.cfg = cfg
+        self.flow_factories = {
+            name: self.flow_factory(cfg)
+            for name, cfg in self.cfg.items()
+        }
         self.flows = {}
 
     async def create_flow(
@@ -93,15 +114,31 @@ class FlowManager:
             client_id: str) -> Optional[LoginFlow]:
         """Creates a login flow"""
         flow_id = uuid.uuid4().hex
-        if flow_type in FLOW_TYPES:
-            flow: LoginFlow = FLOW_TYPES[flow_type](
-                self.auth_manager, self, flow_id, client_id)
-            self.flows[flow_id] = flow
+        factory = self.flow_factories.get(flow_type)
+        if factory:
+            flow: LoginFlow = await factory(client_id)
+            self.flows[flow.id] = flow
             return flow
 
     def destroy_flow(self, flow_id: str) -> None:
         """Destroys a login flow"""
         self.flows.pop(flow_id, None)
+
+    def flow_factory(self, cfg: dict) -> Callable:
+        """
+        Returns a factory function for a login flow with certain configuration
+        """
+        provider = cfg["provider"]
+
+        async def create_flow(client_id: str) -> Optional[LoginFlow]:
+            flow_id = uuid.uuid4().hex
+            if provider in FLOW_TYPES:
+                flow: LoginFlow = FLOW_TYPES[provider](
+                    self, flow_id, client_id, cfg=cfg
+                )
+                return flow
+
+        return create_flow
 
 
 DUMMY_HASH = b'$2b$12$aZFoxzj4axZgsa1oyGYQmecFwGYFzX/YvObOTCNE6Za9r9ixdUm/y'
@@ -110,6 +147,17 @@ DUMMY_HASH = b'$2b$12$aZFoxzj4axZgsa1oyGYQmecFwGYFzX/YvObOTCNE6Za9r9ixdUm/y'
 class PasswordLoginFlow(LoginFlow):
     """The password login flow"""
     user: User
+
+    def __init__(
+            self,
+            flow_manager: FlowManager,
+            id: str,
+            client_id: str,
+            cfg: dict = None) -> None:
+
+        super().__init__(flow_manager, id, client_id, cfg=cfg)
+
+        self.mfa_module = self.cfg.get("mfa-module", None)
 
     async def step_init(self, data: dict) -> FlowStep:
         """The first step"""
@@ -134,21 +182,47 @@ class PasswordLoginFlow(LoginFlow):
 
         self.user = self.auth_manager.get_user_by_name(data["username"])
 
+        credential_provider: PasswordCredentialProvider = (
+            self.auth_manager.credential_providers["password"])
+
         if not self.user:
             bcrypt.checkpw(data["password"].encode(), DUMMY_HASH)
             valid_password = False
         else:
-            valid_password = self.user.match_password(data["password"])
+            valid_password = await credential_provider.validate_login_data(
+                self.user, data=data["password"])
 
         if not valid_password:
             return FlowStep(error="Invalid credentials")
 
-        code = await self.auth_manager.create_authorization_code(
-            client_id=self.client_id,
-            user=self.user
-        )
+        if not self.mfa_module:
+            return await self.return_auth_code()
+        else:
+            return self.set_step(
+                type="form",
+                step_id="mfa",
+                data={
+                    "code": "String"
+                }
+            )
 
-        return FlowStep(user=self.user, type="success", auth_code=code.code)
+    async def step_mfa(self, data: dict) -> FlowStep:
+        """The step for multiple-factor authentication"""
+        print("MFA")
+        print(data)
+        if self.mfa_module == "totp":
+            totp_provider: CredentialProvider = (
+                self.auth_manager.credential_providers[self.mfa_module])
+
+            print(totp_provider)
+            print(data["code"])
+            valid_code = await totp_provider.validate_login_data(
+                self.user, data=data["code"])
+
+            if valid_code:
+                return await self.return_auth_code()
+
+        return FlowStep(error="Invalid MFA module or invalid code")
 
 
 FLOW_TYPES = {

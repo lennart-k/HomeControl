@@ -1,32 +1,23 @@
 """Provides OAuth2 for HomeControl"""
-from typing import (
-    Callable,
-    Optional
-)
+from typing import Callable
 import logging
 from json import JSONDecodeError
-import hashlib
-import base64
 from datetime import timedelta
-from socket import gethostbyname
 from aiohttp import web, hdrs
 import voluptuous as vol
-import bcrypt
 from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.dependencies.resolve_path import resolve_path
-from homecontrol.dependencies.validators import ConsistsOf
 from homecontrol.core import Core
 
 from .auth import AuthManager
-from .auth.models import RefreshToken
-from .auth.login_flows import FlowManager, FLOW_TYPES
+from .auth.login_flows import FlowManager
+from .auth.credential_provider import CredentialProvider
+from .auth.auth_providers import AUTH_PROVIDERS
 from .decorator import needs_auth
 
 LOGGER = logging.getLogger(__name__)
 
-GRANT_TYPES = (
-    "password", "code", "refresh_token"
-)
+GRANT_TYPES = ("password", "code", "refresh_token")
 
 AUTHORIZE_PAYLOAD_SCHEMA = vol.Schema({
     vol.Required("client_id"): str,
@@ -53,10 +44,12 @@ REFRESH_TOKEN_SCHEMA = TOKEN_PAYLOAD_SCHEMA.extend({
 }, extra=vol.PREVENT_EXTRA)
 
 CONFIG_SCHEMA = vol.Schema({
-    vol.Optional("trusted_clients", default=[]): ConsistsOf({
-        vol.Required("address"): str,
-        vol.Required("user", default="system"): str
-    })
+    vol.Required("providers"): vol.Schema([
+        vol.Schema({
+            vol.Required("type"): str
+        }, extra=vol.ALLOW_EXTRA)
+    ]),
+    vol.Required("login-flows", default={}): object
 })
 
 
@@ -66,8 +59,8 @@ class Module:
 
     async def init(self) -> None:
         """Initialises the module"""
-        self.auth_manager = AuthManager(self.core)
-        self.flow_manager = FlowManager(self.auth_manager)
+        self.cfg = await self.core.cfg.register_domain(
+            "auth", schema=CONFIG_SCHEMA)
         self.core.event_engine.register(
             "http_add_main_middlewares")(self.add_middlewares)
         self.core.event_engine.register(
@@ -78,13 +71,14 @@ class Module:
         self.static_folder = resolve_path(
             "@/www", config_dir=self.core.cfg_dir)
 
-        self.cfg = await self.core.cfg.register_domain(
-            "auth", schema=CONFIG_SCHEMA)
-        self.trusted_clients = {}
-        for trusted_client in self.cfg["trusted_clients"]:
-            self.trusted_clients[gethostbyname(trusted_client["address"])] = {
-                "user": trusted_client["user"]
-            }
+        self.auth_manager = AuthManager(self.core)
+        self.flow_manager = FlowManager(
+            self.auth_manager, self.cfg["login-flows"])
+
+        self.auth_providers = {
+            cfg["type"]: AUTH_PROVIDERS[cfg["type"]](self.auth_manager, cfg)
+            for cfg in self.cfg["providers"]
+        }
 
     def _log_invalid_auth(self, request: web.Request) -> None:
         LOGGER.warning("Unauthorized API request: %s %s from %s "
@@ -104,27 +98,23 @@ class Module:
             if not hasattr(handler, "use_auth"):
                 return await handler(request)
 
-            refresh_token = await self.validate_auth_header(request)
+            for provider_name, provider in self.auth_providers.items():
+                user = await provider.validate_request(request)
+                if user:
+                    request.user = user
 
-            if refresh_token:
-                user = request.user = refresh_token.user
-            else:
-                if request.remote in self.trusted_clients:
-                    user = request.user = self.auth_manager.get_user(
-                        self.trusted_clients[request.remote]["user"])
-                else:
-                    if handler.log_invalid:
-                        self._log_invalid_auth(request)
-                    raise web.HTTPUnauthorized()
+                    if handler.owner_only and not user.owner:
+                        if handler.log_invalid:
+                            self._log_invalid_auth(request)
+                        raise web.HTTPUnauthorized()
 
-            # User required
-            if not user and handler.require_user:
-                if handler.log_invalid:
-                    self._log_invalid_auth(request)
-                raise web.HTTPUnauthorized()
+                    return await handler(request)
+                elif user == False:  # pylint: disable=singleton-comparison
+                    # Provider banned the request
+                    break
 
-            # User has to be owner
-            if handler.owner_only and not user.owner:
+            # No user found
+            if handler.require_user:
                 if handler.log_invalid:
                     self._log_invalid_auth(request)
                 raise web.HTTPUnauthorized()
@@ -174,14 +164,15 @@ class Module:
         async def get_login_flow_providers(
                 request: web.Request) -> JSONResponse:
             """Returns a list of login providers"""
-            return JSONResponse(list(FLOW_TYPES.keys()))
+            return JSONResponse(list(self.flow_manager.flow_factories.keys()))
 
         @router.post("/auth/login_flow")
         async def create_login_flow(request: web.Request) -> JSONResponse:
             """Creates a login flow"""
             try:
                 data = vol.Schema({
-                    vol.Required("provider"): vol.Any(*FLOW_TYPES.keys()),
+                    vol.Required("provider"): vol.Any(
+                        *self.flow_manager.flow_factories.keys()),
                     vol.Required("client_id"): str
                 })(await request.json())
             except (vol.Invalid, JSONDecodeError) as e:
@@ -236,6 +227,54 @@ class Module:
                 output["auth_code"] = step_result.auth_code
             return JSONResponse(output)
 
+        @router.post("/auth/test")
+        async def test(request: web.Request) -> JSONResponse:
+            try:
+                data = vol.Schema({
+                    vol.Required("provider", default="password"): vol.Any(
+                        *self.auth_manager.credential_providers.keys()),
+                    vol.Required("user"): str,
+                    vol.Required("data"): object
+                })(await request.json())
+            except (vol.Invalid, JSONDecodeError) as e:
+                return JSONResponse(error=str(e))
+
+            provider: CredentialProvider = (
+                self.auth_manager.credential_providers[data["provider"]])
+
+            result = await provider.validate_login_data(
+                self.auth_manager.get_user(data["user"]),
+                data["data"]
+            )
+            print(result)
+            return JSONResponse(result)
+
+        @router.post("/auth/bind_credentials")
+        async def bind_credentials(request: web.Request) -> JSONResponse:
+            """Binds credentials to a user"""
+            try:
+                data = vol.Schema({
+                    vol.Required("provider", default="password"): vol.Any(
+                        *self.auth_manager.credential_providers.keys()),
+                    vol.Required("user"): str,
+                    vol.Required("data"): object
+                })(await request.json())
+            except (vol.Invalid, JSONDecodeError) as e:
+                return JSONResponse(error=str(e))
+
+            provider: CredentialProvider = (
+                self.auth_manager.credential_providers[data["provider"]])
+
+            creds = await provider.create_credentials(
+                self.auth_manager.get_user(data["user"]),
+                data["data"]
+            )
+            self.auth_manager.users.schedule_save()
+
+            return JSONResponse({
+                "credential_id": creds.credential_id
+            })
+
         @router.post("/auth/create_user")
         @needs_auth(owner_only=True, log_invalid=True)
         async def create_user(request: web.Request) -> JSONResponse:
@@ -247,15 +286,18 @@ class Module:
             })
             payload = payload_schema(await request.json())
 
-            hashed = base64.b64encode(
-                hashlib.sha256(payload["password"].encode()).digest())
-            salted = bcrypt.hashpw(hashed, bcrypt.gensalt(12))
-
             user = await self.auth_manager.create_user(
                 name=payload["name"],
-                owner=payload["is_owner"],
-                salted_password=salted
+                owner=payload["is_owner"]
             )
+
+            provider: CredentialProvider = (
+                self.auth_manager.credential_providers["password"])
+
+            creds = await provider.create_credentials(
+                user, payload["password"])
+
+            self.auth_manager.users.schedule_save()
 
             return JSONResponse({
                 "user_id": user.id
@@ -314,8 +356,17 @@ class Module:
                         "error_description": "Invalid credentials"
                     }, status_code=400)
 
+                cred_provider: CredentialProvider = (
+                    self.auth_manager.credential_providers["password"])
+
                 user = self.auth_manager.get_user_by_name(payload["username"])
-                if not (user and user.match_password(payload["password"])):
+
+                login_valid = await cred_provider.validate_login_data(
+                    user,
+                    payload["password"]
+                )
+
+                if not login_valid:
                     return JSONResponse({
                         "error": "invalid_grant",
                         "error_description": "Invalid credentials"
@@ -362,19 +413,5 @@ class Module:
                 "expires_in": access_token.expiration,
                 "refresh_token": refresh_token.token,
             }, headers={
-                "Cache-Control": "no-store"
+                hdrs.CACHE_CONTROL: "no-store"
             })
-
-    async def validate_auth_header(
-            self,
-            request: web.Request) -> Optional[RefreshToken]:
-        """Validates the auth header"""
-        auth_header = request.headers.get(hdrs.AUTHORIZATION)
-        if not auth_header:
-            return False
-        if " " not in auth_header:
-            return False
-
-        auth_type, token_value = auth_header.split(" ", 1)
-
-        return await self.auth_manager.validate_access_token(token_value)

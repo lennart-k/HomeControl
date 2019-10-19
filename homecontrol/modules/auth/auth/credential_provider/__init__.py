@@ -22,8 +22,15 @@ class CredentialProvider:
         self.core = auth_manager.core
 
     async def create_credentials(
-            self, user: User, data: object) -> Credentials:
-        """Creates credentials for a user"""
+            self, user: User, data: object) -> (Credentials, Optional[object]):
+        """
+        Creates credentials for a user
+
+        Returns:
+            Credentials The credential object
+            Optional[object] Data to return to the API caller
+                             For example a QR code when setting up TOTP
+        """
         raise NotImplementedError()
 
     async def validate_login_data(self, user: User, data: object) -> bool:
@@ -53,12 +60,12 @@ class PasswordCredentialProvider(CredentialProvider):
 
     # pylint: disable=arguments-differ
     async def create_credentials(
-            self, user: User, password: str) -> Credentials:
+            self, user: User, data: str) -> (Credentials, Optional[object]):
         """Creates credentials for a user"""
         user.credentials.setdefault(self.namespace, {})
 
         hashed = base64.b64encode(
-            hashlib.sha256(password.encode()).digest())
+            hashlib.sha256(data.encode()).digest())
         salted = base64.b64encode(
             bcrypt.hashpw(hashed, bcrypt.gensalt(12))).decode()
 
@@ -69,7 +76,7 @@ class PasswordCredentialProvider(CredentialProvider):
         )
         user.credentials[self.namespace] = {creds.credential_id: creds}
 
-        return creds
+        return creds, None
 
     async def validate_login_data(self, user: User, data: dict) -> bool:
         """Validates the password against the user input"""
@@ -89,7 +96,8 @@ class TOTPCredentialProvider(CredentialProvider):
     """Provides TOTP based authentication"""
     namespace = "totp"
 
-    async def create_credentials(self, user: User, data: dict) -> Credentials:
+    async def create_credentials(
+            self, user: User, data: dict) -> (Credentials, Optional[object]):
         user.credentials.setdefault(self.namespace, {})
 
         secret = pyotp.random_base32()
@@ -98,9 +106,11 @@ class TOTPCredentialProvider(CredentialProvider):
             provider=self.namespace,
             data=secret
         )
-        print(pyotp.TOTP(secret).provisioning_uri(user.name))
         user.credentials[self.namespace] = {creds.credential_id: creds}
-        return creds
+        return creds, {
+            "secret": secret,
+            "url": pyotp.TOTP(secret).provisioning_uri(user.name)
+        }
 
     async def validate_login_data(self, user: User, data: str) -> bool:
         for creds in user.credentials.get(self.namespace, {}).values():

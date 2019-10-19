@@ -278,11 +278,13 @@ class Module:
             provider: CredentialProvider = (
                 self.auth_manager.credential_providers[data["provider"]])
 
-            creds = await provider.create_credentials(user, data["data"])
+            creds, return_data = await provider.create_credentials(
+                user, data["data"])
             self.auth_manager.users.schedule_save()
 
             return JSONResponse({
-                "credential_id": creds.credential_id
+                "credential_id": creds.credential_id,
+                "data": return_data
             })
 
         @router.post("/auth/create_user")

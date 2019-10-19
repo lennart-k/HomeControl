@@ -95,29 +95,36 @@ class Module:
         async def check_authentication(request: web.Request,
                                        handler: Callable) -> web.Response:
 
-            if not hasattr(handler, "use_auth"):
+            if getattr(handler, "allow_banned", False):
                 return await handler(request)
 
+            # pylint: disable=singleton-comparison
             for provider_name, provider in self.auth_providers.items():
-                user = await provider.validate_request(request)
-                if user:
-                    request.user = user
-
-                    if handler.owner_only and not user.owner:
-                        if handler.log_invalid:
-                            self._log_invalid_auth(request)
-                        raise web.HTTPUnauthorized()
-
-                    return await handler(request)
-                elif user == False:  # pylint: disable=singleton-comparison
-                    # Provider banned the request
+                request.user = user = await provider.validate_request(request)
+                if user != None:
                     break
 
-            # No user found
-            if handler.require_user:
+            # user == False means access is forbidden
+            if user == False:
                 if handler.log_invalid:
                     self._log_invalid_auth(request)
-                raise web.HTTPUnauthorized()
+                raise web.HTTPUnauthorized(
+                    text="401: You are banned from using this endpoint")
+
+            # Owner required but user is not owner
+            if (getattr(handler, "owner_only", False)
+                    and not getattr(user, "owner", False)):
+                if handler.log_invalid:
+                    self._log_invalid_auth(request)
+                raise web.HTTPUnauthorized(
+                    text="401: You need owner permissions for this endpoint")
+
+            # No user found
+            if getattr(handler, "require_user", False) and not user:
+                if handler.log_invalid:
+                    self._log_invalid_auth(request)
+                raise web.HTTPUnauthorized(
+                    text="401: You need to log in for this endpoint")
 
             return await handler(request)
 

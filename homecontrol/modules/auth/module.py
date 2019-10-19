@@ -265,7 +265,7 @@ class Module:
                     vol.Required("provider", default="password"): vol.Any(
                         *self.auth_manager.credential_providers.keys()),
                     vol.Optional("user", default=None): vol.Any(str, None),
-                    vol.Required("data"): object
+                    vol.Optional("data", default=None): object
                 })(await request.json())
             except (vol.Invalid, JSONDecodeError) as e:
                 return JSONResponse(error=str(e))

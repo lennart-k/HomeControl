@@ -1,7 +1,6 @@
 """ModuleManager module"""
 
 import sys
-import subprocess
 import importlib
 import importlib.util
 import os

@@ -8,18 +8,17 @@ from homecontrol.const import ItemStatus
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.validators import ConsistsOf
 
 LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA = vol.Schema(
-    ConsistsOf({
+CONFIG_SCHEMA = vol.Schema([
+    vol.Schema({
         vol.Required("id"): str,
         vol.Required("type"): str,
         vol.Optional("name"): str,
         vol.Required("states", default={}): dict
     }, extra=vol.ALLOW_EXTRA)
-)
+])
 
 
 class ItemManager:

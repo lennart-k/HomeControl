@@ -4,7 +4,6 @@ import asyncio
 import logging
 
 import voluptuous as vol
-from homecontrol.dependencies.validators import ConsistsOf
 
 from homecontrol.core import Core
 
@@ -16,8 +15,8 @@ SPEC = {
     }
 }
 
-CONFIG_SCHEMA = vol.Schema(
-    ConsistsOf({
+CONFIG_SCHEMA = vol.Schema([
+    {
         "alias": str,
         "trigger": vol.Schema({
             "provider": str
@@ -25,8 +24,8 @@ CONFIG_SCHEMA = vol.Schema(
         "action": vol.Schema({
             "provider": str
         }, extra=vol.ALLOW_EXTRA)
-    })
-)
+    }
+])
 
 
 class EventTriggerProvider:

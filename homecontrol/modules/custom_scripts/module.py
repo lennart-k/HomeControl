@@ -5,10 +5,9 @@ import logging
 import importlib
 
 import voluptuous as vol
-from homecontrol.dependencies.validators import ConsistsOf
 
 CONFIG_SCHEMA = vol.Schema({
-    vol.Required("scripts", default=[]): ConsistsOf(str)
+    vol.Required("scripts", default=[]): [str]
 })
 
 LOGGER = logging.getLogger(__name__)

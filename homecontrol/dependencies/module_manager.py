@@ -8,7 +8,6 @@ import logging
 
 import pkg_resources
 import voluptuous as vol
-from homecontrol.dependencies.validators import ConsistsOf
 
 import homecontrol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
@@ -21,9 +20,9 @@ from homecontrol.exceptions import PipInstallError
 LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
-    vol.Required("folders", default=[]): ConsistsOf(str),
-    vol.Required("blacklist", default=[]): ConsistsOf(str),
-    vol.Required("whitelist", default=[]): ConsistsOf(str),
+    vol.Required("folders", default=[]): [str],
+    vol.Required("blacklist", default=[]): [str],
+    vol.Required("whitelist", default=[]): [str],
     vol.Required("install-pip-requirements", default=True): bool,
     vol.Required("load-internal-modules", default=True): bool
 })

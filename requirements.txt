@@ -8,3 +8,4 @@ uvloop
 attr
 jwt
 bcrypt
+pyotp

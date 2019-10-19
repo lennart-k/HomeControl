@@ -18,6 +18,19 @@ api-server:
     Access-Control-Allow-Origin: "*"
     Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
 
+auth:
+  providers:
+    - type: trusted-clients
+      trusted-addresses:
+        - address: 127.0.0.1
+          user: system
+    - type: oauth
+
+  login-flows:
+    password:
+      provider: password
+      mfa-modules: totp
+
 szenes: !include szenes.yaml
 
 automation: !include automation.yaml

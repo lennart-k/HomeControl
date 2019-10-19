@@ -1,5 +1,5 @@
 pylint:
-	pylint homecontrol homecontrol/modules homecontrol/dependencies --rcfile=pylintrc
+	pylint homecontrol --rcfile=pylintrc
 
 flake8:
 	flake8

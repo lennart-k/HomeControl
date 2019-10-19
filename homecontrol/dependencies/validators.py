@@ -13,7 +13,7 @@ class ConsistsOf:
     [{"a": 1}, {"a": 2}, {"a": 3}]
     """
 
-    def __init__(self, schema, msg=None, extra: int=vol.PREVENT_EXTRA):
+    def __init__(self, schema, msg=None, extra: int = vol.PREVENT_EXTRA):
         self.schema = vol.Schema(schema, extra=extra)
         self.msg = msg
 

@@ -101,11 +101,11 @@ class Module:
             # pylint: disable=singleton-comparison
             for provider_name, provider in self.auth_providers.items():
                 request.user = user = await provider.validate_request(request)
-                if user != None:
+                if user is not None:
                     break
 
-            # user == False means access is forbidden
-            if user == False:
+            # user is False means access is forbidden
+            if user is False:
                 if handler.log_invalid:
                     self._log_invalid_auth(request)
                 raise web.HTTPUnauthorized(
@@ -284,8 +284,7 @@ class Module:
             provider: CredentialProvider = (
                 self.auth_manager.credential_providers["password"])
 
-            creds = await provider.create_credentials(
-                user, payload["password"])
+            await provider.create_credentials(user, payload["password"])
 
             self.auth_manager.users.schedule_save()
 

@@ -40,7 +40,7 @@ TYPES = {
 
 FORMAT_STRING_SCHEMA = vol.Schema({
     "template": str
-    }, extra=vol.ALLOW_EXTRA)
+}, extra=vol.ALLOW_EXTRA)
 
 
 # pylint: disable=no-member,no-self-use

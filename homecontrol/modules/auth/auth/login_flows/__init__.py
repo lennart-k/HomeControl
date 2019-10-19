@@ -113,7 +113,6 @@ class FlowManager:
             flow_type: str,
             client_id: str) -> Optional[LoginFlow]:
         """Creates a login flow"""
-        flow_id = uuid.uuid4().hex
         factory = self.flow_factories.get(flow_type)
         if factory:
             flow: LoginFlow = await factory(client_id)

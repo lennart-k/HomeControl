@@ -2,15 +2,12 @@
 from datetime import datetime, timedelta
 
 from typing import (
-    List,
     Dict,
     Optional
 )
 
 import logging
 import time
-import base64
-import voluptuous as vol
 import jwt
 
 from homecontrol.core import Core

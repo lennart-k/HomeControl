@@ -28,45 +28,45 @@ class JSONEncoder(json.JSONEncoder):
         self.core = core
         super().__init__(*args, **kwargs)
 
-    # pylint: disable=no-self-use,too-many-return-statements
-    def default(self, obj):
+    # pylint: disable=no-self-use,too-many-return-statements,method-hidden
+    def default(self, o):
         """Parse custom types"""
-        if isinstance(obj, Item):
+        if isinstance(o, Item):
             return {
                 "!type": "Item",
-                "item_type": obj.type,
-                "id": obj.identifier,
-                "name": obj.name
+                "item_type": o.type,
+                "id": o.identifier,
+                "name": o.name
             }
-        if isinstance(obj, Module):
+        if isinstance(o, Module):
             return {
                 "!type": "Module",
-                "name": obj.name,
-                "meta": obj.meta
+                "name": o.name,
+                "meta": o.meta
             }
 
-        if isinstance(obj, (BaseException, Exception)):
+        if isinstance(o, (BaseException, Exception)):
             return {
                 "!type": "Exception",
-                "type": type(obj).__name__,
-                "message": str(obj)
+                "type": type(o).__name__,
+                "message": str(o)
             }
-        if isinstance(obj, Enum):
-            return obj.value
+        if isinstance(o, Enum):
+            return o.value
 
-        if isinstance(obj, datetime):
-            return obj.isoformat()
+        if isinstance(o, datetime):
+            return o.isoformat()
 
-        if isinstance(obj, tuple(type_set)):
+        if isinstance(o, tuple(type_set)):
             return {
-                "!type": type(obj).__name__,
-                "data": obj.dump()
+                "!type": type(o).__name__,
+                "data": o.dump()
             }
 
-        if hasattr(obj, "dump"):
-            return obj.dump()
+        if hasattr(o, "dump"):
+            return o.dump()
 
-        return obj
+        return o
 
 
 class JSONDecoder(json.JSONDecoder):
@@ -152,4 +152,3 @@ def dump(obj, fp, *, skipkeys=False, ensure_ascii=True, check_circular=True,
                      cls=partial(JSONEncoder, core=core),
                      allow_nan=allow_nan, indent=indent,
                      separators=separators, sort_keys=sort_keys, **kw)
-

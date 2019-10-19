@@ -50,7 +50,7 @@ class Module:
                 "core": self.core,
                 "loop": self.core.loop,
                 "logger": logging.getLogger(f"scripts.{name}")
-                })
+            })
             spec.loader.exec_module(mod)
 
         except Exception:  # pylint: disable=broad-except

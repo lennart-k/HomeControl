@@ -3,7 +3,6 @@
 import base64
 import hashlib
 from typing import Optional
-import uuid
 import bcrypt
 import pyotp
 
@@ -117,6 +116,7 @@ class TOTPCredentialProvider(CredentialProvider):
             if pyotp.TOTP(creds.data).verify(data):
                 return True
         return False
+
 
 CREDENTIAL_PROVIDERS = {
     "password": PasswordCredentialProvider,

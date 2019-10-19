@@ -28,5 +28,6 @@ class ConfigurationNotApproved(HomeControlException):
 class ItemNotOnlineError(HomeControlException):
     """Item is not online"""
 
+
 class ItemTypeNotExistsError(HomeControlException):
     """Item type does not exist"""

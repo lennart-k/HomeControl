@@ -29,6 +29,7 @@ CONFIG_SCHEMA = vol.Schema({
 })
 
 
+# pylint: disable=too-few-public-methods
 class ModuleFolder:
     """
     module folder representation to create
@@ -159,7 +160,6 @@ class ModuleManager:
                 exception=e,
                 name=name)
             return
-
 
         mod_name = f"homecontrol_{os.path.basename(parent_path)}.{name}"
         mod_spec = importlib.util.spec_from_file_location(

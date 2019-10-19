@@ -96,7 +96,7 @@ class Core:
         pending = [task
                    for task
                    in asyncio.all_tasks(loop=self.loop)
-                   if not task is asyncio.current_task(loop=self.loop)]
+                   if task is not asyncio.current_task(loop=self.loop)]
 
         if pending:
             LOGGER.info("Waiting for pending tasks (1s)")

@@ -70,7 +70,7 @@ class Storage:
         data = None
         if self._data is not None:
             return self._data["data"]
-        elif os.path.isfile(self.path):
+        if os.path.isfile(self.path):
             try:
                 data = FILE_SCHEMA(load(open(self.path, "r"), core=self.core))
             except (vol.Error, JSONDecodeError):

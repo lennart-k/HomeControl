@@ -63,12 +63,14 @@ class TrustedClientsAuthProvider(AuthProvider):
         remote = request.remote
 
         # Block forwarded request, they'd be a huge security nightmare
-        if request.forwarded: return
+        if request.forwarded:
+            return
 
         if remote in self.trusted_clients:
             return self.auth_manager.get_user(
                 self.trusted_clients[remote]["user"]
             )
+
 
 AUTH_PROVIDERS = {
     "oauth": OauthAuthProvider,

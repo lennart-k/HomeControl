@@ -1,7 +1,5 @@
 """Data models required by the auth module"""
 import uuid
-import base64
-import hashlib
 import secrets
 from datetime import datetime, timedelta
 
@@ -10,10 +8,10 @@ from typing import (
     Dict,
     Any
 )
-import bcrypt
 from attr import attrs, attrib
 
 # pylint: disable=too-few-public-methods
+
 
 @attrs(slots=True)
 class AccessToken:
@@ -60,6 +58,7 @@ class User:
     credentials: Dict[str, "Credentials"] = attrib(default={})
     system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)
+
 
 @attrs(slots=True)
 class Credentials:

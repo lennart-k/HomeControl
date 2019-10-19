@@ -3,6 +3,7 @@ from functools import wraps
 from typing import Callable
 from aiohttp.web import Request
 
+
 def needs_auth(
         require_user: bool = True,
         owner_only: bool = False,

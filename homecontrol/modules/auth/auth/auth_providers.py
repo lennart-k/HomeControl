@@ -62,8 +62,8 @@ class TrustedClientsAuthProvider(AuthProvider):
     async def validate_request(self, request: web.Request) -> Optional[User]:
         remote = request.remote
 
-        if request.forwarded:
-            remote = request.forwarded[0].get("for")
+        # Block forwarded request, they'd be a huge security nightmare
+        if request.forwarded: return
 
         if remote in self.trusted_clients:
             return self.auth_manager.get_user(

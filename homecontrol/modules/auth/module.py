@@ -257,25 +257,28 @@ class Module:
             return JSONResponse(result)
 
         @router.post("/auth/bind_credentials")
+        @needs_auth(require_user=True)
         async def bind_credentials(request: web.Request) -> JSONResponse:
             """Binds credentials to a user"""
             try:
                 data = vol.Schema({
                     vol.Required("provider", default="password"): vol.Any(
                         *self.auth_manager.credential_providers.keys()),
-                    vol.Required("user"): str,
+                    vol.Optional("user", default=None): vol.Any(str, None),
                     vol.Required("data"): object
                 })(await request.json())
             except (vol.Invalid, JSONDecodeError) as e:
                 return JSONResponse(error=str(e))
 
+            if data["user"] and not request.user.owner:
+                return JSONResponse(error="Unauthorized", status_code=401)
+
+            user = self.auth_manager.get_user(data["user"]) or request.user
+
             provider: CredentialProvider = (
                 self.auth_manager.credential_providers[data["provider"]])
 
-            creds = await provider.create_credentials(
-                self.auth_manager.get_user(data["user"]),
-                data["data"]
-            )
+            creds = await provider.create_credentials(user, data["data"])
             self.auth_manager.users.schedule_save()
 
             return JSONResponse({

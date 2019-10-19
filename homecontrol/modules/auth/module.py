@@ -234,28 +234,6 @@ class Module:
                 output["auth_code"] = step_result.auth_code
             return JSONResponse(output)
 
-        @router.post("/auth/test")
-        async def test(request: web.Request) -> JSONResponse:
-            try:
-                data = vol.Schema({
-                    vol.Required("provider", default="password"): vol.Any(
-                        *self.auth_manager.credential_providers.keys()),
-                    vol.Required("user"): str,
-                    vol.Required("data"): object
-                })(await request.json())
-            except (vol.Invalid, JSONDecodeError) as e:
-                return JSONResponse(error=str(e))
-
-            provider: CredentialProvider = (
-                self.auth_manager.credential_providers[data["provider"]])
-
-            result = await provider.validate_login_data(
-                self.auth_manager.get_user(data["user"]),
-                data["data"]
-            )
-            print(result)
-            return JSONResponse(result)
-
         @router.post("/auth/bind_credentials")
         @needs_auth(require_user=True)
         async def bind_credentials(request: web.Request) -> JSONResponse:

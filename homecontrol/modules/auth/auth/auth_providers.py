@@ -60,9 +60,14 @@ class TrustedClientsAuthProvider(AuthProvider):
             }
 
     async def validate_request(self, request: web.Request) -> Optional[User]:
-        if request.remote in self.trusted_clients:
+        remote = request.remote
+
+        if request.forwarded:
+            remote = request.forwarded[0].get("for")
+
+        if remote in self.trusted_clients:
             return self.auth_manager.get_user(
-                self.trusted_clients[request.remote]["user"]
+                self.trusted_clients[remote]["user"]
             )
 
 AUTH_PROVIDERS = {

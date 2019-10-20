@@ -163,10 +163,13 @@ class PasswordLoginFlow(LoginFlow):
         return self.set_step(
             type="form",
             step_id="login",
-            data={
-                "username": "String",
-                "password": "Password"
-            }
+            data=[{
+                "field": "username",
+                "type": "String"
+            }, {
+                "field": "password",
+                "type": "Password"
+            }]
         )
 
     async def step_login(self, data: dict) -> FlowStep:
@@ -200,21 +203,19 @@ class PasswordLoginFlow(LoginFlow):
             return self.set_step(
                 type="form",
                 step_id="mfa",
-                data={
-                    "code": "String"
-                }
+                data=[{
+                    "field": "code",
+                    "type": "String"
+                }]
             )
 
+    # TODO Proper implementation for MFA!
     async def step_mfa(self, data: dict) -> FlowStep:
         """The step for multiple-factor authentication"""
-        print("MFA")
-        print(data)
         if self.mfa_module == "totp":
             totp_provider: CredentialProvider = (
                 self.auth_manager.credential_providers[self.mfa_module])
 
-            print(totp_provider)
-            print(data["code"])
             valid_code = await totp_provider.validate_login_data(
                 self.user, data=data["code"])
 

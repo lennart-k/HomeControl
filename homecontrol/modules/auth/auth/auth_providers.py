@@ -1,5 +1,5 @@
 """auth providers for HomeControl"""
-from socket import gethostbyname
+import ipaddress
 from typing import Optional
 from aiohttp import web, hdrs
 from . import AuthManager
@@ -53,10 +53,11 @@ class TrustedClientsAuthProvider(AuthProvider):
     """Allows clients to identify by their network address"""
     def __init__(self, auth_manager: AuthManager, cfg: dict) -> None:
         super().__init__(auth_manager, cfg)
-        self.trusted_clients = {}
-        for trusted_client in self.cfg["trusted-addresses"]:
-            self.trusted_clients[gethostbyname(trusted_client["address"])] = {
-                "user": trusted_client["user"]
+        self.trusted_networks = {}
+        for trusted_network in self.cfg["trusted-networks"]:
+            network = ipaddress.ip_network(trusted_network["address"])
+            self.trusted_networks[network] = {
+                "user": trusted_network["user"]
             }
 
     async def validate_request(self, request: web.Request) -> Optional[User]:
@@ -66,10 +67,9 @@ class TrustedClientsAuthProvider(AuthProvider):
         if request.forwarded:
             return
 
-        if remote in self.trusted_clients:
-            return self.auth_manager.get_user(
-                self.trusted_clients[remote]["user"]
-            )
+        for network, data in self.trusted_networks.items():
+            if ipaddress.ip_address(remote) in network:
+                return self.auth_manager.get_user(data["user"])
 
 
 AUTH_PROVIDERS = {

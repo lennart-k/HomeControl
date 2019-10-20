@@ -21,8 +21,10 @@ api-server:
 auth:
   providers:
     - type: trusted-clients
-      trusted-addresses:
+      trusted-networks:
         - address: 127.0.0.1
+          user: system
+        - address: ::1/128
           user: system
     - type: oauth
 

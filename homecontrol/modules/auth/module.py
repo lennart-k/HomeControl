@@ -199,10 +199,13 @@ class Module:
                 "type": first_result.type,
                 "data": first_result.data
             }
+            # TODO REWRITE!
             if first_result.error:
                 output["error"] = first_result.error
             if first_result.auth_code:
                 output["auth_code"] = first_result.auth_code
+            if first_result.form_type:
+                output["form_type"] = first_result.form_type
 
             return JSONResponse(output)
 
@@ -228,10 +231,13 @@ class Module:
                 "type": step_result.type,
                 "data": step_result.data
             }
+            # TODO REWRITE!
             if step_result.error:
                 output["error"] = step_result.error
             if step_result.auth_code:
                 output["auth_code"] = step_result.auth_code
+            if step_result.form_type:
+                output["form_type"] = step_result.form_type
             return JSONResponse(output)
 
         @router.post("/auth/bind_credentials")

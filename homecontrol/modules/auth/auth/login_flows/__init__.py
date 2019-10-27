@@ -16,7 +16,6 @@ from ..credential_provider import (
     PasswordCredentialProvider, CredentialProvider
 )
 
-
 # pylint: disable=redefined-builtin,invalid-name
 class FlowStep:
     """The class representing the result of a step"""
@@ -34,13 +33,15 @@ class FlowStep:
             type: str = None,
             error: str = None,
             data: dict = None,
-            auth_code: str = None) -> None:
+            auth_code: str = None,
+            form_type: str = None) -> None:
         self.user = user
         self.type = type or ("form" if not error else "error")
         self.error = error
         self.step_id = step_id
         self.data = data
         self.auth_code = auth_code
+        self.form_type = form_type
 
 
 class LoginFlow:
@@ -169,7 +170,8 @@ class PasswordLoginFlow(LoginFlow):
             }, {
                 "field": "password",
                 "type": "Password"
-            }]
+            }],
+            form_type="password"
         )
 
     async def step_login(self, data: dict) -> FlowStep:
@@ -206,23 +208,26 @@ class PasswordLoginFlow(LoginFlow):
                 data=[{
                     "field": "code",
                     "type": "String"
-                }]
+                }],
+                form_type="totp"
             )
 
     # TODO Proper implementation for MFA!
     async def step_mfa(self, data: dict) -> FlowStep:
         """The step for multiple-factor authentication"""
-        if self.mfa_module == "totp":
-            totp_provider: CredentialProvider = (
-                self.auth_manager.credential_providers[self.mfa_module])
+        if not self.mfa_module in self.auth_manager.credential_providers:
+            return FlowStep(error="Invalid MFA module")
 
-            valid_code = await totp_provider.validate_login_data(
-                self.user, data=data["code"])
+        totp_provider: CredentialProvider = (
+            self.auth_manager.credential_providers[self.mfa_module])
 
-            if valid_code:
-                return await self.return_auth_code()
+        valid_code = await totp_provider.validate_login_data(
+            self.user, data=data["code"])
 
-        return FlowStep(error="Invalid MFA module or invalid code")
+        if valid_code:
+            return await self.return_auth_code()
+
+        return FlowStep(error="Invalid MFA code")
 
 
 FLOW_TYPES = {

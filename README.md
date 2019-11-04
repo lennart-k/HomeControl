@@ -20,9 +20,9 @@ docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk
 
 On arm machines like the Raspberry Pi do:
 ```
-docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk01/homecontrol:arm
+docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk01/homecontrol:armv7l
 ```
-If you are using arm you should consider the manual installation as I've not been able to set up automated builds for arm.
+If you are using arm you should consider the manual installation as I've not been able to set up automated builds for arm yet.
 
 
 ### Python

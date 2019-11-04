@@ -115,9 +115,6 @@ class EventEngine:
     def register(self, event: str) -> Callable:
         """
         Decorator to register event handlers
-
-        :param event:
-        :return:
         """
         def _register(coro):
             self.handlers[event].add(coro)

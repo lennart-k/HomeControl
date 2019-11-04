@@ -24,25 +24,20 @@ from homecontrol.dependencies.entity_types import (
 
 class JSONEncoder(json.JSONEncoder):
     """Custom JSONEncoder that also parses HomeControl types"""
+
     def __init__(self, core: Core, *args, **kwargs):
         self.core = core
         super().__init__(*args, **kwargs)
 
     # pylint: disable=no-self-use,too-many-return-statements,method-hidden
     def default(self, o):
-        """Parse custom types"""
+        """Encode custom types"""
         if isinstance(o, Item):
             return {
                 "!type": "Item",
                 "item_type": o.type,
                 "id": o.identifier,
                 "name": o.name
-            }
-        if isinstance(o, Module):
-            return {
-                "!type": "Module",
-                "name": o.name,
-                "meta": o.meta
             }
 
         if isinstance(o, (BaseException, Exception)):
@@ -51,6 +46,7 @@ class JSONEncoder(json.JSONEncoder):
                 "type": type(o).__name__,
                 "message": str(o)
             }
+
         if isinstance(o, Enum):
             return o.value
 
@@ -71,6 +67,7 @@ class JSONEncoder(json.JSONEncoder):
 
 class JSONDecoder(json.JSONDecoder):
     """Custom JSONDecoder with object_hook"""
+
     def __init__(self, core: Core, *args, **kwargs):
         self.core = core
         super().__init__(*args, **kwargs, object_hook=self._object_hook)
@@ -85,14 +82,6 @@ class JSONDecoder(json.JSONDecoder):
                     raise ItemNotFoundException(
                         f"There's no item with id {obj['id']}")
                 return self.core.item_manager.items[obj["id"]]
-
-            if obj["!type"] == "Module":
-                MODULE_SCHEMA(obj)  # Check if obj has needed attributes
-                # Check if module exists
-                if not obj["name"] in self.core.module_manager.loaded_modules:
-                    raise ModuleNotFoundException(
-                        f"There's no module with name {obj['name']}")
-                return self.core.module_manager.loaded_modules[obj["name"]]
 
             if obj["!type"] in types:
                 return types[obj["!type"]].from_data(obj["data"])

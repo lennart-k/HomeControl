@@ -27,7 +27,7 @@ If you are using arm you should consider the manual installation as I've not bee
 
 ### Python
 
-The minimum Python version for HomeControl is Python 3.6
+The minimum Python version for HomeControl is Python 3.7
 You can install it the following:
 ```
 python -m pip install git+https://github.com/lennart-k/HomeControl

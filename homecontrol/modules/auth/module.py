@@ -193,21 +193,7 @@ class Module:
 
             first_result = await flow.step_init(data)
 
-            output = {
-                "id": flow.id,
-                "step_id": first_result.step_id,
-                "type": first_result.type,
-                "data": first_result.data
-            }
-            # TODO REWRITE!
-            if first_result.error:
-                output["error"] = first_result.error
-            if first_result.auth_code:
-                output["auth_code"] = first_result.auth_code
-            if first_result.form_type:
-                output["form_type"] = first_result.form_type
-
-            return JSONResponse(output)
+            return JSONResponse(first_result.to_json())
 
         @router.post("/auth/login_flow/{flow_id}")
         async def do_login_flow_step(request: web.Request) -> JSONResponse:
@@ -225,20 +211,7 @@ class Module:
             step = flow.get_step(flow.current_step)
             step_result = await step(data)
 
-            output = {
-                "id": flow.id,
-                "step_id": step_result.step_id,
-                "type": step_result.type,
-                "data": step_result.data
-            }
-            # TODO REWRITE!
-            if step_result.error:
-                output["error"] = step_result.error
-            if step_result.auth_code:
-                output["auth_code"] = step_result.auth_code
-            if step_result.form_type:
-                output["form_type"] = step_result.form_type
-            return JSONResponse(output)
+            return JSONResponse(step_result.to_json())
 
         @router.post("/auth/bind_credentials")
         @needs_auth(require_user=True)

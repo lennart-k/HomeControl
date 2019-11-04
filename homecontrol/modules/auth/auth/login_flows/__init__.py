@@ -17,6 +17,8 @@ from ..credential_provider import (
 )
 
 # pylint: disable=redefined-builtin,invalid-name
+
+
 class FlowStep:
     """The class representing the result of a step"""
     user: User
@@ -28,6 +30,7 @@ class FlowStep:
 
     def __init__(
             self,
+            flow: "LoginFlow",
             step_id: str = None,
             user: User = None,
             type: str = None,
@@ -35,6 +38,7 @@ class FlowStep:
             data: dict = None,
             auth_code: str = None,
             form_type: str = None) -> None:
+        self.flow = flow
         self.user = user
         self.type = type or ("form" if not error else "error")
         self.error = error
@@ -42,6 +46,22 @@ class FlowStep:
         self.data = data
         self.auth_code = auth_code
         self.form_type = form_type
+
+    def to_json(self) -> dict:
+        output = {
+            "id": self.flow.id,
+            "step_id": self.step_id,
+            "type": self.type,
+            "data": self.data
+        }
+        if self.error:
+            output["error"] = self.error
+        if self.auth_code:
+            output["auth_code"] = self.auth_code
+        if self.form_type:
+            output["form_type"] = self.form_type
+
+        return output
 
 
 class LoginFlow:
@@ -80,6 +100,7 @@ class LoginFlow:
         if step_id:
             self.current_step = step_id
         return FlowStep(
+            self,
             step_id=step_id,
             **kwargs
         )
@@ -93,7 +114,7 @@ class LoginFlow:
             user=user or self.user,
             client_id=client_id or self.client_id
         )
-        return FlowStep(user=user, type="success", auth_code=code.code)
+        return FlowStep(self, user=user, type="success", auth_code=code.code)
 
 
 class FlowManager:
@@ -182,7 +203,7 @@ class PasswordLoginFlow(LoginFlow):
                 vol.Required("password"): str
             })(data)
         except vol.Invalid as e:
-            return FlowStep(error=str(e))
+            return FlowStep(self, error=str(e))
 
         self.user = self.auth_manager.get_user_by_name(data["username"])
 
@@ -197,7 +218,7 @@ class PasswordLoginFlow(LoginFlow):
                 self.user, data=data["password"])
 
         if not valid_password:
-            return FlowStep(error="Invalid credentials")
+            return FlowStep(self, error="Invalid credentials")
 
         if not self.mfa_module:
             return await self.return_auth_code()
@@ -216,7 +237,7 @@ class PasswordLoginFlow(LoginFlow):
     async def step_mfa(self, data: dict) -> FlowStep:
         """The step for multiple-factor authentication"""
         if not self.mfa_module in self.auth_manager.credential_providers:
-            return FlowStep(error="Invalid MFA module")
+            return FlowStep(self, error="Invalid MFA module")
 
         totp_provider: CredentialProvider = (
             self.auth_manager.credential_providers[self.mfa_module])
@@ -227,7 +248,7 @@ class PasswordLoginFlow(LoginFlow):
         if valid_code:
             return await self.return_auth_code()
 
-        return FlowStep(error="Invalid MFA code")
+        return FlowStep(self, error="Invalid MFA code")
 
 
 FLOW_TYPES = {

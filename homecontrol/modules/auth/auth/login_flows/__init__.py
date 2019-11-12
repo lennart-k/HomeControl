@@ -179,42 +179,34 @@ class PasswordLoginFlow(LoginFlow):
         super().__init__(flow_manager, id, client_id, cfg=cfg)
 
         self.mfa_module = self.cfg.get("mfa-module", None)
+        self.password_provider: PasswordCredentialProvider = (
+            self.auth_manager.credential_providers["password"])
+        self.mfa_provider: CredentialProvider = (
+            self.auth_manager.credential_providers.get(self.mfa_module))
 
     async def step_init(self, data: dict) -> FlowStep:
         """The first step"""
         return self.set_step(
             type="form",
             step_id="login",
-            data=[{
-                "field": "username",
-                "type": "String"
-            }, {
-                "field": "password",
-                "type": "Password"
-            }],
-            form_type="password"
+            data=self.password_provider.form,
+            form_type=self.password_provider.namespace
         )
 
     async def step_login(self, data: dict) -> FlowStep:
         """The actual login step"""
         try:
-            data = vol.Schema({
-                vol.Required("username"): str,
-                vol.Required("password"): str
-            })(data)
+            data = self.password_provider.schema(data)
         except vol.Invalid as e:
             return FlowStep(self, error=str(e))
 
         self.user = self.auth_manager.get_user_by_name(data["username"])
 
-        credential_provider: PasswordCredentialProvider = (
-            self.auth_manager.credential_providers["password"])
-
         if not self.user:
             bcrypt.checkpw(data["password"].encode(), DUMMY_HASH)
             valid_password = False
         else:
-            valid_password = await credential_provider.validate_login_data(
+            valid_password = await self.password_provider.validate_login_data(
                 self.user, data=data["password"])
 
         if not valid_password:
@@ -226,23 +218,16 @@ class PasswordLoginFlow(LoginFlow):
             return self.set_step(
                 type="form",
                 step_id="mfa",
-                data=[{
-                    "field": "code",
-                    "type": "String"
-                }],
-                form_type="totp"
+                data=self.mfa_provider.form,
+                form_type=self.mfa_module.namespace
             )
 
-    # TODO Proper implementation for MFA!
     async def step_mfa(self, data: dict) -> FlowStep:
         """The step for multiple-factor authentication"""
         if not self.mfa_module in self.auth_manager.credential_providers:
             return FlowStep(self, error="Invalid MFA module")
 
-        totp_provider: CredentialProvider = (
-            self.auth_manager.credential_providers[self.mfa_module])
-
-        valid_code = await totp_provider.validate_login_data(
+        valid_code = await self.mfa_provider.validate_login_data(
             self.user, data=data["code"])
 
         if valid_code:

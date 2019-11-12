@@ -5,6 +5,7 @@ import hashlib
 from typing import Optional
 import bcrypt
 import pyotp
+import voluptuous as vol
 
 from ..models import User, Credentials
 
@@ -15,6 +16,8 @@ class CredentialProvider:
     """Abstract class for credential providers"""
 
     namespace = "example"
+    form: object
+    schema: vol.Schema
 
     def __init__(self, auth_manager) -> None:
         self.auth_manager = auth_manager
@@ -56,8 +59,20 @@ class PasswordCredentialProvider(CredentialProvider):
     """Provides password credentials"""
 
     namespace = "password"
+    form = [{
+        "field": "username",
+        "type": "String",
+    }, {
+        "field": "password",
+        "type": "Password"
+    }]
+    schema = vol.Schema({
+        vol.Required("username"): str,
+        vol.Required("password"): str
+    })
 
     # pylint: disable=arguments-differ
+
     async def create_credentials(
             self, user: User, data: str) -> (Credentials, Optional[object]):
         """Creates credentials for a user"""
@@ -94,6 +109,10 @@ class PasswordCredentialProvider(CredentialProvider):
 class TOTPCredentialProvider(CredentialProvider):
     """Provides TOTP based authentication"""
     namespace = "totp"
+    form = [{
+        "field": "code",
+        "type": "String"
+    }]
 
     async def create_credentials(
             self, user: User, data: dict) -> (Credentials, Optional[object]):

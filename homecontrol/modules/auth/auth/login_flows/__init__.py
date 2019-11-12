@@ -219,7 +219,7 @@ class PasswordLoginFlow(LoginFlow):
                 type="form",
                 step_id="mfa",
                 data=self.mfa_provider.form,
-                form_type=self.mfa_module.namespace
+                form_type=self.mfa_provider.namespace
             )
 
     async def step_mfa(self, data: dict) -> FlowStep:

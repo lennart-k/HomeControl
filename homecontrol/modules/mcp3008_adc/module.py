@@ -2,11 +2,13 @@
 
 import logging
 
+from homecontrol.dependencies.entity_types import Item
+
 
 LOGGER = logging.getLogger(__name__)
 
 
-class MCP3008ADC:
+class MCP3008ADC(Item):
     """The MCP3008ADC item"""
     handle = None
 
@@ -34,7 +36,7 @@ class MCP3008ADC:
                                self.identifier)
 
 
-class AnalogInput:
+class AnalogInput(Item):
     """Item that holds an analog reading"""
     async def init(self):
         """Initialise the item"""

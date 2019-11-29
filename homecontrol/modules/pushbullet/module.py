@@ -1,15 +1,17 @@
 """Pushbullet module"""
 
 import json
-
 import requests
+
+from homecontrol.dependencies.entity_types import Item
+
 
 BASE_URL = "https://api.pushbullet.com/v2"
 PUSH_URL = BASE_URL + "/pushes"
 ME_URL = BASE_URL + "/users/me"
 
 
-class Pushbullet:
+class Pushbullet(Item):
     """The Pushbullet item"""
     async def init(self):
         """Initialise Pushbullet"""

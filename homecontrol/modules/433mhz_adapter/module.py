@@ -3,8 +3,9 @@
 # pylint: disable=import-error
 from .dependencies import rf
 
+from homecontrol.dependencies.entity_types import Item
 
-class RFRXAdapter:
+class RFRXAdapter(Item):
     """The RX adapter"""
     cfg: dict
 
@@ -27,7 +28,7 @@ class RFRXAdapter:
         self.rx.cancel()
 
 
-class RFTXAdapter:
+class RFTXAdapter(Item):
     """The TX adapter"""
     cfg: dict
 

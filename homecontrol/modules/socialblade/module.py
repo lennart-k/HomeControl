@@ -5,6 +5,9 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
+from homecontrol.dependencies.entity_types import Item
+
+
 LOGGER = logging.getLogger(__name__)
 
 LOOKUP_URL = "https://bastet.socialblade.com/{platform}/lookup"
@@ -33,7 +36,7 @@ def get_rawname(name: str, platform: str) -> str:
     return None
 
 
-class TwitchFollowers:
+class TwitchFollowers(Item):
     """Followers on Twitch"""
     async def init(self) -> bool:
         """Initialise the item"""
@@ -56,7 +59,7 @@ class TwitchFollowers:
         await self.states.update("followers", await self.poll_followers())
 
 
-class YouTubeFollowers:
+class YouTubeFollowers(Item):
     """Followers on YouTube"""
     async def init(self) -> bool:
         """Initialise the item"""
@@ -79,7 +82,7 @@ class YouTubeFollowers:
         await self.states.update("followers", await self.poll_followers())
 
 
-class TwitterFollowers:
+class TwitterFollowers(Item):
     """Followers on Twitter"""
     async def init(self) -> bool:
         """Initialise the item"""

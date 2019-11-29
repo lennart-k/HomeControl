@@ -2,8 +2,10 @@
 
 import requests
 
+from homecontrol.dependencies.entity_types import Item
 
-class HeliosVentilation:
+
+class HeliosVentilation(Item):
     """The ventilation item"""
     async def init(self):
         """Initialise the HeliosVentilation item"""

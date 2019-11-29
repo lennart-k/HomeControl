@@ -6,13 +6,16 @@ import rxv
 # pylint: disable=redefined-builtin
 from requests.exceptions import ConnectionError
 
+from homecontrol.dependencies.entity_types import Item
+
+
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("rxv").setLevel(logging.CRITICAL)
 
 CTRL_URL = "http://{host}/YamahaRemoteControl/ctrl"
 
 
-class YamahaAVReceiver:
+class YamahaAVReceiver(Item):
     """The YamahaAVReceiver item"""
     async def init(self):
         """Initialise the item"""

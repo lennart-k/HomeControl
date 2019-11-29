@@ -5,8 +5,10 @@ import json
 from functools import reduce
 import asyncio
 
+from homecontrol.dependencies.entity_types import Item
 
-class TasmotaRFAdapter:
+
+class TasmotaRFAdapter(Item):
     """The TasmotaRFAdapter class"""
     sending: asyncio.Event
 

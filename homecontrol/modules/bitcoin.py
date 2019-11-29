@@ -3,6 +3,9 @@
 import voluptuous as vol
 import requests
 
+from homecontrol.dependencies.entity_types import Item
+
+
 SPEC = {
     "meta": {
         "name": "Bitcoin",
@@ -39,7 +42,7 @@ RESULT_SCHEMA = vol.Schema({
 DATA_URL = "https://api.blockchain.info/stats"
 
 
-class BitcoinStats:
+class BitcoinStats(Item):
     """Item holding Bitcoin stats"""
     async def init(self):
         """Initialise the item"""

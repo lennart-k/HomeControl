@@ -2,6 +2,8 @@
 
 from .dependencies.intertechno_codes import from_code, to_code
 
+from homecontrol.dependencies.entity_types import Item
+
 
 class Module:
     """The module translating RF codes to Intertechno codes"""
@@ -18,7 +20,7 @@ class Module:
                         **dict(zip(("house", "id", "state"), it_code)))
 
 
-class IntertechnoSwitch:
+class IntertechnoSwitch(Item):
     """An Intertechno switch"""
     cfg: dict
 

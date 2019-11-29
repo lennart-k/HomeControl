@@ -5,8 +5,10 @@ import asyncio
 from concurrent.futures import TimeoutError
 import paho.mqtt.client as mqtt
 
+from homecontrol.dependencies.entity_types import Item
 
-class MQTTAdapter:
+
+class MQTTAdapter(Item):
     """The MQTT adapter"""
     async def init(self):
         """Initialise the adapter"""

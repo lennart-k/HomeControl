@@ -10,8 +10,10 @@ from homecontrol.dependencies.data_types import Color
 
 from .dependencies.lcd import LCD
 
+from homecontrol.dependencies.entity_types import Item
 
-class PiGPIOAdapter:
+
+class PiGPIOAdapter(Item):
     """The PiGPIO adapter"""
     cfg: dict
     pigpio: pigpio.pi
@@ -37,7 +39,7 @@ class PiGPIOAdapter:
         self.pigpio.stop()
 
 
-class BinaryOutput:
+class BinaryOutput(Item):
     """A binary output"""
     cfg: dict
     core: Core
@@ -61,7 +63,7 @@ class BinaryOutput:
         return await self.states.set("on", not await self.states.get("on"))
 
 
-class Button:
+class Button(Item):
     """A button that can also toggle"""
     cfg: dict
     core: Core
@@ -98,7 +100,7 @@ class Button:
             self._cb.cancel()
 
 
-class I2CLCD:
+class I2CLCD(Item):
     """A 2x16 I²C display for PiGPIO"""
     async def init(self):
         """Initialise the display"""
@@ -128,7 +130,7 @@ class I2CLCD:
         self.lcd.close()
 
 
-class RGBLight:
+class RGBLight(Item):
     """The RGBLight item"""
     cfg: dict
     mode: str

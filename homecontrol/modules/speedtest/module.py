@@ -1,13 +1,15 @@
 """Module for internet speedtest"""
 
 import logging
-
 import speedtest
+
+from homecontrol.dependencies.entity_types import Item
+
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Speedtest:
+class Speedtest(Item):
     """The Speedtest item"""
     async def init(self) -> None:
         """Init the Speedtest item"""

@@ -4,8 +4,10 @@ import math
 import time
 import asyncio
 
+from homecontrol.dependencies.entity_types import Item
 
-class Timer:
+
+class Timer(Item):
     """A basic timer"""
     float_remaining: float
     last_time: (float, float) = (0, 0)

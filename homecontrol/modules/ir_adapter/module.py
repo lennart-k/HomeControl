@@ -3,8 +3,10 @@
 # pylint: disable=import-error
 from .dependencies.ir_receiver import NECIRReceiver as Receiver
 
+from homecontrol.dependencies.entity_types import Item
 
-class NECIRReceiver:
+
+class NECIRReceiver(Item):
     """The receiver item"""
     async def init(self):
         """Initialise the receiver"""

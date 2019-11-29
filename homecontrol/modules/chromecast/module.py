@@ -2,8 +2,9 @@
 
 import pychromecast
 
+from homecontrol.dependencies.entity_types import Item
 
-class Chromecast:
+class Chromecast(Item):
     """The Chromecast item"""
     last_time_jump = 0
 

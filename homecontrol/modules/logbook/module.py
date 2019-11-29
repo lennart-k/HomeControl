@@ -40,9 +40,8 @@ class Module:
             allow_reload=False,
             default={
                 "db-path": (
-                    "sqlite:///"
-                    + abspath(resolve_path('homecontrol.db',
-                                           config_dir=self.core.cfg_dir)))
+                    "sqlite:///" + resolve_path(
+                        '@/homecontrol.db', config_dir=self.core.cfg_dir))
             }
         )
         self.engine = sqlalchemy.create_engine(

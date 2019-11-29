@@ -18,15 +18,17 @@ def resolve_path(path: str,
             only available if config_dir is specified
         for paths relative to the current file
     """
-    file_path = file_path or config_dir
+    relative_dir = os.path.abspath(
+        os.path.dirname(file_path) if file_path else config_dir)
 
     if path.startswith("~"):
         return os.path.expanduser(path)
     if path.startswith("/"):
         return path
     if path.startswith("./"):
-        return os.path.join(os.path.dirname(file_path), path[2:])
-    if config_dir:
-        if path.startswith("@/"):
+        return os.path.join(relative_dir, path[2:])
+    if path.startswith("@/"):
+        if config_dir:
             return os.path.join(config_dir, path[2:])
-    return os.path.join(file_path, path)
+        raise FileNotFoundError("Cannot use @/ paths without config_dir")
+    return os.path.join(relative_dir, path)

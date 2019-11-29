@@ -92,9 +92,8 @@ class Constructor(SafeConstructor):
         """
         if not isinstance(node.value, str):
             raise TypeError(f"folder must be of type str")
-        path = resolve_path(node.value,
-                            file_path=os.path.dirname(self.name),
-                            config_dir=self.cfg_folder)
+        path = resolve_path(
+            node.value, file_path=self.name, config_dir=self.cfg_folder)
         if not os.path.isfile(path):
             raise FileNotFoundError(path)
 
@@ -110,9 +109,8 @@ class Constructor(SafeConstructor):
         """
         if not isinstance(node.value, str):
             raise TypeError(f"folder must be of type str")
-        folder = resolve_path(node.value,
-                              file_path=os.path.dirname(self.name),
-                              config_dir=self.cfg_folder)
+        folder = resolve_path(
+            node.value, file_path=self.name, config_dir=self.cfg_folder)
         if not os.path.isdir(folder):
             raise FileNotFoundError(folder)
 
@@ -140,10 +138,10 @@ class Constructor(SafeConstructor):
         elif not isinstance(paths, list):
             raise TypeError(f"paths must be either of type str or list")
 
-        paths = [resolve_path(path,
-                              file_path=os.path.dirname(self.name),
-                              config_dir=self.cfg_folder)
-                 for path in paths]
+        paths = [
+            resolve_path(path, file_path=self.name, config_dir=self.cfg_folder)
+            for path in paths]
+
         files = set()
         for path in paths:
             if os.path.isfile(path):
@@ -179,9 +177,10 @@ class Constructor(SafeConstructor):
         /   for absolute paths
         anything else for paths relative to your config folder
         """
-        return resolve_path(node.value,
-                            file_path=os.path.dirname(self.name),
-                            config_dir=self.cfg_folder)
+        print(self.name, node.value)
+
+        return resolve_path(
+            node.value, file_path=self.name, config_dir=self.cfg_folder)
 
     def listdir_constructor(self, node: yaml.Node) -> list:
         """
@@ -190,10 +189,8 @@ class Constructor(SafeConstructor):
         Returns the contents of a directory
         """
         path = resolve_path(
-            node.value,
-            file_path=os.path.dirname(self.name),
-            config_dir=self.cfg_folder
-        )
+            node.value, file_path=self.name, config_dir=self.cfg_folder)
+
         if os.path.isdir(path):
             return [os.path.join(path, item) for item in os.listdir(path)]
         return list()

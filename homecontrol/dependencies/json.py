@@ -10,14 +10,11 @@ from homecontrol.core import Core
 from homecontrol.dependencies.data_types import type_set, types
 from homecontrol.dependencies.entity_types import (
     Item,
-    Module
 )
 from homecontrol.exceptions import (
     ItemNotFoundException,
-    ModuleNotFoundException
 )
 from homecontrol.dependencies.entity_types import (
-    MODULE_SCHEMA,
     ITEM_SCHEMA
 )
 

@@ -224,7 +224,7 @@ class PasswordLoginFlow(LoginFlow):
 
     async def step_mfa(self, data: dict) -> FlowStep:
         """The step for multiple-factor authentication"""
-        if not self.mfa_module in self.auth_manager.credential_providers:
+        if self.mfa_module not in self.auth_manager.credential_providers:
             return FlowStep(self, error="Invalid MFA module")
 
         valid_code = await self.mfa_provider.validate_login_data(

@@ -5,8 +5,6 @@ import logging
 import voluptuous as vol
 
 from homecontrol.const import ItemStatus
-from homecontrol.dependencies.state_engine import StateEngine
-from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.entity_types import Item
 
 LOGGER = logging.getLogger(__name__)
@@ -30,7 +28,7 @@ class ItemManager:
     def __init__(self, core):
         self.core = core
         self.items = {}
-        self.item_specs = {}
+        self.item_classes = {}
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
@@ -50,10 +48,12 @@ class ItemManager:
         mod_obj: homecontrol.data_types.Module
         """
         for name, spec in mod_obj.spec.get("items", {}).items():
-            spec["class"] = type(name, (getattr(mod_obj.mod, name), Item), {})
-            spec["module"] = mod_obj
-            self.item_specs[f"{mod_obj.name}.{name}"] = spec
-            mod_obj.item_specs[name] = spec
+            item_type = f"{mod_obj.name}.{name}"
+            item_class = type(name, (getattr(mod_obj.mod, name), Item), {})
+            item_class.spec = spec
+            item_class.module = mod_obj
+            item_class.type = item_type
+            self.item_classes[item_type] = item_class
 
     def iter_items_by_id(self, iterable) -> [Item]:
         """Translates item identifiers into item instances"""
@@ -171,6 +171,7 @@ class ItemManager:
                 Raw configuration to check whether the item has to be recreated
                 when updating the configuration
             cfg (dict):
+                The item's configuration
             state_defaults (dict):
                 If the initial state cannot be polled on init
                 you can pass a default
@@ -178,63 +179,24 @@ class ItemManager:
                 How your item should be displayed in the frontend
 
         """
-        if item_type not in self.item_specs:
+        if item_type not in self.item_classes:
             LOGGER.error("Item type not found: %s", item_type)
             return
 
-        spec = self.item_specs[item_type]
-        item = spec["class"].__new__(spec["class"])
-        item.type = item_type
-        item.core = self.core
+        item_class = self.item_classes[item_type]
+
+        item = item_class(
+            identifier, name, cfg,
+            state_defaults=state_defaults,
+            core=self.core
+        )
         # pylint: disable=protected-access
         item._raw_cfg = raw_cfg
-        item.spec = spec
-        item.module = spec["module"]
-        item.status = ItemStatus.ONLINE
-        item.identifier = identifier
-        item.name = name or identifier
-        # Identifiers of items that will depend on this one
-        item.dependant_items = dependant_items or set()
-        # Identifiers of items this new item depends on
-        item.dependencies = set()
-
-        if spec.get("config-schema"):
-            schema = spec.get("config-schema")
-            if not isinstance(spec["config-schema"], vol.Schema):
-                schema = vol.Schema(
-                    spec["config-schema"], extra=vol.ALLOW_EXTRA)
-
-            config = schema(cfg or {})
-        else:
-            config = cfg
-
-        for key, value in list(config.items()):
-            if isinstance(value, str):
-                if value.startswith("i!"):
-                    dependency = self.items.get(value[2:], None)
-                    config[key] = dependency
-                    if dependency:
-                        item.dependencies.add(dependency.identifier)
-                        dependency.dependant_items.add(item.identifier)
-
-                        if dependency.status != ItemStatus.ONLINE:
-                            item.status = ItemStatus.WAITING_FOR_DEPENDENCY
-                    else:
-                        LOGGER.error(
-                            "Item %s depends on item %s which does not exist",
-                            item.identifier, value[2:])
-                        item.status = ItemStatus.WAITING_FOR_DEPENDENCY
-
-        item.cfg = config
-        item.states = StateEngine(
-            item, self.core, state_defaults=state_defaults or {})
-        item.actions = ActionEngine(item, self.core)
-        item.__init__()
 
         self.items[identifier] = item
-        spec["module"].items[identifier] = item
+        item_class.module.items[identifier] = item
 
-        if item.status == ItemStatus.ONLINE:
+        if item.status != ItemStatus.WAITING_FOR_DEPENDENCY:
             await self.init_item(item)
 
         self.core.event_engine.broadcast("item_created", item=item)

@@ -4,7 +4,6 @@ import logging
 from typing import Callable, Any
 import voluptuous as vol
 from homecontrol.dependencies.data_types import types
-from homecontrol.dependencies.entity_types import Item
 from homecontrol.const import ItemStatus
 from homecontrol.exceptions import (
     ItemNotOnlineError
@@ -15,7 +14,11 @@ LOGGER = logging.getLogger(__name__)
 
 class StateEngine:
     """Holds the states of an item"""
-    def __init__(self, item: Item, core, state_defaults: dict = None):
+    def __init__(
+            self,
+            item: "homecontrol.dependencies.entity_types.Item",
+            core: "homecontrol.core.Core",
+            state_defaults: dict = None):
         state_defaults = state_defaults or {}
 
         self.item = item

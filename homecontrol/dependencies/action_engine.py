@@ -1,12 +1,11 @@
 """ActionEngine for HomeControl"""
 
-from homecontrol.dependencies.entity_types import Item
-
 
 # pylint: disable=too-few-public-methods
 class ActionEngine:
     """Holds available actions for an item"""
-    def __init__(self, item: Item, core):
+    def __init__(
+            self, item: "homecontrol.dependencies.entity_types.Item", core):
         self.core = core
         self.item = item
         self.actions = {}

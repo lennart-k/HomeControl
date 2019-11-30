@@ -91,7 +91,7 @@ class Item:
         self.actions = ActionEngine(self, self.core)
 
     def __repr__(self) -> str:
-        return (f"<Item {self.type} identifier={self.identifier}"
+        return (f"<Item {self.type} identifier={self.identifier} "
                 f"name={self.name}>")
 
     async def init(self) -> None:

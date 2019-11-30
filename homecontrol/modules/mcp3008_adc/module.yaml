@@ -3,7 +3,6 @@ meta:
   description: Support for the MCP3008 ADC which enables the Raspberry Pi to get analog input
 
 items:
-
   MCP3008ADC:
     config-schema:
       !vol/Required {schema: pigpio_adapter}:

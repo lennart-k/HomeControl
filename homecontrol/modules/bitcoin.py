@@ -13,10 +13,10 @@ SPEC = {
     },
     "items": {
         "BitcoinStats": {
-            "config-schema": vol.Schema({
+            "config-schema": {
                 vol.Required("update_interval", default=3600):
                 vol.Coerce(type=int)
-            }),
+            },
             "actions": {
                 "update": "update_stats"
             },

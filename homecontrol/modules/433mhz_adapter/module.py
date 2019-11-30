@@ -5,6 +5,7 @@ from .dependencies import rf
 
 from homecontrol.dependencies.entity_types import Item
 
+
 class RFRXAdapter(Item):
     """The RX adapter"""
     cfg: dict

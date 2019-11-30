@@ -90,7 +90,6 @@ class Item:
             self, self.core, state_defaults=state_defaults or {})
         self.actions = ActionEngine(self, self.core)
 
-
     def __repr__(self) -> str:
         return (f"<Item {self.type} identifier={self.identifier}"
                 f"name={self.name}>")

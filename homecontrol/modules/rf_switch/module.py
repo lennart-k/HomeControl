@@ -1,5 +1,7 @@
 """A module for the old Intertechno switches"""
 
+from typing import (Dict)
+
 from .dependencies.intertechno_codes import from_code, to_code
 
 from homecontrol.dependencies.entity_types import Item
@@ -34,7 +36,7 @@ class IntertechnoSwitch(Item):
                 await self.states.update("on", state)
 
     # pylint: disable=invalid-name
-    async def switch(self, on):
+    async def switch(self, on: bool) -> Dict[str, bool]:
         """Setter for on"""
         await self.cfg["433mhz_tx_adapter"].send_code(
             to_code(self.cfg["house"], self.cfg["id"], on))

@@ -45,5 +45,4 @@ items:
       value:
         default: 0
         getter: get_value
-        poll-function: poll_value
         poll-interval: 0.1

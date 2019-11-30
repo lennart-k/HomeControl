@@ -112,8 +112,8 @@ class Module:
                     "id": item.identifier,
                     "name": item.name,
                     "type": item.type,
-                    "module": item.module,
-                    "status": item.status,
+                    "module": item.module.name,
+                    "status": item.status.value,
                     "actions": list(item.actions.actions.keys()),
                     "states": await item.states.dump()
                 } for item in self.core.item_manager.items.values()
@@ -134,9 +134,9 @@ class Module:
             return JSONResponse({
                 "id": item.identifier,
                 "type": item.type,
-                "module": item.module,
+                "module": item.module.name,
                 "config": item.cfg,
-                "status": item.status
+                "status": item.status.value
             })
 
         @r.post("/item/{id}/reload")
@@ -155,7 +155,7 @@ class Module:
 
             return JSONResponse({
                 "message": f"Item {identifier} recreated",
-                "status": item.status
+                "status": item.status.value
             })
 
         @r.get("/item/{id}/states")

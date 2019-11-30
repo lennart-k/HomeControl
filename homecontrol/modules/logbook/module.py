@@ -1,7 +1,6 @@
 """logbook module"""
 import logging
 from contextlib import contextmanager
-from os.path import abspath
 
 import uuid
 import sqlalchemy
@@ -62,7 +61,7 @@ class Module:
         try:
             yield session
             session.commit()
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disle=broad-except
             LOGGER.error("An error occured when executing a query: %s", e)
         finally:
             session.close()

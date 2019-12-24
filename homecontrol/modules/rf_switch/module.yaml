@@ -18,6 +18,3 @@ items:
 
       !vol/Required {schema: 433mhz_tx_adapter}:
         !type/str
-
-    actions:
-      toggle: toggle_on

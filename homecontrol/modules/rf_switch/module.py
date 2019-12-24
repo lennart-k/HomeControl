@@ -5,6 +5,7 @@ import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.action_engine import action
 
 from .dependencies.intertechno_codes import from_code, to_code
 
@@ -38,6 +39,7 @@ class IntertechnoSwitch(Item):
                     == (house, identifier):
                 await self.states.update("on", state)
 
+    @action("toggle")
     async def toggle_on(self):
         """Toggle on"""
         return await self.states.set("on", not await self.states.get("on"))

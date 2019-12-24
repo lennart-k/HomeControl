@@ -19,14 +19,5 @@ items:
       !vol/Required {schema: 433mhz_tx_adapter}:
         !type/str
 
-    states:
-      "on":
-        default: True
-        setter: switch
-        schema:
-          !vol/All
-            - !vol/Any [ !type/bool , !type/int ]
-            - !vol/Coerce { type: !type/bool }
-
     actions:
       toggle: toggle_on

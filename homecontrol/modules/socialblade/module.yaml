@@ -10,13 +10,6 @@ items:
     config-schema:
       !vol/Any [rawname, name]: !type/str
 
-    states:
-      followers:
-        type: Integer
-        default: 0
-        poll-function: poll_followers
-        poll-interval: 30
-
     actions:
       update_followers: update_followers
 
@@ -24,26 +17,12 @@ items:
     config-schema:
       !vol/Any [rawname, name]: !type/str
 
-    states:
-      followers:
-        type: Integer
-        default: 0
-        poll-function: poll_followers
-        poll-interval: 30
-
     actions:
       update_followers: update_followers
 
   TwitterFollowers:
     config-schema:
       !vol/Required { schema: name }: !type/str
-
-    states:
-      followers:
-        type: Integer
-        default: 0
-        poll-function: poll_followers
-        poll-interval: 30
 
     actions:
       update_followers: update_followers

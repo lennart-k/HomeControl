@@ -1,10 +1,12 @@
 """A module for the old Intertechno switches"""
 
 from typing import (Dict)
-
-from .dependencies.intertechno_codes import from_code, to_code
+import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.state_engine import StateDef
+
+from .dependencies.intertechno_codes import from_code, to_code
 
 
 class Module:
@@ -25,6 +27,7 @@ class Module:
 class IntertechnoSwitch(Item):
     """An Intertechno switch"""
     cfg: dict
+    on = StateDef(default=False)
 
     async def init(self):
         """Initialise the switch"""
@@ -35,13 +38,17 @@ class IntertechnoSwitch(Item):
                     == (house, identifier):
                 await self.states.update("on", state)
 
-    # pylint: disable=invalid-name
-    async def switch(self, on: bool) -> Dict[str, bool]:
-        """Setter for on"""
-        await self.cfg["433mhz_tx_adapter"].send_code(
-            to_code(self.cfg["house"], self.cfg["id"], on))
-        return {"on": on}
-
     async def toggle_on(self):
         """Toggle on"""
         return await self.states.set("on", not await self.states.get("on"))
+
+    # pylint: disable=invalid-name
+    @on.setter(schema=vol.Schema(vol.All(
+        vol.Any(bool, int), vol.Coerce(type=bool)
+    )))
+    async def set_on(self, on: bool) -> Dict[str, bool]:
+        """Setter for on state"""
+        print(f"Setting {self.identifier} to {on}")
+        await self.cfg["433mhz_tx_adapter"].send_code(
+            to_code(self.cfg["house"], self.cfg["id"], on))
+        return {"on": on}

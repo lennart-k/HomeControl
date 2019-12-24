@@ -1,7 +1,8 @@
 """StateEngine module"""
 
 import logging
-from typing import Callable, Any
+from typing import Any, Callable, Optional
+from types import MethodType
 import voluptuous as vol
 from homecontrol.dependencies.data_types import types
 from homecontrol.const import ItemStatus
@@ -10,6 +11,52 @@ from homecontrol.exceptions import (
 )
 
 LOGGER = logging.getLogger(__name__)
+
+
+class StateDef:
+    def __init__(
+            self,
+            poll_interval: Optional[float] = None,
+            default: Any = None) -> None:
+
+        self._poll_interval = poll_interval
+        self._default = default
+        self._getter = None
+        self._setter = None
+        self._schema = None
+
+    def setter(self, schema: Optional[vol.Schema] = None) -> Callable:
+        """Decorator to register a setter"""
+        def _setter_decorator(setter_method: Callable) -> Callable:
+            self._setter = setter_method
+            self._schema = schema
+            return setter_method
+        return _setter_decorator
+
+    def getter(self) -> Callable:
+        """Decorator to register a getter"""
+        def _getter_decorator(getter_method: Callable) -> Callable:
+            self._getter = getter_method
+            return getter_method
+        return _getter_decorator
+
+    def register_state(
+            self,
+            state_engine: "StateEngine",
+            name: str,
+            item: "homecontrol.dependencies.entity_types.Item") -> "State":
+        """Generates a State instance and registers it to a StateEngine"""
+        state = State(
+            state_engine,
+            self._default,
+            MethodType(self._getter, item) if self._getter else None,
+            MethodType(self._setter, item) if self._setter else None,
+            name=name,
+            poll_interval=self._poll_interval,
+            schema=self._schema
+        )
+        state_engine.register_state(state)
+        return state
 
 
 class StateEngine:
@@ -33,13 +80,20 @@ class StateEngine:
                 default=default_state,
                 getter=getattr(item, details.get("getter", ""), None),
                 setter=getattr(item, details.get("setter", ""), None),
-                poll_function=getattr(
-                    item, details.get("poll-function", ""), None),
                 schema=details.get("schema", None),
                 state_type=types.get(details.get("type", ""), None),
                 poll_interval=details.get("poll-interval", None),
                 name=state_name
             )
+
+        for name in dir(item):
+            state_def = getattr(item, name)
+            if isinstance(state_def, StateDef):
+                state_def.register_state(self, name, item)
+
+    def register_state(self, state: "State") -> None:
+        """Registers a State instance to the StateEngine"""
+        self.states[state.name] = state
 
     async def get(self, state: str):
         """Gets an item's state"""
@@ -86,7 +140,6 @@ class State:
                  default,
                  getter: Callable = None,
                  setter: Callable = None,
-                 poll_function: Callable = None,
                  name: str = None,
                  state_type: type = None,
                  schema: dict = None,
@@ -98,7 +151,6 @@ class State:
         self.state_engine = state_engine
         self.schema = vol.Schema(schema) if schema else None
         self.poll_interval = poll_interval
-        self.poll_function = poll_function or self.getter
         if self.poll_interval:
             self.state_engine.core.tick_engine.tick(
                 self.poll_interval)(self.poll_value)
@@ -107,7 +159,7 @@ class State:
         """Polls the current state and updates it"""
         if self.state_engine.item.status != ItemStatus.ONLINE:
             return None
-        await self.update(await self.poll_function())
+        await self.update(await self.getter())
 
     async def get(self):
         """Gets a state"""

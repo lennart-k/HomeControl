@@ -5,6 +5,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
+from homecontrol.dependencies.state_engine import StateDef
 from homecontrol.dependencies.entity_types import Item
 
 
@@ -38,6 +39,8 @@ def get_rawname(name: str, platform: str) -> str:
 
 class TwitchFollowers(Item):
     """Followers on Twitch"""
+    followers = StateDef(poll_interval=30)
+
     async def init(self) -> bool:
         """Initialise the item"""
         self.cfg.setdefault("rawname", get_rawname(
@@ -46,6 +49,7 @@ class TwitchFollowers(Item):
         if not self.cfg["rawname"]:
             return False
 
+    @followers.getter()
     async def poll_followers(self):
         """Polls the current state"""
         response = requests.get(
@@ -61,6 +65,8 @@ class TwitchFollowers(Item):
 
 class YouTubeFollowers(Item):
     """Followers on YouTube"""
+    followers = StateDef(poll_interval=30)
+
     async def init(self) -> bool:
         """Initialise the item"""
         self.cfg.setdefault("rawname", get_rawname(
@@ -69,6 +75,7 @@ class YouTubeFollowers(Item):
         if not self.cfg["rawname"]:
             return False
 
+    @followers.getter()
     async def poll_followers(self):
         """Polls the current state"""
         response = requests.get(
@@ -84,9 +91,12 @@ class YouTubeFollowers(Item):
 
 class TwitterFollowers(Item):
     """Followers on Twitter"""
+    followers = StateDef(poll_interval=30)
+
     async def init(self) -> bool:
         """Initialise the item"""
 
+    @followers.getter()
     async def poll_followers(self):
         """Polls the current state"""
         response = requests.get(

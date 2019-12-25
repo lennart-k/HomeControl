@@ -117,11 +117,18 @@ def get_config(directory: str) -> dict:
     file = os.path.join(directory, CONFIG_FILE_NAME)
     if not os.path.isfile(file):
         LOGGER.critical("Config file does not exist: %s", file)
-        create_new_config = input(
-            (f"Shall a default config folder be created "
-             f"at {directory}? [Y/n]"))
+        # Don't ask if HomeControl is not interactive.
+        # It's quite likely a Docker container or daemon
+        create_new_config = not sys.stdout.isatty()
 
-        if not create_new_config or create_new_config.lower()[0] == "y":
+        if not create_new_config:
+            user_choice = input(
+                (f"Shall a default config folder be created "
+                 f"at {directory}? [Y/n]"))
+            create_new_config = (not user_choice
+                                 or create_new_config.lower()[0] == "y")
+
+        if create_new_config:
             LOGGER.info(
                 "Installing the default configuration to %s",
                 directory)

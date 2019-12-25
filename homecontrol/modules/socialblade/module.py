@@ -22,8 +22,8 @@ def get_rawname(name: str, platform: str) -> str:
     """
     Gets a user id from a username
     """
-    response = requests.get(NAME_URL.format(
-        name=name, platform=platform),
+    response = requests.get(
+        NAME_URL.format(name=name, platform=platform),
         headers=HEADERS)
 
     if response.status_code != 200:

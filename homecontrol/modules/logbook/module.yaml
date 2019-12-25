@@ -4,3 +4,4 @@ meta:
 
 pip-requirements:
   - SQLAlchemy
+  - PyMySQL

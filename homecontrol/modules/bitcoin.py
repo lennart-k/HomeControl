@@ -4,6 +4,8 @@ import voluptuous as vol
 import requests
 
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.state_engine import StateDef
 
 
 SPEC = {
@@ -12,22 +14,7 @@ SPEC = {
         "description": "Get statistics about Bitcoin"
     },
     "items": {
-        "BitcoinStats": {
-            "config-schema": {
-                vol.Required("update_interval", default=3600):
-                vol.Coerce(type=int)
-            },
-            "actions": {
-                "update": "update_stats"
-            },
-            "states": {
-                "last_update": {"type": float},
-                "market_price_usd": {"type": float},
-                "hash_rate": {"type": "float"},
-                "n_btc_mined": {"type": int},
-                "block_interval": {"type": float}
-            }
-        }
+        "BitcoinStats": {}
     }
 }
 
@@ -44,11 +31,24 @@ DATA_URL = "https://api.blockchain.info/stats"
 
 class BitcoinStats(Item):
     """Item holding Bitcoin stats"""
+
+    last_update = StateDef()
+    market_price_usd = StateDef()
+    hash_rate = StateDef()
+    n_btc_mined = StateDef()
+    block_interval = StateDef()
+
+    config_schema = vol.Schema({
+        vol.Required("update_interval", default=3600):
+        vol.Coerce(type=int)
+    }, extra=vol.ALLOW_EXTRA)
+
     async def init(self):
         """Initialise the item"""
         self.core.tick_engine.tick(
             self.cfg["update_interval"])(self.update_stats)
 
+    @action("update")
     async def update_stats(self):
         """Update the current states"""
         try:

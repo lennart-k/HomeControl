@@ -209,7 +209,7 @@ class ItemManager:
 
         return item
 
-    async def apply_new_configuration(self, domain, config):
+    async def apply_new_configuration(self, domain: str, config: dict) -> None:
         """Applies a new configuration"""
         self.cfg = config
 

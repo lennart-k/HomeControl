@@ -5,7 +5,7 @@ import logging
 import voluptuous as vol
 
 from homecontrol.const import ItemStatus
-from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.entity_types import Item, Module
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class ItemManager:
         for raw_cfg in self.cfg:
             await self.create_from_raw_cfg(raw_cfg)
 
-    async def add_from_module(self, mod_obj) -> None:
+    async def add_from_module(self, mod_obj: Module) -> None:
         """
         Adds the item specifications of a module to the dict of available ones
 

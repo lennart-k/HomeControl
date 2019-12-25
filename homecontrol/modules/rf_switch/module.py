@@ -29,6 +29,17 @@ class IntertechnoSwitch(Item):
     """An Intertechno switch"""
     cfg: dict
     on = StateDef(default=False)
+    config_schema = vol.Schema({
+        vol.Required("house"): vol.All(
+            vol.Coerce(type=str),
+            vol.Upper,
+            vol.Any("A", "B", "C", "D", "E", "F", "G", "H",
+                    "J", "K", "L", "M", "N", "O", "P", "Q")),
+        vol.Required("id"): vol.All(
+            vol.Coerce(int),
+            vol.Range(min=1, max=16)),
+        vol.Required("433mhz_tx_adapter"): str
+    }, extra=vol.ALLOW_EXTRA)
 
     async def init(self):
         """Initialise the switch"""

@@ -36,6 +36,7 @@ class Item:
     status: ItemStatus = ItemStatus.OFFLINE
     core: "homecontrol.core.Core"
     _raw_cfg: dict
+    config_schema: vol.Schema
     spec: dict
     module: Optional["Module"]
     dependant_items: set
@@ -55,15 +56,15 @@ class Item:
         self.identifier = identifier
         self.name = name or identifier
 
-        if self.spec.get("config-schema"):
-            schema = self.spec.get("config-schema")
-            if not isinstance(self.spec["config-schema"], vol.Schema):
-                schema = vol.Schema(
-                    self.spec["config-schema"], extra=vol.ALLOW_EXTRA)
+        spec_schema = self.spec.get("config-schema")
+        if spec_schema:
+            if not isinstance(spec_schema, vol.Schema):
+                spec_schema = vol.Schema(
+                    spec_schema, extra=vol.ALLOW_EXTRA)
 
-            self.cfg = schema(cfg or {})
-        else:
-            self.cfg = cfg
+            self.config_schema = spec_schema
+
+        self.cfg = self.config_schema(cfg or {}) if self.config_schema else cfg
 
         self.status = ItemStatus.OFFLINE
 

@@ -3,18 +3,4 @@ meta:
   description: Adds support for Intertechno YCT-100 switches
 
 items:
-  IntertechnoSwitch:
-    config-schema:
-      !vol/Required {schema: house, default: A}:
-        !vol/All
-          - !vol/Coerce { type: !type/str }
-          - !vol/Upper
-          - !vol/Any ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q"]
-
-      !vol/Required {schema: id, default: 1}:
-        !vol/All
-          - !vol/Coerce { type: !type/int }
-          - !vol/Range {min: 1, max: 16}
-
-      !vol/Required {schema: 433mhz_tx_adapter}:
-        !type/str
+  IntertechnoSwitch: {}

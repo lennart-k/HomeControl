@@ -144,10 +144,10 @@ class ItemManager:
 
         for dependant_item in self.iter_items_by_id(item.dependant_items):
             if (dependant_item.status == ItemStatus.WAITING_FOR_DEPENDENCY
-                    and all([dependency.status == ItemStatus.ONLINE
+                    and all(dependency.status == ItemStatus.ONLINE
                              for dependency
                              in self.iter_items_by_id(
-                                 dependant_item.dependencies)])):
+                                 dependant_item.dependencies))):
                 await self.init_item(dependant_item)
 
     # pylint: disable=too-many-arguments,too-many-locals

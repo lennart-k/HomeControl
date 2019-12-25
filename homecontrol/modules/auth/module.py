@@ -278,7 +278,7 @@ class Module:
                 data = dict((await request.post()).items())
                 payload = TOKEN_PAYLOAD_SCHEMA(data)
             except vol.Invalid as e:
-                path = ', '.join([str(var) for var in e.path])
+                path = ', '.join(str(var) for var in e.path)
                 return JSONResponse({
                     "error": "invalid_request",
                     "error_description": "Invalid parameters: "

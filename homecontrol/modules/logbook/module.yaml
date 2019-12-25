@@ -3,4 +3,4 @@ meta:
   description: Logs states and events in a database
 
 pip-requirements:
-  - sqlalchemy
+  - SQLAlchemy

@@ -1,7 +1,5 @@
-meta:
-  name: PiGPIO
-  description: Contains an adapter for PiGPIO
-  author: Lennart K
+name: PiGPIO
+description: Contains an adapter for PiGPIO
 
 pip-requirements:
   - pigpio

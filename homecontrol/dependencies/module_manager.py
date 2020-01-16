@@ -187,7 +187,6 @@ class ModuleManager:
         mod_obj = mod.Module.__new__(mod.Module)
 
         mod_obj.core = self.core
-        mod_obj.meta = spec.get("meta", {})
         mod_obj.resource_folder = mod.resource_folder
         mod_obj.name = name
         mod_obj.path = path

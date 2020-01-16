@@ -3,10 +3,8 @@
 import logging
 
 SPEC = {
-    "meta": {
-        "name": "Szenes",
-        "description": "Provides szene functionality"
-    }
+    "name": "Szenes",
+    "description": "Provides szene functionality"
 }
 
 LOGGER = logging.getLogger(__name__)

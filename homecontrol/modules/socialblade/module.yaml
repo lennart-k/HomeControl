@@ -1,6 +1,5 @@
-meta:
-  name: SocialBlade
-  description: Track follower stats on YouTube, Twitch, Twitter and Instagram
+name: SocialBlade
+description: Track follower stats on YouTube, Twitch, Twitter and Instagram
 
 pip-requirements:
   - beautifulsoup4

@@ -1,6 +1,5 @@
-meta:
-  name: MQTT Adapter
-  description: Adds an adapter to subscribe to MQTT messages
+name: MQTT Adapter
+description: Adds an adapter to subscribe to MQTT messages
 
 pip-requirements:
   - paho-mqtt

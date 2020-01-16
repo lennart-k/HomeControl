@@ -7,12 +7,9 @@ from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.state_engine import StateDef
 
-
 SPEC = {
-    "meta": {
-        "name": "Bitcoin",
-        "description": "Get statistics about Bitcoin"
-    },
+    "name": "Bitcoin",
+    "description": "Get statistics about Bitcoin",
     "items": {
         "BitcoinStats": {}
     }

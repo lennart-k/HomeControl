@@ -1,6 +1,5 @@
-meta:
-  name: Yamaha AV
-  description: Support for Yamaha AV receivers (RX-V473, RX-V573, RX-V673, RX-V773)
+name: Yamaha AV
+description: Support for Yamaha AV receivers (RX-V473, RX-V573, RX-V673, RX-V773)
 
 pip-requirements:
   - rxv

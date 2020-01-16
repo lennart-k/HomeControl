@@ -8,9 +8,7 @@ import voluptuous as vol
 from aiohttp import web
 
 SPEC = {
-    "meta": {
-        "name": "HTTP Server"
-    }
+    "name": "HTTP Server"
 }
 
 CONFIG_SCHEMA = vol.Schema({

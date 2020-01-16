@@ -1,6 +1,5 @@
-meta:
-  name: Auth module
-  description: Provides OAuth2 authentication for HomeControl
+name: Auth module
+description: Provides OAuth2 authentication for HomeControl
 
 pip-requirements:
   - jwt

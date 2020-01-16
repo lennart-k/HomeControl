@@ -1,6 +1,5 @@
-meta:
-  name: Tasmota RF Adapter
-  description: An adapter to transceive 433MHz signals using an MQTT device with Tasmota
+name: Tasmota RF Adapter
+description: An adapter to transceive 433MHz signals using an MQTT device with Tasmota
 
 items:
   TasmotaRFAdapter:

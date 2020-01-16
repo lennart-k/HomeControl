@@ -106,7 +106,6 @@ class Module:
     items: dict
     spec: dict
     core: "homecontrol.core.Core"
-    meta: dict
     resource_folder: str
     path: str
     items: dict

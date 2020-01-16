@@ -10,9 +10,7 @@ from homecontrol.core import Core
 LOGGER = logging.getLogger(__name__)
 
 SPEC = {
-    "meta": {
-        "name": "Automation"
-    }
+    "name": "Automation"
 }
 
 CONFIG_SCHEMA = vol.Schema([

@@ -1,6 +1,5 @@
-meta:
-  name: Speedtest
-  description: Checks the internet speed with speedtest.net
+name: Speedtest
+description: Checks the internet speed with speedtest.net
 
 pip-requirements:
   - speedtest-cli

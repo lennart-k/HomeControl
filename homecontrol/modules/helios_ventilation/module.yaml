@@ -1,6 +1,5 @@
-meta:
-  name: Helios Ventilation
-  description: Integration for Helios ventilation systems
+name: Helios Ventilation
+description: Integration for Helios ventilation systems
 
 items:
   HeliosVentilation:

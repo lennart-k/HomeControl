@@ -1,6 +1,5 @@
-meta:
-  name: IR Adapter
-  description: Transceive IR codes
+name: IR Adapter
+description: Transceive IR codes
 
 items:
   NECIRReceiver:

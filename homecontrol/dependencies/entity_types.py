@@ -21,11 +21,6 @@ ITEM_SCHEMA = vol.Schema({
     vol.Required("id"): str,
     vol.Required("!type"): "Item"
 })
-MODULE_SCHEMA = vol.Schema({
-    vol.Optional("meta"): str,
-    vol.Required("name"): str,
-    vol.Required("!type"): "Module"
-})
 
 
 class Item:

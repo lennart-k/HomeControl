@@ -1,6 +1,7 @@
 """ItemManager for HomeControl"""
 
 import asyncio
+from inspect import isclass
 import logging
 import voluptuous as vol
 
@@ -47,6 +48,18 @@ class ItemManager:
 
         mod_obj: homecontrol.data_types.Module
         """
+        if not mod_obj.spec.get("items", None):
+            for attribute in dir(mod_obj.mod):
+                item_class = getattr(mod_obj.mod, attribute)
+
+                if (isclass(item_class)
+                        and issubclass(item_class, Item)
+                        and item_class is not Item):
+                    item_class.spec = getattr(item_class, "spec", {})
+                    item_class.module = mod_obj
+                    item_class.type = f"{mod_obj.name}.{item_class.__name__}"
+                    self.item_classes[item_class.type] = item_class
+
         for name, spec in mod_obj.spec.get("items", {}).items():
             item_type = f"{mod_obj.name}.{name}"
             item_class = type(name, (getattr(mod_obj.mod, name), Item), {})

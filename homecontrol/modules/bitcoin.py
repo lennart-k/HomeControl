@@ -10,9 +10,6 @@ from homecontrol.dependencies.state_engine import StateDef
 SPEC = {
     "name": "Bitcoin",
     "description": "Get statistics about Bitcoin",
-    "items": {
-        "BitcoinStats": {}
-    }
 }
 
 RESULT_SCHEMA = vol.Schema({

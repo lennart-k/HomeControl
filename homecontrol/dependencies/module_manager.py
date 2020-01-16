@@ -118,8 +118,7 @@ class ModuleManager:
         else:
             mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
-        spec = (mod.SPEC if isinstance(mod.SPEC, dict) else YAMLLoader.load(
-            mod.SPEC)) if hasattr(mod, "SPEC") else {}
+        spec = getattr(mod, "SPEC", {})
 
         return await self._load_module_object(spec, name, mod_path, mod)
 

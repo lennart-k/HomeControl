@@ -139,14 +139,14 @@ class ModuleManager:
         try:
             assert os.path.isdir(path)
             assert os.path.isfile(mod_path)
-            assert os.path.isfile(spec_path)
         except AssertionError as error:
             LOGGER.warning("Module could not be loaded: %s at %s", name, path)
             self.core.event_engine.broadcast(
                 "module_not_loaded", exception=error, name=name)
             return error
 
-        spec = YAMLLoader.load(open(spec_path))
+        spec = (YAMLLoader.load(open(spec_path))
+                if os.path.isfile(spec_path) else {})
 
         try:
             ensure_pip_requirements(spec.get("pip-requirements", []))
@@ -168,7 +168,7 @@ class ModuleManager:
         mod.SPEC = spec
         mod.resource_folder = path
         mod_spec.loader.exec_module(mod)
-        return await self._load_module_object(spec, name, path, mod)
+        return await self._load_module_object(mod.SPEC, name, path, mod)
 
     async def _load_module_object(self,
                                   spec: dict,

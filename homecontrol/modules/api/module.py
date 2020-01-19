@@ -24,6 +24,10 @@ from homecontrol.exceptions import (
 )
 from homecontrol.modules.auth.decorator import needs_auth
 
+SPEC = {
+    "name": "API"
+}
+
 LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({

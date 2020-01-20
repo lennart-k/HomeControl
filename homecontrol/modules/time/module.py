@@ -4,42 +4,62 @@ import math
 import time
 import asyncio
 
+import voluptuous as vol
+
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.action_engine import action
+
+SPEC = {
+    "name": "Time",
+    "description": "Provides time related features"
+}
 
 
 class Timer(Item):
     """A basic timer"""
     float_remaining: float
     last_time: (float, float) = (0, 0)
+    config_schema = vol.Schema({
+        vol.Required("seconds", default=60): vol.All(
+            vol.Coerce(int), vol.Range(min=1))
+    }, extra=vol.ALLOW_EXTRA)
+    time_remaining = StateDef(default=0)
+    running = StateDef(default=False)
 
     async def init(self):
         """Initialise the timer"""
         await self.reset()
 
+    @action
     async def start(self):
         """Action: Start"""
         await self.states.update("running", True)
         self.last_time = (time.time(), self.float_remaining)
         asyncio.run_coroutine_threadsafe(self.tick(), loop=self.core.loop)
 
+    @action("stop")
     async def stop_timer(self):
         """Action: Stop"""
         start_time, start_remaining = self.last_time
         self.float_remaining = start_remaining-time.time()+start_time
         await self.states.update("running", False)
 
+    @action
     async def reset(self):
         """Action: Reset"""
         await self.states.update("running", False)
         await self.states.update("time_remaining", self.cfg["seconds"])
         self.float_remaining = self.cfg["seconds"]
 
+    @action
     async def set_time(self, seconds: int):
         """Set time"""
         await self.states.update("time_remaining", seconds)
         self.float_remaining = seconds
         self.last_time = (time.time(), self.float_remaining)
 
+    @action
     async def add_time(self, seconds: int):
         """Add time to the timer"""
         await self.states.update(

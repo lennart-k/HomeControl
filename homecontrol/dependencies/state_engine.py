@@ -17,10 +17,11 @@ class StateDef:
     def __init__(
             self,
             poll_interval: Optional[float] = None,
-            default: Any = None) -> None:
+            default: Any = None,
+            default_factory: Callable = None) -> None:
 
         self._poll_interval = poll_interval
-        self._default = default
+        self._default = default_factory() if default_factory else default
         self._getter = None
         self._setter = None
         self._schema = None

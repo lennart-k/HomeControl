@@ -6,6 +6,11 @@ import importlib
 
 import voluptuous as vol
 
+SPEC = {
+    "name": "Custom Scripts",
+    "description": "Allows you to create custom scripts"
+}
+
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("scripts", default=[]): [str]
 })

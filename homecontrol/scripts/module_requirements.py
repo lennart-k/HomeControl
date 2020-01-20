@@ -19,11 +19,11 @@ def get_requirements() -> list:
         if node == "__pycache__":
             continue
         mod_path = os.path.join(MODULE_FOLDER, node)
+        spec_path = os.path.join(mod_path, "module.yaml")
 
-        if os.path.isdir(mod_path):
-            cfg_path = os.path.join(mod_path, "module.yaml")
-            cfg = YAMLLoader.load(open(cfg_path))
-            output.extend(cfg.get("pip-requirements", []))
+        if os.path.isfile(spec_path):
+            spec = YAMLLoader.load(open(spec_path))
+            output.extend(spec.get("pip-requirements", []))
 
     return output
 

@@ -1,5 +1,5 @@
 """Provides OAuth2 for HomeControl"""
-from typing import Callable
+from typing import Callable, cast
 import logging
 from json import JSONDecodeError
 from datetime import timedelta
@@ -11,6 +11,7 @@ from homecontrol.core import Core
 
 from .auth import AuthManager
 from .auth.login_flows import FlowManager
+from .authorized_request import AuthorizedRequest
 from .auth.credential_provider import CredentialProvider
 from .auth.auth_providers import AUTH_PROVIDERS
 from .decorator import needs_auth
@@ -101,6 +102,7 @@ class Module:
             # pylint: disable=singleton-comparison
             for provider_name, provider in self.auth_providers.items():
                 request.user = user = await provider.validate_request(request)
+                cast(AuthorizedRequest, request)
                 if user is not None:
                     break
 

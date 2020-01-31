@@ -6,6 +6,7 @@ import logging
 import voluptuous as vol
 
 from homecontrol.core import Core
+from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 
 LOGGER = logging.getLogger(__name__)
 
@@ -171,7 +172,8 @@ class Module:
             allow_reload=True
         ) or []
 
-        self.core.event_engine.register("core_bootstrap_complete")(self.start)
+        self.core.event_engine.register(
+            EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
     async def start(self, event: str) -> None:
         """Start when core bootstrap is complete"""

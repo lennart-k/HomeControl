@@ -5,7 +5,12 @@ from inspect import isclass
 import logging
 import voluptuous as vol
 
-from homecontrol.const import ItemStatus
+from homecontrol.const import (
+    ItemStatus,
+    EVENT_ITEM_CREATED,
+    EVENT_ITEM_REMOVED,
+    EVENT_ITEM_NOT_WORKING
+)
 from homecontrol.dependencies.entity_types import Item, Module
 
 LOGGER = logging.getLogger(__name__)
@@ -112,7 +117,7 @@ class ItemManager:
             dependency.dependant_items.remove(item.identifier)
 
         del self.items[identifier]
-        self.core.event_engine.broadcast("item_removed", item=item)
+        self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
     async def create_from_raw_cfg(self,
@@ -212,13 +217,13 @@ class ItemManager:
         if item.status != ItemStatus.WAITING_FOR_DEPENDENCY:
             await self.init_item(item)
 
-        self.core.event_engine.broadcast("item_created", item=item)
+        self.core.event_engine.broadcast(EVENT_ITEM_CREATED, item=item)
         LOGGER.debug("Item created: %s", item.identifier)
         if item.status != ItemStatus.ONLINE:
             LOGGER.warning(
                 "Item could not be initialised: %s [%s]",
                 identifier, item_type)
-            self.core.event_engine.broadcast("item_not_working", item=item)
+            self.core.event_engine.broadcast(EVENT_ITEM_NOT_WORKING, item=item)
 
         return item
 

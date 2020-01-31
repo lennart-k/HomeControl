@@ -7,6 +7,8 @@ import ssl
 import voluptuous as vol
 from aiohttp import web
 
+from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
+
 SPEC = {
     "name": "HTTP Server"
 }
@@ -50,7 +52,8 @@ class Module:
         if not self.core.start_args["verbose"]:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())
 
-        self.core.event_engine.register("core_bootstrap_complete")(self.start)
+        self.core.event_engine.register(
+            EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
     async def start(self, *args):
         """Start the HTTP server"""

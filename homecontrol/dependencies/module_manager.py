@@ -10,6 +10,7 @@ import pkg_resources
 import voluptuous as vol
 
 import homecontrol
+from homecontrol.const import EVENT_MODULE_LOADED
 from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.dependencies.entity_types import Module
 from homecontrol.dependencies.ensure_pip_requirements import (
@@ -200,7 +201,7 @@ class ModuleManager:
         await self.core.item_manager.add_from_module(mod_obj)
         if hasattr(mod_obj, "init"):
             await mod_obj.init()
-        self.core.event_engine.broadcast("module_loaded", module=mod_obj)
+        self.core.event_engine.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
         return mod_obj
 
     async def unload_module(self, name: str) -> None:

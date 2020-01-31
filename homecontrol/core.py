@@ -18,7 +18,8 @@ from homecontrol.dependencies.config_manager import ConfigManager
 
 from homecontrol.const import (
     EXIT_SHUTDOWN,
-    EXIT_RESTART
+    EXIT_RESTART,
+    EVENT_CORE_BOOTSTRAP_COMPLETE
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ class Core:
         # Init items
         await self.item_manager.init()
 
-        self.event_engine.broadcast("core_bootstrap_complete")
+        self.event_engine.broadcast(EVENT_CORE_BOOTSTRAP_COMPLETE)
         LOGGER.info("Core bootstrap complete")
 
     async def block_until_stop(self) -> int:

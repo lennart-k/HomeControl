@@ -5,6 +5,7 @@ import logging
 import importlib
 
 import voluptuous as vol
+from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 
 SPEC = {
     "name": "Custom Scripts",
@@ -28,7 +29,7 @@ class Module:
             schema=CONFIG_SCHEMA,
             allow_reload=False
         )
-        self.core.event_engine.register("core_bootstrap_complete")(
+        self.core.event_engine.register(EVENT_CORE_BOOTSTRAP_COMPLETE)(
             self.execute_scripts)
 
     async def execute_scripts(self, event) -> None:

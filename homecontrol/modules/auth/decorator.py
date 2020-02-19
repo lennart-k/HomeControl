@@ -1,7 +1,6 @@
 """Middleware decorator for auth"""
 from functools import wraps
 from typing import Callable
-from aiohttp.web import Request
 
 
 def needs_auth(
@@ -18,10 +17,6 @@ def needs_auth(
         f.owner_only = owner_only
         f.allow_banned = allow_banned
         f.log_invalid = log_invalid
+        return f
 
-        @wraps(f)
-        def wrapper(request: Request):
-            return f(request)
-
-        return wrapper
     return decorator

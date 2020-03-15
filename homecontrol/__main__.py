@@ -42,13 +42,13 @@ def get_arguments() -> dict:
         "-pid-file",
         default=None,
         help=("Location of the PID file."
-              "Ensures that only one session is running."
+              "Ensures that only one session is running. "
               "Defaults to the configuration path"))
     parser.add_argument(
         "-clearport",
         action="store_true",
         default=None,
-        help=("Frees the port for the API server using fuser."
+        help=("Frees the port for the API server using fuser. "
               "Therefore only available on Linux"))
     parser.add_argument(
         "-verbose",

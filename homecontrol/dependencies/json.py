@@ -37,13 +37,6 @@ class JSONEncoder(json.JSONEncoder):
                 "name": o.name
             }
 
-        if isinstance(o, (BaseException, Exception)):
-            return {
-                "!type": "Exception",
-                "type": type(o).__name__,
-                "message": str(o)
-            }
-
         if isinstance(o, Enum):
             return o.value
 

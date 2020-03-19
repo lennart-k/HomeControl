@@ -109,9 +109,8 @@ class ItemManager:
         self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
-    async def create_from_raw_cfg(self,
-                                  raw_cfg: dict,
-                                  dependant_items=None) -> Item:
+    async def create_from_raw_cfg(
+            self, raw_cfg: dict, dependant_items=None) -> Item:
         """Creates an Item from raw_cfg"""
         return await self.create_item(
             identifier=raw_cfg["id"],
@@ -158,14 +157,10 @@ class ItemManager:
                 await self.init_item(dependant_item)
 
     # pylint: disable=too-many-arguments,too-many-locals
-    async def create_item(self,
-                          identifier: str,
-                          item_type: str,
-                          raw_cfg: dict,
-                          cfg: dict = None,
-                          state_defaults: dict = None,
-                          name: str = None,
-                          dependant_items: set = None) -> Item:
+    async def create_item(
+            self, identifier: str, item_type: str, raw_cfg: dict,
+            cfg: dict = None, state_defaults: dict = None, name: str = None,
+            dependant_items: set = None) -> Item:
         """
         Creates a HomeControl item
 

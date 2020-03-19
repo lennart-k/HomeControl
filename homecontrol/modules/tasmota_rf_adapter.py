@@ -4,13 +4,28 @@ from contextlib import suppress
 import json
 from functools import reduce
 import asyncio
+import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.action_engine import action
+
+SPEC = {
+    "name": "Tasmota RF Adapter",
+    "description": "An adapter to transceive 433MHz signals "
+                   "using an MQTT device with Tasmota"
+}
 
 
 class TasmotaRFAdapter(Item):
     """The TasmotaRFAdapter class"""
     sending: asyncio.Event
+    config_schema = vol.Schema({
+        vol.Required("mqtt_adapter"): str,
+        vol.Required("topic"): str,
+        vol.Required("tx_interval", default=0.5): vol.All(
+            vol.Coerce(float), vol.Range(0))
+    }, extra=vol.ALLOW_EXTRA)
 
     async def init(self):
         """Initialise the adapter"""
@@ -39,6 +54,7 @@ class TasmotaRFAdapter(Item):
                             code=int(bits, 2),
                             length=len(bits))
 
+    @action("send_code")
     async def send_code(self, code: int) -> None:
         """Send RF code"""
         await self.sending.wait()

@@ -1,13 +1,20 @@
 """Module providing an IR receiver"""
 
 # pylint: disable=import-error
+import voluptuous as vol
+from homecontrol.dependencies.entity_types import Item
 from .dependencies.ir_receiver import NECIRReceiver as Receiver
 
-from homecontrol.dependencies.entity_types import Item
 
 
 class NECIRReceiver(Item):
     """The receiver item"""
+    config_schema = vol.Schema({
+        vol.Required("pin", default=16): vol.All(
+            vol.Coerce(int), vol.Range(2, 40)),
+        vol.Required("pigpio_adapter"): str
+    }, extra=vol.ALLOW_EXTRA)
+
     async def init(self):
         """Initialise the receiver"""
         self.ir_receiver = Receiver(

@@ -3,27 +3,3 @@ description: Provides an adapter to send and receive codes on 433MHz
 
 pip-requirements:
   - pigpio
-
-items:
-  RFRXAdapter:
-    config-schema:
-      !vol/Required {schema: pin, default: 20}:
-        !vol/All
-          - !vol/Coerce { type: !type/int }
-          - !vol/Range { min: 2, max: 40 }
-
-      !vol/Required {schema: pigpio_adapter}:
-        !type/str
-
-  RFTXAdapter:
-    config-schema:
-      !vol/Required {schema: pin, default: 20}:
-        !vol/All
-          - !vol/Coerce { type: !type/int }
-          - !vol/Range { min: 2, max: 40 }
-
-      !vol/Required {schema: pigpio_adapter}:
-        !type/str
-
-      !vol/Required {schema: bits, default: 12}:
-        !vol/Coerce { type: !type/int }

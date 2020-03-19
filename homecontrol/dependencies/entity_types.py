@@ -30,7 +30,6 @@ class Item:
     name: str
     status: ItemStatus = ItemStatus.OFFLINE
     core: "homecontrol.core.Core"
-    _raw_cfg: dict
     config_schema: vol.Schema
     spec: dict
     module: Optional["Module"]

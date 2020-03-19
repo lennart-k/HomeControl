@@ -4,12 +4,17 @@ import asyncio
 # pylint: disable=redefined-builtin
 from concurrent.futures import TimeoutError
 import paho.mqtt.client as mqtt
-
+import voluptuous as vol
 from homecontrol.dependencies.entity_types import Item
 
 
 class MQTTAdapter(Item):
     """The MQTT adapter"""
+    config_schema = vol.Schema({
+        vol.Required("host", default="localhost"): str,
+        vol.Required("port", default=1883): vol.Coerce(int)
+    }, extra=vol.ALLOW_EXTRA)
+
     async def init(self):
         """Initialise the adapter"""
         self.connected = asyncio.Event()

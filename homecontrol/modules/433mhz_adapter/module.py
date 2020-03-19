@@ -1,14 +1,19 @@
 """Support for 3-pin 433MHz receivers and transmitters using pigpio"""
 
 # pylint: disable=import-error
-from .dependencies import rf
-
+import voluptuous as vol
 from homecontrol.dependencies.entity_types import Item
+
+from .dependencies import rf
 
 
 class RFRXAdapter(Item):
     """The RX adapter"""
-    cfg: dict
+    config_schema = vol.Schema({
+        vol.Required("pin", default=20): vol.All(
+            vol.Coerce(int), vol.Range(2, 40)),
+        vol.Required("pigpio_adapter"): str
+    }, extra=vol.ALLOW_EXTRA)
 
     # pylint: disable=invalid-name
     async def init(self):
@@ -31,7 +36,12 @@ class RFRXAdapter(Item):
 
 class RFTXAdapter(Item):
     """The TX adapter"""
-    cfg: dict
+    config_schema = vol.Schema({
+        vol.Required("pin", default=20): vol.All(
+            vol.Coerce(int), vol.Range(2, 40)),
+        vol.Required("pigpio_adapter"): str,
+        vol.Required("bits", default=12): vol.Coerce(int)
+    }, extra=vol.ALLOW_EXTRA)
 
     # pylint: disable=invalid-name
     async def init(self):

@@ -3,21 +3,26 @@
 import asyncio
 from contextlib import suppress
 import pigpio
+import voluptuous as vol
 
 from homecontrol.dependencies.throttle_function import throttle
 from homecontrol.core import Core
 from homecontrol.dependencies.data_types import Color
+from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.action_engine import action
 
 from .dependencies.lcd import LCD
 
-from homecontrol.dependencies.entity_types import Item
 
 
 class PiGPIOAdapter(Item):
     """The PiGPIO adapter"""
-    cfg: dict
     pigpio: pigpio.pi
-    core: Core
+    config_schema = vol.Schema({
+        vol.Required("host", default="localhost"): str,
+        vol.Required("port", default=8888): vol.Coerce(int)
+    }, extra=vol.ALLOW_EXTRA)
 
     async def init(self):
         """Initialise the adapter"""
@@ -41,8 +46,14 @@ class PiGPIOAdapter(Item):
 
 class BinaryOutput(Item):
     """A binary output"""
-    cfg: dict
-    core: Core
+    config_schema = vol.Schema({
+        vol.Required("pin", default=16): vol.All(
+            int, vol.Range(2, 40)),
+        vol.Required("on_state", default=True): bool,
+        vol.Required("pigpio_adapter"): str
+    }, extra=vol.ALLOW_EXTRA)
+
+    on = StateDef(default=False)
 
     async def init(self):
         """Initialise the output"""
@@ -52,12 +63,14 @@ class BinaryOutput(Item):
             self.cfg["pin"],
             not (await self.states.get("on")) ^ self.cfg["on_state"])
 
+    @on.setter()
     async def set_on(self, value: bool) -> dict:
         """Setter for value"""
         self.pigpio.write(self.cfg["pin"], not value ^ self.cfg["on_state"])
 
         return {"on": value}
 
+    @action("toggle_on")
     async def toggle_on(self):
         """Action: toggle"""
         return await self.states.set("on", not await self.states.get("on"))
@@ -65,8 +78,14 @@ class BinaryOutput(Item):
 
 class Button(Item):
     """A button that can also toggle"""
-    cfg: dict
-    core: Core
+    config_schema = vol.Schema({
+        vol.Required("pin", default=16): vol.All(int, vol.Range(2, 40)),
+        vol.Required("pigpio_adapter"): str,
+        vol.Required("pull_up", default=True): bool,
+        vol.Required("toggle", default=False): bool
+    }, extra=vol.ALLOW_EXTRA)
+
+    value = StateDef(default=0)
 
     async def init(self):
         """Initialise the button"""
@@ -102,6 +121,16 @@ class Button(Item):
 
 class I2CLCD(Item):
     """A 2x16 I²C display for PiGPIO"""
+    config_schema = vol.Schema({
+        vol.Required("bus", default=0): int,
+        vol.Required("pigpio_adapter"): str,
+        vol.Required("address", default=0x27): int
+    }, extra=vol.ALLOW_EXTRA)
+
+    backlight = StateDef(default=True)
+    line1 = StateDef(default="HomeControl")
+    line2 = StateDef(default="HomeControl")
+
     async def init(self):
         """Initialise the display"""
         self.pigpio: pigpio.pi = self.cfg["pigpio_adapter"].pigpio
@@ -110,16 +139,19 @@ class I2CLCD(Item):
                        addr=self.cfg["address"],
                        backlight_on=await self.states.get("backlight"))
 
+    @backlight.setter()
     async def set_backlight(self, value: bool) -> dict:
         """Set the backlight to on or off"""
         self.lcd.backlight(value)
         return {"backlight": value}
 
+    @line1.setter()
     async def set_line1(self, text: str) -> dict:
         """Put text on the first line"""
         self.lcd.put_line(0, text[:16])
         return {"line1": text}
 
+    @line2.setter()
     async def set_line2(self, text: str) -> dict:
         """Put text on the second line"""
         self.lcd.put_line(1, text[:16])
@@ -132,9 +164,17 @@ class I2CLCD(Item):
 
 class RGBLight(Item):
     """The RGBLight item"""
-    cfg: dict
-    mode: str
+    config_schema = vol.Schema({
+        vol.Required("pin_r", default=22): vol.All(int, vol.Range(2, 40)),
+        vol.Required("pin_g", default=27): vol.All(int, vol.Range(2, 40)),
+        vol.Required("pin_b", default=17): vol.All(int, vol.Range(2, 40)),
+        vol.Required("pigpio_adapter"): str
+    }, extra=vol.ALLOW_EXTRA)
     gpio: pigpio.pi
+
+    mode = StateDef(default="static")
+    color = StateDef(default=Color(0, 0, 100))
+    on = StateDef(default=False)
 
     async def init(self):
         """Initialise RGBLight"""
@@ -150,6 +190,7 @@ class RGBLight(Item):
                          self.cfg["pin_b"]))))
         await self.apply_color()
 
+    @color.setter()
     async def set_color(self, color: Color) -> dict:
         """Setter for color"""
         await self.apply_color(color)
@@ -168,12 +209,14 @@ class RGBLight(Item):
             self.gpio.set_PWM_dutycycle(pin, val)
         return color
 
+    @mode.setter()
     async def set_mode(self, mode: str) -> dict:
         """Set a mode"""
         if mode == "static":
             return {"mode": mode, "color": await self.apply_color()}
         return {"mode": mode}
 
+    @on.setter()
     async def set_on(self, value: bool) -> dict:
         """Setter for on"""
         if value:
@@ -184,22 +227,26 @@ class RGBLight(Item):
         await self.apply_color(Color(0, 0, 0))
         return {"on": False}
 
+    @action("toggle")
     async def toggle_on(self):
         """Action: Toggle"""
         await self.set_on(not await self.states.get("on"))
 
+    @action("set_hue")
     async def set_hue(self, value):
         """Set Hue"""
         color = await self.states.get("color")
         color.h = value
         await self.states.set("color", color)
 
+    @action("set_saturation")
     async def set_saturation(self, value):
         """Set Saturation"""
         color = await self.states.get("color")
         color.s = value
         await self.states.set("color", color)
 
+    @action("set_brightness")
     async def set_brightness(self, value):
         """Set Brightness"""
         color = await self.states.get("color")

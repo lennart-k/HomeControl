@@ -1,9 +1,16 @@
 """Supports the MCP3008 ADC using PiGPIO"""
 
 import logging
-
+import voluptuous as vol
 from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.state_engine import StateDef
 
+
+SPEC = {
+    "name": "MCP3008",
+    "description": "Support for the MCP3008 ADC which "
+                   "enables the Raspberry Pi to get analog input"
+}
 
 LOGGER = logging.getLogger(__name__)
 
@@ -11,6 +18,13 @@ LOGGER = logging.getLogger(__name__)
 class MCP3008ADC(Item):
     """The MCP3008ADC item"""
     handle = None
+    config_schema = vol.Schema({
+        vol.Required("pigpio_adapter"): str,
+        vol.Required("spi_channel", default=0): vol.All(
+            int, vol.Range(0, 2)),
+        vol.Required("baud_rate"): int,
+        vol.Required("spi_flags", default=0): int
+    }, extra=vol.ALLOW_EXTRA)
 
     async def init(self) -> bool:
         """Initialise the item"""
@@ -38,11 +52,24 @@ class MCP3008ADC(Item):
 
 class AnalogInput(Item):
     """Item that holds an analog reading"""
+    config_schema = vol.Schema({
+        vol.Schema("adc"): str,
+        vol.Required("channel", default=0): vol.All(
+            int, vol.Range(0, 7)),
+        vol.Required("min", default=0): int,
+        vol.Required("max", default=1023): int,
+        vol.Required("change_threshold", default=0): vol.All(
+            int, vol.Range(0))
+    }, extra=vol.ALLOW_EXTRA)
+
+    value = StateDef(default=0, poll_interval=0.1)
+
     async def init(self):
         """Initialise the item"""
         self.adc = self.cfg["adc"]
         self.raw_value = 0
 
+    @value.getter()
     async def get_value(self) -> int:
         """Getter for the value"""
         new_raw_value = self.adc.get_value(self.cfg["channel"])

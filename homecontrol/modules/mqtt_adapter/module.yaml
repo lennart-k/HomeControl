@@ -3,12 +3,3 @@ description: Adds an adapter to subscribe to MQTT messages
 
 pip-requirements:
   - paho-mqtt
-
-items:
-  MQTTAdapter:
-    config-schema:
-      !vol/Required {schema: host, default: "localhost"}:
-        !type/str
-
-      !vol/Required {schema: port, default: 1883}:
-        !vol/Coerce { type: !type/int }

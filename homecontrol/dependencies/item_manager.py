@@ -200,8 +200,6 @@ class ItemManager:
             state_defaults=state_defaults,
             core=self.core
         )
-        # pylint: disable=protected-access
-        item._raw_cfg = raw_cfg
 
         self.items[identifier] = item
         item_class.module.items[identifier] = item

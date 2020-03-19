@@ -102,12 +102,10 @@ class Module:
     """A dummy Module"""
     name: str
     folder_location: str = None
-    items: dict
     spec: dict
     core: "homecontrol.core.Core"
     resource_folder: str
     path: str
-    items: dict
     item_specs: dict
     mod: "module"
 

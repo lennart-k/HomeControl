@@ -202,7 +202,6 @@ class ItemManager:
         )
 
         self.items[identifier] = item
-        item_class.module.items[identifier] = item
 
         if item.status != ItemStatus.WAITING_FOR_DEPENDENCY:
             await self.init_item(item)

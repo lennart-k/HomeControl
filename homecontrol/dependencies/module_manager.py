@@ -191,7 +191,6 @@ class ModuleManager:
         mod_obj.resource_folder = mod.resource_folder
         mod_obj.name = name
         mod_obj.path = path
-        mod_obj.items = {}
         mod_obj.item_specs = {}
         mod_obj.mod = mod
         mod_obj.spec = spec

@@ -39,10 +39,7 @@ class ItemManager:
     async def init(self) -> None:
         """Initialise the items from configuration"""
         self.cfg = await self.core.cfg.register_domain(
-            "items",
-            handler=self,
-            schema=CONFIG_SCHEMA,
-            allow_reload=True)
+            "items", schema=CONFIG_SCHEMA)
 
         for raw_cfg in self.cfg:
             await self.create_from_raw_cfg(raw_cfg)
@@ -215,21 +212,3 @@ class ItemManager:
             self.core.event_engine.broadcast(EVENT_ITEM_NOT_WORKING, item=item)
 
         return item
-
-    async def apply_new_configuration(self, domain: str, config: dict) -> None:
-        """Applies a new configuration"""
-        self.cfg = config
-
-        for raw_cfg in config:
-            # pylint: disable=protected-access
-            if (raw_cfg["id"] in self.items
-                    and self.items[raw_cfg["id"]]._raw_cfg == raw_cfg
-                    and self.items[raw_cfg["id"]].status != ItemStatus.OFFLINE
-               ):  # noqa: E124
-                continue  # Item is unchanged
-            if raw_cfg["id"] in self.items:
-                await self.recreate_item(self.items[raw_cfg["id"]], raw_cfg)
-            else:
-                await self.create_from_raw_cfg(raw_cfg)
-
-        LOGGER.info("Applied new item configuration")

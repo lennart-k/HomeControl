@@ -75,9 +75,9 @@ class AnalogInput(Item):
         new_raw_value = self.adc.get_value(self.cfg["channel"])
         if abs(self.raw_value - new_raw_value) >= self.cfg["change_threshold"]:
             self.raw_value = new_raw_value
-        return self.value(self.raw_value)
+        return self.translate_value(self.raw_value)
 
-    def value(self, raw_val) -> int:
+    def translate_value(self, raw_val) -> int:
         """
         Translate the raw reading
         to a range defined in the item's configuration

@@ -53,7 +53,7 @@ class MCP3008ADC(Item):
 class AnalogInput(Item):
     """Item that holds an analog reading"""
     config_schema = vol.Schema({
-        vol.Schema("adc"): str,
+        vol.Required("adc"): str,
         vol.Required("channel", default=0): vol.All(
             int, vol.Range(0, 7)),
         vol.Required("min", default=0): int,

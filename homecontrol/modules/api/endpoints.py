@@ -37,7 +37,6 @@ def add_routes(app: web.Application):
     ReloadConfigView.register_view(app)
     ListItemsView.register_view(app)
     GetItemView.register_view(app)
-    ReloadItemView.register_view(app)
     ItemStatesView.register_view(app)
     ItemStateView.register_view(app)
     ActionsView.register_view(app)

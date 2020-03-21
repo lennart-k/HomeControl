@@ -40,7 +40,7 @@ class ItemManager:
         self.yaml_cfg = await self.core.cfg.register_domain(
             "items", schema=CONFIG_SCHEMA)
 
-        for yaml_entry in self.cfg:
+        for yaml_entry in self.yaml_cfg:
             await self.create_from_yaml_cfg(yaml_entry)
 
     async def add_from_module(self, mod_obj: Module) -> None:

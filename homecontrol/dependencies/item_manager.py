@@ -37,11 +37,11 @@ class ItemManager:
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
-        self.cfg = await self.core.cfg.register_domain(
+        self.yaml_cfg = await self.core.cfg.register_domain(
             "items", schema=CONFIG_SCHEMA)
 
-        for raw_cfg in self.cfg:
-            await self.create_from_raw_cfg(raw_cfg)
+        for yaml_entry in self.cfg:
+            await self.create_from_yaml_cfg(yaml_entry)
 
     async def add_from_module(self, mod_obj: Module) -> None:
         """
@@ -96,25 +96,15 @@ class ItemManager:
         self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
-    async def create_from_raw_cfg(
-            self, raw_cfg: dict) -> Item:
-        """Creates an Item from raw_cfg"""
+    async def create_from_yaml_cfg(self, yaml_entry: dict) -> Item:
+        """Creates an Item from a YAML entry"""
         return await self.create_item(
-            identifier=raw_cfg["id"],
-            name=raw_cfg.get("name"),
-            item_type=raw_cfg["type"],
-            raw_cfg=raw_cfg,
-            cfg=raw_cfg.get("cfg", raw_cfg),
-            state_defaults=raw_cfg["states"]
+            identifier=yaml_entry["id"],
+            name=yaml_entry.get("name"),
+            item_type=yaml_entry["type"],
+            cfg=yaml_entry.get("cfg", yaml_entry),
+            state_defaults=yaml_entry["states"]
         )
-
-    async def recreate_item(self, item: Item, raw_cfg: dict = None) -> Item:
-        """Removes and recreates an item"""
-        # pylint: disable=protected-access
-        raw_cfg = raw_cfg or item._raw_cfg
-        await self.remove_item(item.identifier)
-        del item
-        await self.create_from_raw_cfg(raw_cfg)
 
     async def init_item(self, item: Item) -> None:
         """Initialises an item"""
@@ -141,7 +131,7 @@ class ItemManager:
 
     # pylint: disable=too-many-arguments,too-many-locals
     async def create_item(
-            self, identifier: str, item_type: str, raw_cfg: dict,
+            self, identifier: str, item_type: str,
             cfg: dict = None, state_defaults: dict = None, name: str = None
     ) -> Item:
         """
@@ -152,9 +142,6 @@ class ItemManager:
                 The item identifier
             item_type (str):
                 The type of your item consisting of MODULE.CLASS
-            raw_cfg (dict):
-                Raw configuration to check whether the item has to be recreated
-                when updating the configuration
             cfg (dict):
                 The item's configuration
             state_defaults (dict):

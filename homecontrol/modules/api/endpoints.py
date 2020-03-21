@@ -131,29 +131,6 @@ class GetItemView(APIView):
 
 
 @needs_auth()
-class ReloadItemView(APIView):
-    """Reloads an item"""
-    path = "/item/{id}/reload"
-
-    async def post(self) -> JSONResponse:
-        """POST /item{id}/reload"""
-        identifier = self.data["id"]
-        item = self.core.item_manager.items.get(identifier)
-
-        if not item:
-            return self.error(
-                ERROR_ITEM_NOT_FOUND,
-                f"No item found with identifier {identifier}", 404)
-
-        await self.core.item_manager.recreate_item(item)
-
-        return self.json({
-            "message": f"Item {identifier} recreated",
-            "status": item.status.value
-        })
-
-
-@needs_auth()
 class ItemStatesView(APIView):
     """Item states view"""
     path = "/item/{id}/states"

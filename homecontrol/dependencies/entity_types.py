@@ -30,60 +30,34 @@ class Item:
     name: str
     status: ItemStatus = ItemStatus.OFFLINE
     core: "homecontrol.core.Core"
-    config_schema: vol.Schema
-    spec: dict
+    cfg: dict
+    config_schema: vol.Schema = vol.Schema(object)
     module: Optional["Module"]
-    dependant_items: set
-    dependencies: set
     states: StateEngine
     actions: ActionEngine
 
-    def __init__(
-            self,
-            identifier: str,
-            name: str,
-            cfg: dict,
-            state_defaults: dict,
-            core: "homecontrol.core.Core",
-            dependant_items: Optional[set] = None) -> None:
-        self.core = core
-        self.identifier = identifier
-        self.name = name or identifier
+    @classmethod
+    async def constructor(
+            cls, identifier: str, name: str, cfg: dict, state_defaults: dict,
+            core: "homecontrol.core.Core") -> "Item":
+        """Constructs an item"""
+        item = cls()
 
-        spec_schema = self.spec.get("config-schema")
-        if spec_schema:
-            if not isinstance(spec_schema, vol.Schema):
-                spec_schema = vol.Schema(
-                    spec_schema, extra=vol.ALLOW_EXTRA)
+        item.core = core
+        item.identifier = identifier
+        item.name = name
 
-            self.config_schema = spec_schema
+        item.cfg = item.config_schema(cfg or {})
+        item.status = ItemStatus.OFFLINE
 
-        self.cfg = self.config_schema(cfg or {}) if self.config_schema else cfg
+        for key, value in list(item.cfg.items()):
+            if isinstance(value, str) and value.startswith("i!"):
+                item.cfg[key] = core.item_manager.items.get(value[2:], None)
 
-        self.status = ItemStatus.OFFLINE
-
-        self.dependant_items = dependant_items or set()
-        self.dependencies = set()
-
-        # Dependency management  # TODO Refactoring
-        for key, value in list(self.cfg.items()):
-            if isinstance(value, str):
-                if value.startswith("i!"):
-                    dependency = self.core.item_manager.items.get(
-                        value[2:], None)
-                    self.cfg[key] = dependency
-                    if dependency:
-                        self.dependencies.add(dependency.identifier)
-                        dependency.dependant_items.add(self.identifier)
-                    else:
-                        LOGGER.error(
-                            "Item %s depends on item %s which does not exist",
-                            self.identifier, value[2:])
-                        self.status = ItemStatus.WAITING_FOR_DEPENDENCY
-
-        self.states = StateEngine(
-            self, self.core, state_defaults=state_defaults or {})
-        self.actions = ActionEngine(self, self.core)
+        item.states = StateEngine(
+            item, core, state_defaults=state_defaults or {})
+        item.actions = ActionEngine(item, core)
+        return item
 
     def __repr__(self) -> str:
         return (f"<Item {self.type} identifier={self.identifier} "

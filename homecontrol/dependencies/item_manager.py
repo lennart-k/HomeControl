@@ -12,7 +12,6 @@ from homecontrol.const import (
     EVENT_ITEM_NOT_WORKING
 )
 from homecontrol.dependencies.entity_types import Item, Module
-from homecontrol.dependencies.storage import Storage, DictWrapper
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,13 +34,6 @@ class ItemManager:
         self.core = core
         self.items = {}
         self.item_constructors = {}
-        item_storage = Storage(
-            self.core, "item_storage", 1,
-            storage_init=lambda: {},
-            loader=self._load_items,
-            dumper=self._dump_items
-        )
-        self.item_storage = DictWrapper(item_storage)
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
@@ -50,12 +42,6 @@ class ItemManager:
 
         for raw_cfg in self.cfg:
             await self.create_from_raw_cfg(raw_cfg)
-
-    def _load_items(self, data: dict) -> dict:
-        return data
-
-    def _dump_items(self, data: dict) -> dict:
-        return self.cfg
 
     async def add_from_module(self, mod_obj: Module) -> None:
         """

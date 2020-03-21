@@ -203,21 +203,10 @@ class ModuleManager:
         self.core.event_engine.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
         return mod_obj
 
-    async def unload_module(self, name: str) -> None:
-        """
-        First removes all the items the module offers.
-        Then it triggers the stop-coro and fully removes it.
-        """
-        for identifier in self.loaded_modules[name].items.keys():
-            await self.core.item_manager.remove_item(identifier)
-        if hasattr(self.loaded_modules[name], "stop"):
-            await self.loaded_modules[name].stop()
-        del self.loaded_modules[name]
-
     async def stop(self) -> None:
         """Unloads all modules to prepare for a shutdown"""
-        for module in list(self.loaded_modules.keys()):
-            await self.unload_module(module)
+        for module in list(self.loaded_modules.values()):
+            await module.stop()
 
     # pylint: disable=no-self-use
     def resource_path(self, module: Module, path: str = "") -> str:

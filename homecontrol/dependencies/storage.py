@@ -8,11 +8,14 @@ from json.decoder import JSONDecodeError
 from typing import (
     Optional,
     Callable,
-    Any
+    Any,
+    TYPE_CHECKING
 )
 import voluptuous as vol
 
-from homecontrol.core import Core
+if TYPE_CHECKING:
+    from homecontrol.core import Core
+
 from homecontrol.dependencies.json import load, dump
 
 
@@ -46,7 +49,7 @@ class Storage:
     """JSON-file based data storage"""
 
     def __init__(self,
-                 core: Core,
+                 core: "Core",
                  name: str,
                  version: int,
                  storage_init: Optional[Callable] = None,
@@ -112,7 +115,7 @@ class Storage:
 
     @classmethod
     def get_storage(cls,
-                    core: Core,
+                    core: "Core",
                     name: str,
                     version: int,
                     storage_init: Optional[Callable] = None,

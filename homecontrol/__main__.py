@@ -30,8 +30,8 @@ CONFIG_FILE_NAME = "configuration.yaml"
 LOGGER = logging.getLogger(__name__)
 
 
-def get_arguments() -> dict:
-    """Parse commandline arguments"""
+def get_argparser() -> argparse.ArgumentParser:
+    """Returns the ArgumentParser"""
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="HomeControl")
     parser.add_argument(
@@ -80,8 +80,11 @@ def get_arguments() -> dict:
             action="store_true",
             default=None,
             help="Start HomeControl as a daemon process [posix only]")
+    return parser
 
-    return vars(parser.parse_args())
+def get_arguments() -> dict:
+    """Parse commandline arguments"""
+    return vars(get_argparser().parse_args())
 
 
 def copy_folder(src: str, dest: str, merge_folders: bool = False) -> None:
@@ -377,4 +380,5 @@ def main() -> None:
     run_homecontrol(config=cfg, config_file=cfg_file, start_args=args)
 
 
-main()
+if __name__ == "__main__":
+    main()

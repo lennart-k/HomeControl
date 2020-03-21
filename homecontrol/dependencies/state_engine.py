@@ -72,23 +72,12 @@ class StateEngine:
         self.item = item
         self.core = core
         self.states = {}
-        for state_name, details in item.spec.get("states", {}).items():
-            default_state = state_defaults.get(
-                state_name, details.get("default", None))
-
-            self.states[state_name] = State(
-                self,
-                default=default_state,
-                getter=getattr(item, details.get("getter", ""), None),
-                setter=getattr(item, details.get("setter", ""), None),
-                schema=details.get("schema", None),
-                state_type=types.get(details.get("type", ""), None),
-                poll_interval=details.get("poll-interval", None),
-                name=state_name
-            )
 
         for name in dir(item):
-            state_def = getattr(item, name)
+            state_def: StateDef = getattr(item, name)
+            if name in state_defaults:
+                # pylint: disable=protected-access
+                state_def._default = state_defaults[name]
             if isinstance(state_def, StateDef):
                 state_def.register_state(self, name, item)
 

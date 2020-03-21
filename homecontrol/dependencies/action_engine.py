@@ -38,8 +38,6 @@ class ActionEngine:
             func = getattr(self.item, attribute)
             if hasattr(func, "action_name"):
                 self.actions[getattr(func, "action_name")] = func
-        for action_name, method_name in item.spec.get("actions", {}).items():
-            self.actions[action_name] = getattr(item, method_name)
 
     async def execute(self, name: str, *args, **kwargs) -> bool:
         """Executes an action, optionally with parameters"""

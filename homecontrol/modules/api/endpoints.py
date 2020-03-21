@@ -14,7 +14,7 @@ from homecontrol.const import (
 )
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.json_response import JSONResponse
-from homecontrol.dependencies import json
+import json
 from homecontrol.exceptions import ItemNotOnlineError
 
 from .view import APIView

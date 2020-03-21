@@ -1,23 +1,16 @@
 """JSON Encoder and Decoder"""
 
 # pylint: disable=invalid-name,too-few-public-methods,import-self
+from typing import TYPE_CHECKING
+from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.data_types import type_set, types
+if TYPE_CHECKING:
+    from homecontrol.core import Core
+from homecontrol.exceptions import ItemNotFoundException
 import json
 from functools import partial
 from enum import Enum
 from datetime import datetime
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from homecontrol.core import Core
-from homecontrol.dependencies.data_types import type_set, types
-from homecontrol.dependencies.entity_types import (
-    Item,
-)
-from homecontrol.exceptions import (
-    ItemNotFoundException,
-)
-from homecontrol.dependencies.entity_types import (
-    ITEM_SCHEMA
-)
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -54,57 +47,6 @@ class JSONEncoder(json.JSONEncoder):
             return o.dump()
 
         return o
-
-
-class JSONDecoder(json.JSONDecoder):
-    """Custom JSONDecoder with object_hook"""
-
-    def __init__(self, core: "Core", *args, **kwargs):
-        self.core = core
-        super().__init__(*args, **kwargs, object_hook=self._object_hook)
-
-    def _object_hook(self, obj):
-        """Serialise json-incompatible objects"""
-        if "!type" in obj:
-            if obj["!type"] == "Item":
-                ITEM_SCHEMA(obj)  # Check if obj has needed attributes
-                # Check if item exists
-                if not obj["id"] in self.core.item_manager.items:
-                    raise ItemNotFoundException(
-                        f"There's no item with id {obj['id']}")
-                return self.core.item_manager.items[obj["id"]]
-
-            if obj["!type"] in types:
-                return types[obj["!type"]].from_data(obj["data"])
-        return obj
-
-
-def loads(s, *, encoding=None, parse_float=None,
-          parse_int=None, parse_constant=None,
-          object_pairs_hook=None, core: "Core" = None, **kw):
-    """
-    Loads a JSON string with a custom JSONDecoder
-    that supports HomeControl's data types.
-    Note that for items you need to specify the core parameter
-    """
-    return json.loads(s=s, encoding=encoding, parse_float=parse_float,
-                      cls=partial(JSONDecoder, core=core),
-                      parse_int=parse_int, parse_constant=parse_constant,
-                      object_pairs_hook=object_pairs_hook, **kw)
-
-
-def load(fp, *, parse_float=None,
-         parse_int=None, parse_constant=None, object_pairs_hook=None,
-         core: "Core" = None, **kw):
-    """
-    Loads a Reader with a custom JSONDecoder
-    that supports HomeControl's data types.
-    Note that for items you need to specify the core parameter
-    """
-    return loads(fp.read(),
-                 parse_float=parse_float, parse_int=parse_int,
-                 parse_constant=parse_constant,
-                 object_pairs_hook=object_pairs_hook, **kw)
 
 
 def dumps(obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,

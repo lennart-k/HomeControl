@@ -12,6 +12,7 @@ from homecontrol.const import (
     EVENT_ITEM_NOT_WORKING
 )
 from homecontrol.dependencies.entity_types import Item, Module
+from homecontrol.dependencies.storage import Storage, DictWrapper
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,13 +29,19 @@ CONFIG_SCHEMA = vol.Schema([
 class ItemManager:
     """
     ItemManager manages all your stateful items
-    and takes care of dependant items when removing one
     """
 
     def __init__(self, core):
         self.core = core
         self.items = {}
-        self.item_classes = {}
+        self.item_constructors = {}
+        item_storage = Storage(
+            self.core, "item_storage", 1,
+            storage_init=lambda: {},
+            loader=self._load_items,
+            dumper=self._dump_items
+        )
+        self.item_storage = DictWrapper(item_storage)
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
@@ -43,6 +50,12 @@ class ItemManager:
 
         for raw_cfg in self.cfg:
             await self.create_from_raw_cfg(raw_cfg)
+
+    def _load_items(self, data: dict) -> dict:
+        return data
+
+    def _dump_items(self, data: dict) -> dict:
+        return self.cfg
 
     async def add_from_module(self, mod_obj: Module) -> None:
         """
@@ -56,11 +69,10 @@ class ItemManager:
             if (isclass(item_class)
                     and issubclass(item_class, Item)
                     and item_class is not Item):
-                item_class.spec = getattr(item_class, "spec", {})
                 item_class.module = mod_obj
                 item_class.type = f"{mod_obj.name}.{item_class.__name__}"
-                self.item_classes[item_class.type] = item_class
-
+                self.item_constructors[
+                    item_class.type] = item_class.constructor
 
     def iter_items_by_id(self, iterable) -> [Item]:
         """Translates item identifiers into item instances"""
@@ -77,17 +89,9 @@ class ItemManager:
                     item.identifier, status)
         item.status = status
 
-        await asyncio.gather(*[
-            self.stop_item(dependant_item, ItemStatus.WAITING_FOR_DEPENDENCY)
-            for dependant_item
-            in self.iter_items_by_id(item.dependant_items)
-            if hasattr(dependant_item, "stop")
-            and dependant_item.status == ItemStatus.ONLINE
-        ], return_exceptions=False)
-
     async def remove_item(self, identifier: str) -> None:
         """
-        Removes a HomeControl item and disables dependant items
+        Removes a HomeControl item
 
         identifier: str
             The item's identifier
@@ -102,15 +106,12 @@ class ItemManager:
         if item.status == ItemStatus.ONLINE:
             await self.stop_item(item)
 
-        for dependency in self.iter_items_by_id(item.dependencies):
-            dependency.dependant_items.remove(item.identifier)
-
         del self.items[identifier]
         self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
     async def create_from_raw_cfg(
-            self, raw_cfg: dict, dependant_items=None) -> Item:
+            self, raw_cfg: dict) -> Item:
         """Creates an Item from raw_cfg"""
         return await self.create_item(
             identifier=raw_cfg["id"],
@@ -118,21 +119,19 @@ class ItemManager:
             item_type=raw_cfg["type"],
             raw_cfg=raw_cfg,
             cfg=raw_cfg.get("cfg", raw_cfg),
-            state_defaults=raw_cfg["states"],
-            dependant_items=dependant_items
+            state_defaults=raw_cfg["states"]
         )
 
     async def recreate_item(self, item: Item, raw_cfg: dict = None) -> Item:
         """Removes and recreates an item"""
-        dependant_items = item.dependant_items
         # pylint: disable=protected-access
         raw_cfg = raw_cfg or item._raw_cfg
         await self.remove_item(item.identifier)
         del item
-        await self.create_from_raw_cfg(raw_cfg, dependant_items)
+        await self.create_from_raw_cfg(raw_cfg)
 
     async def init_item(self, item: Item) -> None:
-        """Initialises an item and dependants"""
+        """Initialises an item"""
         LOGGER.debug("Initialising item %s", item.identifier)
         try:
             init_result = await item.init()
@@ -148,19 +147,17 @@ class ItemManager:
 
         item.status = ItemStatus.ONLINE
 
-        for dependant_item in self.iter_items_by_id(item.dependant_items):
-            if (dependant_item.status == ItemStatus.WAITING_FOR_DEPENDENCY
-                    and all(dependency.status == ItemStatus.ONLINE
-                            for dependency
-                            in self.iter_items_by_id(
-                                dependant_item.dependencies))):
-                await self.init_item(dependant_item)
+    def register_item(self, item: Item) -> None:
+        """
+        Registers an item
+        """
+        self.items[item.identifier] = item
 
     # pylint: disable=too-many-arguments,too-many-locals
     async def create_item(
             self, identifier: str, item_type: str, raw_cfg: dict,
-            cfg: dict = None, state_defaults: dict = None, name: str = None,
-            dependant_items: set = None) -> Item:
+            cfg: dict = None, state_defaults: dict = None, name: str = None
+    ) -> Item:
         """
         Creates a HomeControl item
 
@@ -181,13 +178,13 @@ class ItemManager:
                 How your item should be displayed in the frontend
 
         """
-        if item_type not in self.item_classes:
+        if item_type not in self.item_constructors:
             LOGGER.error("Item type not found: %s", item_type)
             return
 
-        item_class = self.item_classes[item_type]
+        item_constructor = self.item_constructors[item_type]
 
-        item = item_class(
+        item = await item_constructor(
             identifier, name, cfg,
             state_defaults=state_defaults,
             core=self.core
@@ -195,8 +192,7 @@ class ItemManager:
 
         self.items[identifier] = item
 
-        if item.status != ItemStatus.WAITING_FOR_DEPENDENCY:
-            await self.init_item(item)
+        await self.init_item(item)
 
         self.core.event_engine.broadcast(EVENT_ITEM_CREATED, item=item)
         LOGGER.debug("Item created: %s", item.identifier)

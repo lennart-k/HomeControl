@@ -5,8 +5,9 @@ import json
 from functools import partial
 from enum import Enum
 from datetime import datetime
-
-from homecontrol.core import Core
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from homecontrol.core import Core
 from homecontrol.dependencies.data_types import type_set, types
 from homecontrol.dependencies.entity_types import (
     Item,
@@ -22,7 +23,7 @@ from homecontrol.dependencies.entity_types import (
 class JSONEncoder(json.JSONEncoder):
     """Custom JSONEncoder that also parses HomeControl types"""
 
-    def __init__(self, core: Core, *args, **kwargs):
+    def __init__(self, core: "Core", *args, **kwargs):
         self.core = core
         super().__init__(*args, **kwargs)
 
@@ -58,7 +59,7 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     """Custom JSONDecoder with object_hook"""
 
-    def __init__(self, core: Core, *args, **kwargs):
+    def __init__(self, core: "Core", *args, **kwargs):
         self.core = core
         super().__init__(*args, **kwargs, object_hook=self._object_hook)
 
@@ -80,7 +81,7 @@ class JSONDecoder(json.JSONDecoder):
 
 def loads(s, *, encoding=None, parse_float=None,
           parse_int=None, parse_constant=None,
-          object_pairs_hook=None, core: Core = None, **kw):
+          object_pairs_hook=None, core: "Core" = None, **kw):
     """
     Loads a JSON string with a custom JSONDecoder
     that supports HomeControl's data types.
@@ -94,7 +95,7 @@ def loads(s, *, encoding=None, parse_float=None,
 
 def load(fp, *, parse_float=None,
          parse_int=None, parse_constant=None, object_pairs_hook=None,
-         core: Core = None, **kw):
+         core: "Core" = None, **kw):
     """
     Loads a Reader with a custom JSONDecoder
     that supports HomeControl's data types.
@@ -108,7 +109,7 @@ def load(fp, *, parse_float=None,
 
 def dumps(obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,
           allow_nan=True, indent=None, separators=None, sort_keys=False,
-          core: Core = None, **kw):
+          core: "Core" = None, **kw):
     """
     Dumps an object into a JSON string with support
     for HomeControl's data types
@@ -122,7 +123,7 @@ def dumps(obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,
 
 def dump(obj, fp, *, skipkeys=False, ensure_ascii=True, check_circular=True,
          allow_nan=True, indent=None, separators=None, sort_keys=False,
-         core: Core = None, **kw):
+         core: "Core" = None, **kw):
     """
     Dumps an object into a Writer with support for HomeControl's data types
     """

@@ -3,9 +3,7 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
-from typing import (
-    Optional
-)
+from typing import Optional
 
 import logging
 import voluptuous as vol

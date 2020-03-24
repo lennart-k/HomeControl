@@ -184,7 +184,6 @@ class ItemStatesView(APIView):
               for state, value in commit.items()])))
 
 
-
 @needs_auth()
 class ItemStateView(APIView):
     """Endpoint for an item state"""

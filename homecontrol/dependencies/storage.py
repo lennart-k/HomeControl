@@ -15,7 +15,6 @@ import voluptuous as vol
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
-
 from homecontrol.dependencies.json import load, dump
 
 

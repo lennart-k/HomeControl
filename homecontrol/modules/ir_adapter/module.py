@@ -6,7 +6,6 @@ from homecontrol.dependencies.entity_types import Item
 from .dependencies.ir_receiver import NECIRReceiver as Receiver
 
 
-
 class NECIRReceiver(Item):
     """The receiver item"""
     config_schema = vol.Schema({

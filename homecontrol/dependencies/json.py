@@ -3,10 +3,9 @@
 # pylint: disable=invalid-name,too-few-public-methods,import-self
 from typing import TYPE_CHECKING
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.data_types import type_set, types
+from homecontrol.dependencies.data_types import type_set
 if TYPE_CHECKING:
     from homecontrol.core import Core
-from homecontrol.exceptions import ItemNotFoundException
 import json
 from functools import partial
 from enum import Enum

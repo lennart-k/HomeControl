@@ -24,7 +24,6 @@ def action(arg: Union[Callable, str]) -> Callable:
     return _decorator
 
 
-
 # pylint: disable=too-few-public-methods
 class ActionEngine:
     """Holds available actions for an item"""

@@ -82,6 +82,7 @@ def get_argparser() -> argparse.ArgumentParser:
             help="Start HomeControl as a daemon process [posix only]")
     return parser
 
+
 def get_arguments() -> dict:
     """Parse commandline arguments"""
     return vars(get_argparser().parse_args())

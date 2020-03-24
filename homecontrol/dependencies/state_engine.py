@@ -4,7 +4,6 @@ import logging
 from typing import Any, Callable, Optional
 from types import MethodType
 import voluptuous as vol
-from homecontrol.dependencies.data_types import types
 from homecontrol.const import ItemStatus
 from homecontrol.exceptions import (
     ItemNotOnlineError

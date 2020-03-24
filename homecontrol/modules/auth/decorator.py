@@ -1,5 +1,4 @@
 """Middleware decorator for auth"""
-from functools import wraps
 from typing import Callable
 
 

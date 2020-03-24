@@ -7,7 +7,6 @@ import asyncio
 import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.state_engine import StateDef
 from homecontrol.dependencies.action_engine import action
 
 SPEC = {

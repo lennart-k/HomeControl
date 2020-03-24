@@ -85,3 +85,5 @@ class Module:
     async def stop(self) -> None:
         """Default stop method"""
         return
+
+ModuleDef = Module

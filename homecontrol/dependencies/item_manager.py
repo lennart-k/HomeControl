@@ -101,7 +101,7 @@ class ItemManager:
         """
         Adds the item specifications of a module to the dict of available ones
 
-        mod_obj: homecontrol.data_types.Module
+        mod_obj: homecontrol.entity_types.Module
         """
         for attribute in dir(mod_obj.mod):
             item_class = getattr(mod_obj.mod, attribute)

@@ -3,7 +3,6 @@
 # pylint: disable=invalid-name,too-few-public-methods,import-self
 from typing import TYPE_CHECKING
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.data_types import type_set
 if TYPE_CHECKING:
     from homecontrol.core import Core
 import json
@@ -35,12 +34,6 @@ class JSONEncoder(json.JSONEncoder):
 
         if isinstance(o, datetime):
             return o.isoformat()
-
-        if isinstance(o, tuple(type_set)):
-            return {
-                "!type": type(o).__name__,
-                "data": o.dump()
-            }
 
         if hasattr(o, "dump"):
             return o.dump()

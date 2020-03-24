@@ -4,18 +4,8 @@ import colorsys
 from datetime import datetime
 
 # pylint: disable=invalid-name
-types = {}
-type_set = set()
 
 
-def data_type(cls: object) -> object:
-    """Decorator to add a data type to the types dict"""
-    type_set.add(cls)
-    types[cls.__name__] = cls
-    return cls
-
-
-@data_type
 class Color:
     """Representation for a color"""
     hsl: (int, int, int)
@@ -96,7 +86,6 @@ class Color:
         return self.hsl
 
 
-@data_type
 class DateTime(datetime):
     """date time format"""
     @staticmethod

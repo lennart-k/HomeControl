@@ -4,7 +4,8 @@ import os
 from shutil import copyfile
 from datetime import datetime
 import logging
-from json.decoder import JSONDecodeError
+from json import load, JSONDecodeError
+from homecontrol.dependencies.json import dump
 from typing import (
     Optional,
     Callable,
@@ -15,7 +16,6 @@ import voluptuous as vol
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
-from homecontrol.dependencies.json import load, dump
 
 
 LOGGER = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ class Storage:
             return self._data["data"]
         if os.path.isfile(self.path):
             try:
-                data = FILE_SCHEMA(load(open(self.path, "r"), core=self.core))
+                data = FILE_SCHEMA(load(open(self.path, "r")))
             except (vol.Error, JSONDecodeError):
                 LOGGER.error(
                     "Storage data for storage %s invalid. "
@@ -157,8 +157,7 @@ class Storage:
         if not os.path.isdir(storage_dir):
             os.makedirs(storage_dir)
 
-        dump(self._data, open(self.path, "w"),
-             sort_keys=True, indent=4, core=self.core)
+        dump(self._data, open(self.path, "w"), sort_keys=True, indent=4)
 
 
 class DictWrapper(dict):

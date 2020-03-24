@@ -16,12 +16,6 @@ from homecontrol.dependencies.action_engine import ActionEngine
 
 LOGGER = logging.getLogger(__name__)
 
-ITEM_SCHEMA = vol.Schema({
-    vol.Optional("item_type"): str,
-    vol.Required("id"): str,
-    vol.Required("!type"): "Item"
-})
-
 
 class Item:
     """A dummy Item"""

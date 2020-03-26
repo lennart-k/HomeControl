@@ -1,7 +1,6 @@
 """"API endpoints"""
 
 from collections import ChainMap
-from json import JSONDecodeError
 import voluptuous as vol
 from aiohttp import web
 from homecontrol.const import (
@@ -285,7 +284,7 @@ class ExecuteActionView(APIView):
         try:
             content = (await self.request.content.read()).decode()
             kwargs = json.loads(content) if content else {}
-        except JSONDecodeError as e:
+        except json.JSONDecodeError as e:
             return self.error(e)
 
         if action_name not in item.actions.actions:

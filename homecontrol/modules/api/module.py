@@ -51,7 +51,6 @@ class Module:
         middlewares = []
 
         @middlewares.append
-        @web.middleware
         async def config_headers(request: web.Request,
                                  handler: Callable) -> web.Response:
             response = await handler(request)

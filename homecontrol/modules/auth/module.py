@@ -91,7 +91,6 @@ class Module:
     async def add_middlewares(self, event, middlewares: list) -> None:
         """Adds the auth middleware to the API app"""
         @middlewares.append
-        @web.middleware
         async def check_authentication(request: web.Request,
                                        handler: Callable) -> web.Response:
             if getattr(handler, "allow_banned", False):

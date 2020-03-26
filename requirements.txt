@@ -5,7 +5,7 @@ aiomonitor
 voluptuous
 setuptools
 uvloop
-attr
+attrs
 jwt
 bcrypt
 pyotp

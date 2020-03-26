@@ -55,10 +55,15 @@ class Module:
         self.core.event_engine.register(
             EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
+    async def middleware(self, request: web.Request, handler) -> web.Response:
+        """Workaround for tasks never being completed"""
+        response = await handler(request)
+        self.core.loop.call_soon(request.protocol.close)
+        return response
+
     async def start(self, *args):
         """Start the HTTP server"""
-        self.main_app = web.Application()
-
+        self.main_app = web.Application(middlewares=[self.middleware])
         self.route_table_def = web.RouteTableDef()
 
         await self.core.event_engine.gather(
@@ -98,6 +103,7 @@ class Module:
         LOGGER.info("Stopping the HTTP server on %s:%s",
                     self.cfg["host"], self.cfg["port"])
         try:
+            await self.site.stop()
             await self.runner.cleanup()
         except AttributeError:
             return

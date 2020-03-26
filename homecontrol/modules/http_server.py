@@ -37,8 +37,8 @@ class SSLLogFilter(logging.Filter):
 
 class Module:
     """The HTTP server module"""
-    handler: None
-    server: "asyncio.Server"
+    runner: web.AppRunner
+    site: web.TCPSite
     route_table_def: web.RouteTableDef
     main_app: web.Application
 
@@ -57,7 +57,7 @@ class Module:
 
     async def start(self, *args):
         """Start the HTTP server"""
-        self.main_app = web.Application(loop=self.core.loop)
+        self.main_app = web.Application()
 
         self.route_table_def = web.RouteTableDef()
 
@@ -69,38 +69,36 @@ class Module:
             main_app=self.main_app)
 
         self.main_app.add_routes(self.route_table_def)
-        self.handler = self.main_app.make_handler(loop=self.core.loop)
+        self.runner = web.AppRunner(self.main_app)
+        await self.runner.setup()
 
         if self.cfg["ssl"]:
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.verify_mode = ssl.CERT_OPTIONAL
-
             context.load_cert_chain(
                 self.cfg["ssl"]["certificate"],
-                self.cfg["ssl"]["key"]
-            )
+                self.cfg["ssl"]["key"])
         else:
             context = None
 
         # Windows doesn't support reuse_port
-        self.server = await self.core.loop.create_server(
-            self.handler,
+        self.site = web.TCPSite(
+            self.runner,
             self.cfg["host"],
             self.cfg["port"],
             reuse_address=True,
             reuse_port=os.name != "nt",
-            ssl=context)
-        LOGGER.info("Started the HTTP server")
+            ssl_context=context)
+        await self.site.start()
+        LOGGER.info("Started the HTTP server on %s:%s",
+                    self.cfg["host"], self.cfg["port"])
 
     async def stop(self):
         """Stop the HTTP server"""
         LOGGER.info("Stopping the HTTP server on %s:%s",
                     self.cfg["host"], self.cfg["port"])
         try:
-            if self.main_app.frozen:
-                await self.main_app.cleanup()
-                self.server.close()
-                await self.server.wait_closed()
+            await self.runner.cleanup()
         except AttributeError:
             return
 

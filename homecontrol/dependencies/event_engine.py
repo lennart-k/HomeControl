@@ -6,6 +6,7 @@ from typing import (
 )
 import asyncio
 import logging
+from functools import partial
 from collections import defaultdict
 from datetime import datetime
 
@@ -121,9 +122,6 @@ class EventEngine:
             return coro
         return _register
 
-    def remove_handler(self, event: str, handler: callable) -> None:
-        """
-        Removes an event handler
-        """
-        with suppress(KeyError):
-            self.handlers[event].remove(handler)
+    def remove_handler(self, event: str, handler: Callable) -> None:
+        """Removes an event handler"""
+        self.handlers[event].discard(handler)

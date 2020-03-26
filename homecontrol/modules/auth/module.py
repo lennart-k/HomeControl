@@ -11,7 +11,6 @@ from homecontrol.core import Core
 
 from .auth import AuthManager
 from .auth.login_flows import FlowManager
-from .authorized_request import AuthorizedRequest
 from .auth.credential_provider import CredentialProvider
 from .auth.auth_providers import AUTH_PROVIDERS
 from .decorator import needs_auth
@@ -92,17 +91,15 @@ class Module:
     async def add_middlewares(self, event, middlewares: list) -> None:
         """Adds the auth middleware to the API app"""
         @middlewares.append
-        @web.middleware
         async def check_authentication(request: web.Request,
                                        handler: Callable) -> web.Response:
-
             if getattr(handler, "allow_banned", False):
                 return await handler(request)
 
             # pylint: disable=singleton-comparison
             for provider_name, provider in self.auth_providers.items():
-                request.user = user = await provider.validate_request(request)
-                cast(AuthorizedRequest, request)
+                request["user"] = user = await provider.validate_request(
+                    request)
                 if user is not None:
                     break
 
@@ -153,7 +150,7 @@ class Module:
 
             refresh_token = await self.auth_manager.create_refresh_token(
                 client_id=data["client_id"],
-                user=request.user,
+                user=request["user"],
                 access_token_expiration=timedelta(days=3650),
                 client_name=data["client_name"]
             )
@@ -229,10 +226,10 @@ class Module:
             except (vol.Invalid, JSONDecodeError) as e:
                 return JSONResponse(error=str(e))
 
-            if data["user"] and not request.user.owner:
+            if data["user"] and not request["user"].owner:
                 return JSONResponse(error="Unauthorized", status_code=401)
 
-            user = self.auth_manager.get_user(data["user"]) or request.user
+            user = self.auth_manager.get_user(data["user"]) or request["user"]
 
             provider: CredentialProvider = (
                 self.auth_manager.credential_providers[data["provider"]])

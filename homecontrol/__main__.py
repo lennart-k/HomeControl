@@ -35,48 +35,48 @@ def get_argparser() -> argparse.ArgumentParser:
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="HomeControl")
     parser.add_argument(
-        "-cfgdir", "-cd",
+        "--cfgdir", "-cd",
         default=os.path.expanduser("~/.homecontrol/"),
         help="Directory storing the HomeControl configuration")
     parser.add_argument(
-        "-pid-file",
+        "--pid-file",
         default=None,
         help=("Location of the PID file."
               "Ensures that only one session is running. "
               "Defaults to the configuration path"))
     parser.add_argument(
-        "-clearport",
+        "--clearport",
         action="store_true",
         default=None,
         help=("Frees the port for the API server using fuser. "
               "Therefore only available on Linux"))
     parser.add_argument(
-        "-verbose",
+        "--verbose",
         action="store_true",
         default=None,
         help="Sets the loglevel for the logfile to INFO")
     parser.add_argument(
-        "-nocolor",
+        "--nocolor",
         action="store_true",
         default=False,
         help="Disables colored console output")
     parser.add_argument(
-        "-logfile",
+        "--logfile",
         default=None,
         help="Logfile location")
     parser.add_argument(
-        "-killprev", "-kp",
+        "--killprev", "-kp",
         action="store_true",
         default=True,
         help="Kills the previous HomeControl instance")
     parser.add_argument(
-        "-skip-pip", "-sp",
+        "--skip-pip", "-sp",
         action="store_true",
         default=False,
         help="Skips the installation of configured pip requirements")
     if os.name == "posix":
         parser.add_argument(
-            "-daemon", "-d",
+            "--daemon", "-d",
             action="store_true",
             default=None,
             help="Start HomeControl as a daemon process [posix only]")

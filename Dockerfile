@@ -17,4 +17,4 @@ RUN pip install $(python -m homecontrol.scripts.module_requirements)
 
 WORKDIR /config
 
-CMD [ "homecontrol", "-cfgdir", "/config" ]
+CMD [ "homecontrol", "--cfgdir", "/config" ]

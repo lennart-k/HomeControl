@@ -120,7 +120,7 @@ def get_config(directory: str) -> dict:
     """
     file = os.path.join(directory, CONFIG_FILE_NAME)
     if not os.path.isfile(file):
-        LOGGER.critical("Config file does not exist: %s", file)
+        LOGGER.warning("Config file does not exist: %s", file)
         # Don't ask if HomeControl is not interactive.
         # It's quite likely a Docker container or daemon
         create_new_config = not sys.stdout.isatty()
@@ -344,6 +344,10 @@ def main() -> None:
     args = get_arguments()
     logfile = (args["logfile"]
                or os.path.join(args["cfgdir"], "homecontrol.log"))
+
+    setup_logging(verbose=args["verbose"],
+                  color=not args["nocolor"],
+                  logfile=logfile)
 
     cfg = get_config(args["cfgdir"])
     cfg_file = os.path.join(args["cfgdir"], CONFIG_FILE_NAME)

@@ -2,4 +2,4 @@ name: 433MHz Adapter
 description: Provides an adapter to send and receive codes on 433MHz
 
 pip-requirements:
-  - pigpio
+  - pigpio==1.42

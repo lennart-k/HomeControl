@@ -2,4 +2,4 @@ name: Chromecast
 description: Adds support for Chromecast
 
 pip-requirements:
-  - PyChromecast
+  - PyChromecast==2.5.2

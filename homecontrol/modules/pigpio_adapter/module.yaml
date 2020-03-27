@@ -2,4 +2,4 @@ name: PiGPIO
 description: Contains an adapter for PiGPIO
 
 pip-requirements:
-  - pigpio
+  - pigpio==1.42

@@ -2,4 +2,4 @@ name: MQTT Adapter
 description: Adds an adapter to subscribe to MQTT messages
 
 pip-requirements:
-  - paho-mqtt
+  - paho-mqtt==1.4.0

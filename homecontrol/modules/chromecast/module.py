@@ -37,7 +37,7 @@ class Chromecast(Item):
         self.media_controller = self.chromecast.media_controller
         self.last_time_jump = vars(
             self.media_controller).get("current_time", 0)
-        await self.states.bulk_update(
+        self.states.bulk_update(
             playing=vars(
                 self.media_controller).get("player_state") == "PLAYING",
             content_type=self.media_controller.status.content_type,
@@ -58,7 +58,6 @@ class Chromecast(Item):
         """"Setter for playtime"""
         value = max(0, min(value, await self.states.get("duration")))
         self.media_controller.seek(value)
-        await self.states.update("playtime", value)
         return {"playtime": value}
 
     @action("pause")
@@ -74,7 +73,6 @@ class Chromecast(Item):
             self.media_controller.play()
         else:
             self.media_controller.pause()
-        await self.states.update("playing", value)
         return {"playing": value}
 
     @action("play")
@@ -108,17 +106,13 @@ class Chromecast(Item):
     async def set_volume(self, value: int) -> dict:
         """Setter for volume"""
         self.chromecast.set_volume(value / 100)
-        return ({"volume": value}
-                if await self.states.update("volume", value)
-                else {})
+        return {"volume": value}
 
     @muted.setter()
     async def set_muted(self, value: bool) -> dict:
         """Setter for muted"""
         self.chromecast.set_volume_muted(bool(value))
-        return ({"muted": value}
-                if await self.states.update("muted", value)
-                else {})
+        return {"muted": value}
 
     @action("toggle_muted")
     async def action_toggle_muted(self) -> None:
@@ -145,7 +139,7 @@ class Chromecast(Item):
         self.last_time_jump = status.current_time
         self.last_status = time.time()
 
-        await self.states.bulk_update(
+        self.states.bulk_update(
             playtime=status.current_time,
             playing=vars(status).get("player_state") == "PLAYING",
             content_type=status.content_type,

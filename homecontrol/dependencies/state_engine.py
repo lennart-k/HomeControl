@@ -98,15 +98,15 @@ class StateEngine:
         """Checks if a value is valid for a state"""
         return self.states[state].check_value(value)
 
-    async def update(self, state: str, value):
+    def update(self, state: str, value):
         """Called from an item to update its state"""
         if state in self.states:
-            return await self.states[state].update(value)
+            return self.states[state].update(value)
 
-    async def bulk_update(self, **kwargs):
+    def bulk_update(self, **kwargs):
         """Called from an item to update multiple states"""
         for state, value in kwargs.items():
-            await self.states[state].update(value)
+            self.states[state].update(value)
 
     async def dump(self) -> dict:
         """Return a JSON serialisable object"""
@@ -148,7 +148,7 @@ class State:
         """Polls the current state and updates it"""
         if self.state_engine.item.status != ItemStatus.ONLINE:
             return None
-        await self.update(await self.getter())
+        self.update(await self.getter())
 
     async def get(self):
         """Gets a state"""
@@ -185,7 +185,7 @@ class State:
                 return error
         return True
 
-    async def update(self, value):
+    def update(self, value):
         """Updates a state"""
         if not self.value == value:
             self.value = value

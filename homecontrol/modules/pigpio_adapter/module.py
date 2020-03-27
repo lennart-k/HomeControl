@@ -99,11 +99,11 @@ class Button(Item):
             if not self.cfg["toggle"]:
                 value = not self.cfg["pull_up"] ^ reading
                 if not value == await self.states.get("value"):
-                    await self.states.update("value", value)
+                    self.states.update("value", value)
                     return True
             else:
                 if not self.cfg["pull_up"] ^ reading:
-                    await self.states.update(
+                    self.states.update(
                         "value", not await self.states.get("value"))
                     return True
 
@@ -192,9 +192,7 @@ class RGBLight(Item):
     async def set_color(self, color: Color) -> dict:
         """Setter for color"""
         await self.apply_color(color)
-        if await self.states.get("on") != bool(color.l):
-            await self.states.update("on", bool(color.l))
-        return {"color": color}
+        return {"color": color, "on": bool(color.l)}
 
     async def apply_color(self, color: Color = None) -> Color:
         """Applies the color without manipulating the state"""

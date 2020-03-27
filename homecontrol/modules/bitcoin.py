@@ -50,7 +50,7 @@ class BitcoinStats(Item):
         except vol.SchemaError:
             return
 
-        await self.states.bulk_update(
+        self.states.bulk_update(
             last_update=result["timestamp"],
             market_price_usd=result["market_price_usd"],
             hash_rate=result["hash_rate"],

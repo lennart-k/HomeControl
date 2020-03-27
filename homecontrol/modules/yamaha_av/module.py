@@ -151,4 +151,4 @@ class YamahaAVReceiver(Item):
             raw_name or name
             for name, raw_name
             in self.av_receiver.inputs().get("available_inputs").items()}
-        await self.states.update("available_inputs", available_inputs)
+        self.states.update("available_inputs", available_inputs)

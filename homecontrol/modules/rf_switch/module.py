@@ -48,7 +48,7 @@ class IntertechnoSwitch(Item):
         async def on_it_code(event, house, identifier, state):
             if (self.cfg["house"].lower(), self.cfg["id"]) \
                     == (house, identifier):
-                await self.states.update("on", state)
+                self.states.update("on", state)
 
     @action("toggle")
     async def toggle_on(self):
@@ -61,7 +61,6 @@ class IntertechnoSwitch(Item):
     )))
     async def set_on(self, on: bool) -> Dict[str, bool]:
         """Setter for on state"""
-        print(f"Setting {self.identifier} to {on}")
         await self.cfg["433mhz_tx_adapter"].send_code(
             to_code(self.cfg["house"], self.cfg["id"], on))
         return {"on": on}

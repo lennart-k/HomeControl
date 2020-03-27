@@ -3,14 +3,15 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import logging
 import voluptuous as vol
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
-
+if TYPE_CHECKING:
+    from homecontrol.core import Core
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class Item:
     identifier: str
     name: str
     status: ItemStatus = ItemStatus.OFFLINE
-    core: "homecontrol.core.Core"
+    core: "Core"
     cfg: dict
     config_schema: vol.Schema = vol.Schema(object)
     module: Optional["Module"]
@@ -31,7 +32,7 @@ class Item:
     @classmethod
     async def constructor(
             cls, identifier: str, name: str, cfg: dict, state_defaults: dict,
-            core: "homecontrol.core.Core") -> "Item":
+            core: "Core") -> "Item":
         """Constructs an item"""
         item = cls()
 
@@ -69,7 +70,7 @@ class Module:
     name: str
     folder_location: str = None
     spec: dict
-    core: "homecontrol.core.Core"
+    core: "Core"
     resource_folder: str
     path: str
     item_specs: dict

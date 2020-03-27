@@ -3,8 +3,10 @@
 from setuptools import setup, find_namespace_packages
 
 from homecontrol import const
+from homecontrol.scripts.module_requirements import get_requirements
 
 REQUIREMENTS = open("requirements.txt").read().splitlines()
+MODULE_REQUIREMENTS = get_requirements()
 
 MINIMUM_PYTHON_VERSION = ">="+".".join(map(str, const.MINIMUM_PYTHON_VERSION))
 
@@ -18,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_namespace_packages(include=("homecontrol", "homecontrol.*")),
     include_package_data=True,
-    install_requires=REQUIREMENTS,
+    install_requires=REQUIREMENTS + MODULE_REQUIREMENTS,
     python_requires=MINIMUM_PYTHON_VERSION,
     package_data={
         "": ["*"]

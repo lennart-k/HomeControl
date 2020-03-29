@@ -51,8 +51,9 @@ class Module:
         middlewares = []
 
         @middlewares.append
-        async def config_headers(request: web.Request,
-                                 handler: Callable) -> web.Response:
+        @web.middleware
+        async def config_headers(
+                request: web.Request, handler: Callable) -> web.Response:
             response = await handler(request)
             response.headers.update(self.cfg.get("headers", {}))
             return response

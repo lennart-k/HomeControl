@@ -55,6 +55,7 @@ class Module:
         self.core.event_engine.register(
             EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
+    @web.middleware
     async def middleware(self, request: web.Request, handler) -> web.Response:
         """Workaround for tasks never being completed"""
         response = await handler(request)

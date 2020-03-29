@@ -1,7 +1,10 @@
 """ItemManager for HomeControl"""
+from typing import Optional
 from inspect import isclass
 import logging
 import voluptuous as vol
+from attr import attrs, attrib, asdict
+
 
 from homecontrol.const import (
     ItemStatus,
@@ -11,6 +14,7 @@ from homecontrol.const import (
 )
 from homecontrol.dependencies.entity_types import Item, Module
 from homecontrol.dependencies.storage import Storage
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,7 +30,25 @@ CONFIG_SCHEMA = vol.Schema([
 ])
 
 
-def yaml_entry_to_json(yaml_entry: dict) -> dict:
+@attrs(slots=True)
+class StorageEntry:
+    """The storage representation of an item"""
+    unique_identifier: str = attrib()
+    type: str = attrib()
+    provider: str = attrib()
+    enabled: bool = attrib(default=True)
+    identifier: str = attrib(default=None)
+    state_defaults: dict = attrib(factory=lambda: {})
+    cfg: dict = attrib(factory=lambda: {})
+    name: str = attrib(default=None)
+    hidden: bool = attrib(default=False)
+
+    def __attrs_post_init__(self):
+        self.identifier = self.identifier or self.unique_identifier
+        self.name = self.name or self.identifier
+
+
+def yaml_entry_to_storage_entry(yaml_entry: dict) -> StorageEntry:
     """Converts a yaml entry to a JSON entry"""
     if "cfg" in yaml_entry:
         cfg = yaml_entry["cfg"]
@@ -34,16 +56,17 @@ def yaml_entry_to_json(yaml_entry: dict) -> dict:
         cfg = yaml_entry.copy()
         for key in ("id", "type", "name", "states", "enabled"):
             cfg.pop(key, None)
-    return {
-        "type": yaml_entry["type"],
-        "name": yaml_entry.get("name", yaml_entry["id"]),
-        "unique_identifier": yaml_entry["id"],
-        "identifier": yaml_entry["id"],
-        "provider": "yaml",
-        "enabled": yaml_entry["enabled"],
-        "cfg": cfg,
-        "state_defaults": yaml_entry["states"],
-    }
+    return StorageEntry(
+        cfg=cfg,
+        enabled=yaml_entry["enabled"],
+        identifier=yaml_entry["id"],
+        unique_identifier="yaml_" + yaml_entry["id"],
+        type=yaml_entry["type"],
+        state_defaults=yaml_entry["states"],
+        provider="yaml",
+        name=yaml_entry.get("name", yaml_entry["id"]),
+        hidden=False
+    )
 
 
 class ItemManager:
@@ -75,27 +98,28 @@ class ItemManager:
     def load_yaml_config(self) -> None:
         """Loads the YAML configuration"""
         for key in tuple(self.item_config.keys()):
-            if self.item_config[key]["provider"] == "yaml":
+            if self.item_config[key].provider == "yaml":
                 del self.item_config[key]
 
         for yaml_entry in self.yaml_cfg:
-            json_entry = yaml_entry_to_json(yaml_entry)
-            self.item_config[json_entry["unique_identifier"]] = json_entry
+            storage_entry = yaml_entry_to_storage_entry(yaml_entry)
+            self.item_config[
+                storage_entry.unique_identifier] = storage_entry
         self.storage.schedule_save(self.item_config)
 
-    def update_storage_entry(self, entry: dict) -> None:
+    def update_storage_entry(self, entry: StorageEntry) -> None:
         """Updates a config storage entry"""
-        self.item_config[entry["unique_identifier"]] = entry
+        self.item_config[entry.unique_identifier] = entry
         self.storage.schedule_save(self.item_config)
 
     def _load_items(self, data: dict) -> dict:
         entries = {}
         for entry in data:
-            entries[entry["unique_identifier"]] = entry
+            entries[entry["unique_identifier"]] = StorageEntry(**entry)
         return entries
 
     def _dump_items(self, data: dict) -> dict:
-        return list(data.values())
+        return [asdict(entry) for entry in data.values()]
 
     async def add_from_module(self, mod_obj: Module) -> None:
         """
@@ -119,6 +143,12 @@ class ItemManager:
         for identifier in iterable:
             if identifier in self.items:
                 yield self.items[identifier]
+
+    def get_by_unique_identifier(self, unique_identifier: str) -> Item:
+        """Returns an item by its unique identifier"""
+        for item in self.items.values():
+            if item.unique_identifier == unique_identifier:
+                return item
 
     async def stop_item(self,
                         item: Item,
@@ -150,14 +180,15 @@ class ItemManager:
         self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
-    async def create_from_storage_entry(self, storage_entry: dict) -> Item:
+    async def create_from_storage_entry(
+            self, storage_entry: StorageEntry) -> Item:
         """Creates an Item from a storage entry"""
         return await self.create_item(
-            identifier=storage_entry["identifier"],
-            name=storage_entry["name"],
-            item_type=storage_entry["type"],
-            cfg=storage_entry["cfg"],
-            state_defaults=storage_entry["state_defaults"]
+            identifier=storage_entry.identifier,
+            name=storage_entry.name,
+            item_type=storage_entry.type,
+            cfg=storage_entry.cfg,
+            state_defaults=storage_entry.state_defaults
         )
 
     async def init_item(self, item: Item) -> None:
@@ -165,7 +196,7 @@ class ItemManager:
         LOGGER.debug("Initialising item %s", item.identifier)
         try:
             init_result = await item.init()
-        except:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             LOGGER.warning("An exception was raised when initialising item %s",
                            item.identifier,
                            exc_info=True)
@@ -177,11 +208,24 @@ class ItemManager:
 
         item.status = ItemStatus.ONLINE
 
-    def register_item(self, item: Item) -> None:
-        """
-        Registers an item
-        """
-        self.items[item.identifier] = item
+    async def register_entry(
+            self, storage_entry: StorageEntry,
+            override: bool = False) -> Optional[Item]:
+        """Registers a storage entry"""
+        existing_item = self.get_by_unique_identifier(
+            storage_entry.unique_identifier)
+
+        if not override and existing_item:
+            return existing_item
+
+        if existing_item:
+            await self.remove_item(existing_item.identifier)
+
+        self.item_config[storage_entry.unique_identifier] = storage_entry
+        self.storage.schedule_save(self.item_config)
+
+        if storage_entry.enabled:
+            return await self.create_from_storage_entry(storage_entry)
 
     # pylint: disable=too-many-arguments,too-many-locals
     async def create_item(

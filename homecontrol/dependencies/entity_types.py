@@ -20,6 +20,7 @@ class Item:
     """A dummy Item"""
     type: Optional[str]
     identifier: str
+    unique_identifier: str
     name: str
     status: ItemStatus = ItemStatus.OFFLINE
     core: "Core"
@@ -32,12 +33,13 @@ class Item:
     @classmethod
     async def constructor(
             cls, identifier: str, name: str, cfg: dict, state_defaults: dict,
-            core: "Core") -> "Item":
+            core: "Core", unique_identifier: str = None) -> "Item":
         """Constructs an item"""
         item = cls()
 
         item.core = core
         item.identifier = identifier
+        item.unique_identifier = unique_identifier or identifier
         item.name = name
 
         item.cfg = item.config_schema(cfg or {})

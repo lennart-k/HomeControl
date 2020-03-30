@@ -180,6 +180,8 @@ class ModuleManager:
         Initialises a module object
         This method should only be invoked by ModuleManager
         """
+        if hasattr(mod, "_setup_module"):
+            mod._setup_module(self.core)
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
         else:

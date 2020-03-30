@@ -150,6 +150,11 @@ class ItemManager:
             if item.unique_identifier == unique_identifier:
                 return item
 
+    def get_item(self, identifier: str) -> Item:
+        """Returns an item by identifier or unique_identifier"""
+        return (self.items.get(identifier, None)
+                or self.get_by_unique_identifier(identifier))
+
     async def stop_item(self,
                         item: Item,
                         status: ItemStatus = ItemStatus.STOPPED) -> None:

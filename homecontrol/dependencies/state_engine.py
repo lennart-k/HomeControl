@@ -133,7 +133,7 @@ class State:
                  state_type: type = None,
                  schema: dict = None,
                  poll_interval: float = None) -> None:
-        self.value = default if not state_type else state_type(*default)
+        self.value = default if not state_type else state_type(default)
         self.name = name
         self.getter = getter
         self.setter = setter

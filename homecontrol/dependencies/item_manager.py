@@ -190,6 +190,7 @@ class ItemManager:
         """Creates an Item from a storage entry"""
         return await self.create_item(
             identifier=storage_entry.identifier,
+            unique_identifier=storage_entry.unique_identifier,
             name=storage_entry.name,
             item_type=storage_entry.type,
             cfg=storage_entry.cfg,
@@ -235,7 +236,8 @@ class ItemManager:
     # pylint: disable=too-many-arguments,too-many-locals
     async def create_item(
             self, identifier: str, item_type: str,
-            cfg: dict = None, state_defaults: dict = None, name: str = None
+            cfg: dict = None, state_defaults: dict = None, name: str = None,
+            unique_identifier: str = None
     ) -> Item:
         """Creates a HomeControl item"""
         if item_type not in self.item_constructors:
@@ -247,7 +249,8 @@ class ItemManager:
         item = await item_constructor(
             identifier, name, cfg,
             state_defaults=state_defaults,
-            core=self.core
+            core=self.core,
+            unique_identifier=unique_identifier or identifier
         )
 
         self.items[identifier] = item

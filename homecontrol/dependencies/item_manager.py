@@ -107,6 +107,10 @@ class ItemManager:
                 storage_entry.unique_identifier] = storage_entry
         self.storage.schedule_save(self.item_config)
 
+    def get_storage_entry(self, unique_identifier: str) -> StorageEntry:
+        """Returns the StorageEntry for a unique_identifier"""
+        return self.item_config.get(unique_identifier, None)
+
     def update_storage_entry(self, entry: StorageEntry) -> None:
         """Updates a config storage entry"""
         self.item_config[entry.unique_identifier] = entry

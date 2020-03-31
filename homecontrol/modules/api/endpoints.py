@@ -119,12 +119,22 @@ class GetItemView(APIView):
                 ERROR_ITEM_NOT_FOUND,
                 f"No item found with identifier {identifier}", 404)
 
+        storage_entry = self.core.item_manager.get_storage_entry(
+            item.unique_identifier)
+
         return self.json({
             "id": item.identifier,
+            "unique_identifier": item.unique_identifier,
             "type": item.type,
             "module": item.module.name,
-            "config": item.cfg,
-            "status": item.status.value
+            # "config": item.cfg,
+            "status": item.status.value,
+            "storage_entry": {
+                "cfg": storage_entry.cfg,
+                "hidden": storage_entry.hidden,
+                "enabled": storage_entry.enabled,
+                "provider": storage_entry.provider
+            } if storage_entry else None
         })
 
 

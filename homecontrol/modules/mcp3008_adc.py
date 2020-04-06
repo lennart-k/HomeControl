@@ -4,6 +4,7 @@ import logging
 import voluptuous as vol
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.const import ItemStatus
 
 
 SPEC = {
@@ -28,6 +29,12 @@ class MCP3008ADC(Item):
 
     async def init(self) -> bool:
         """Initialise the item"""
+        self.pigpio_adapter = self.core.item_manager.get_item(
+            self.cfg["pigpio_adapter"])
+
+        if not self.pigpio_adapter:
+            return ItemStatus.WAITING_FOR_DEPENDENCY
+
         self.handle = self.cfg["pigpio_adapter"].pigpio.spi_open(
             spi_channel=self.cfg["spi_channel"],
             baud=self.cfg["baud_rate"],
@@ -36,7 +43,7 @@ class MCP3008ADC(Item):
 
     def get_value(self, channel: int) -> int:
         """Get the value for one channel"""
-        adc = self.cfg["pigpio_adapter"].pigpio.spi_xfer(
+        adc = self.pigpio_adapter.pigpio.spi_xfer(
             self.handle, [1, (8 + channel) << 4, 0])[1]
         return ((adc[1] & 3) << 8) + adc[2]
 
@@ -44,7 +51,7 @@ class MCP3008ADC(Item):
         """Stop the item"""
         if self.handle is not None:
             try:
-                self.cfg["pigpio_adapter"].pigpio.spi_close(self.handle)
+                self.pigpio_adapter.pigpio.spi_close(self.handle)
             except BrokenPipeError:
                 LOGGER.warning("SPI transport not properly closed for %s",
                                self.identifier)
@@ -66,7 +73,9 @@ class AnalogInput(Item):
 
     async def init(self):
         """Initialise the item"""
-        self.adc = self.cfg["adc"]
+        self.adc = self.core.item_manager.get_item(self.cfg["adc"])
+        if not self.adc:
+            return ItemStatus.WAITING_FOR_DEPENDENCY
         self.raw_value = 0
 
     @value.getter()

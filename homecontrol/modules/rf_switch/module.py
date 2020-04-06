@@ -3,14 +3,15 @@
 from typing import (Dict)
 import voluptuous as vol
 
-from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.state_engine import StateDef
 from homecontrol.dependencies.action_engine import action
+from homecontrol.const import ItemStatus
 
 from .dependencies.intertechno_codes import from_code, to_code
 
 
-class Module:
+class Module(ModuleDef):
     """The module translating RF codes to Intertechno codes"""
     async def init(self):
         """Initialise the module"""
@@ -44,6 +45,12 @@ class IntertechnoSwitch(Item):
     async def init(self):
         """Initialise the switch"""
 
+        self.rf_adapter = self.core.item_manager.get_item(
+            self.cfg["433mhz_adapter"])
+
+        if not self.rf_adapter:
+            return ItemStatus.WAITING_FOR_DEPENDENCY
+
         @self.core.event_engine.register("intertechno_code_received")
         async def on_it_code(event, house, identifier, state):
             if (self.cfg["house"].lower(), self.cfg["id"]) \
@@ -61,6 +68,6 @@ class IntertechnoSwitch(Item):
     )))
     async def set_on(self, on: bool) -> Dict[str, bool]:
         """Setter for on state"""
-        await self.cfg["433mhz_tx_adapter"].send_code(
+        await self.rf_adapter.send_code(
             to_code(self.cfg["house"], self.cfg["id"], on))
         return {"on": on}

@@ -21,14 +21,6 @@ class JSONEncoder(json.JSONEncoder):
     # pylint: disable=no-self-use,too-many-return-statements,method-hidden
     def default(self, o):
         """Encode custom types"""
-        if isinstance(o, Item):
-            return {
-                "!type": "Item",
-                "item_type": o.type,
-                "id": o.identifier,
-                "name": o.name
-            }
-
         if isinstance(o, Enum):
             return o.value
 

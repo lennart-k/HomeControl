@@ -4,6 +4,7 @@
 import voluptuous as vol
 from homecontrol.dependencies.entity_types import Item
 from .dependencies.ir_receiver import NECIRReceiver as Receiver
+from homecontrol.const import ItemStatus
 
 
 class NECIRReceiver(Item):
@@ -16,8 +17,14 @@ class NECIRReceiver(Item):
 
     async def init(self):
         """Initialise the receiver"""
+        self.pigpio_adapter = self.core.item_manager.get(
+            self.cfg["pigpio_adapter"])
+
+        if not self.pigpio_adapter:
+            return ItemStatus.WAITING_FOR_DEPENDENCY
+
         self.ir_receiver = Receiver(
-            self.cfg["pigpio_adapter"].pigpio,
+            self.pigpio_adapter.pigpio,
             self.cfg["pin"],
             self.on_code,
             10)

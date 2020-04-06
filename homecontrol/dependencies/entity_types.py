@@ -45,10 +45,6 @@ class Item:
         item.cfg = item.config_schema(cfg or {})
         item.status = ItemStatus.OFFLINE
 
-        for key, value in list(item.cfg.items()):
-            if isinstance(value, str) and value.startswith("i!"):
-                item.cfg[key] = core.item_manager.items.get(value[2:], None)
-
         item.states = StateEngine(
             item, core, state_defaults=state_defaults or {})
         item.actions = ActionEngine(item, core)

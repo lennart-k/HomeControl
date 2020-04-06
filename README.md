@@ -101,14 +101,8 @@ You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
 ## Compatible Devices/Protocols
 
 - Chromecast
-- 433MHz switches
-- IR devices
-- MQTT
 - Raspberry Pi (GPIO)
   - MCP3008 ADC
   - 433MHz adapter
-  - RGB Lights
-- RF devices
 - Yamaha AV receivers
 - Pushbullet (Send message)
-- Speedtest

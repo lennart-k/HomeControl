@@ -2,4 +2,5 @@ name: Auth module
 description: Provides OAuth2 authentication for HomeControl
 
 pip-requirements:
-  - jwt==0.6.1
+  - PyJWT==1.7.1
+

@@ -181,7 +181,7 @@ class ModuleManager:
         This method should only be invoked by ModuleManager
         """
         if hasattr(mod, "_setup_module"):
-            mod._setup_module(self.core)
+            mod._setup_module(self.core)  # pylint: disable=protected-access
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
         else:

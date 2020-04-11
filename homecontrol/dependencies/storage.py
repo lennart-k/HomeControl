@@ -5,15 +5,10 @@ from shutil import copyfile
 from datetime import datetime
 import logging
 from json import load, JSONDecodeError
-from homecontrol.dependencies.json import dump
-from typing import (
-    Optional,
-    Callable,
-    Any,
-    TYPE_CHECKING
-)
+from typing import Optional, Callable, Any, TYPE_CHECKING
 import voluptuous as vol
 
+from homecontrol.dependencies.json import dump
 if TYPE_CHECKING:
     from homecontrol.core import Core
 

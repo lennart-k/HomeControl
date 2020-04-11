@@ -30,6 +30,7 @@ CONFIG_SCHEMA = vol.Schema([
 ])
 
 
+# pylint: disable=too-few-public-methods
 @attrs(slots=True)
 class StorageEntry:
     """The storage representation of an item"""
@@ -116,13 +117,13 @@ class ItemManager:
         self.item_config[entry.unique_identifier] = entry
         self.storage.schedule_save(self.item_config)
 
-    def _load_items(self, data: dict) -> dict:
+    def _load_items(self, data: dict) -> dict:  # pylint: disable=no-self-use
         entries = {}
         for entry in data:
             entries[entry["unique_identifier"]] = StorageEntry(**entry)
         return entries
 
-    def _dump_items(self, data: dict) -> dict:
+    def _dump_items(self, data: dict) -> dict:  # pylint: disable=no-self-use
         return [asdict(entry) for entry in data.values()]
 
     async def add_from_module(self, mod_obj: Module) -> None:
@@ -153,6 +154,7 @@ class ItemManager:
         for item in self.items.values():
             if item.unique_identifier == unique_identifier:
                 return item
+        return None
 
     def get_item(self, identifier: str) -> Item:
         """Returns an item by identifier or unique_identifier"""

@@ -1,12 +1,10 @@
 """EventEngine for HomeControl"""
 
-from contextlib import suppress
 from typing import (
     List, Callable, Any, Union
 )
 import asyncio
 import logging
-from functools import partial
 from collections import defaultdict
 from datetime import datetime
 

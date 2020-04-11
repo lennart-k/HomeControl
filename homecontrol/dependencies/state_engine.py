@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class StateDef:
+    """A state definition for automatic setup"""
     def __init__(
             self,
             poll_interval: Optional[float] = None,
@@ -102,6 +103,7 @@ class StateEngine:
         """Called from an item to update its state"""
         if state in self.states:
             return self.states[state].update(value)
+        return None
 
     def bulk_update(self, **kwargs):
         """Called from an item to update multiple states"""

@@ -1,14 +1,13 @@
 """JSON Encoder and Decoder"""
 
 # pylint: disable=invalid-name,too-few-public-methods,import-self
-from typing import TYPE_CHECKING
-from homecontrol.dependencies.entity_types import Item
-if TYPE_CHECKING:
-    from homecontrol.core import Core
 import json
 from functools import partial
 from enum import Enum
 from datetime import datetime
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from homecontrol.core import Core
 
 
 class JSONEncoder(json.JSONEncoder):

@@ -85,4 +85,5 @@ class Module:
         """Default stop method"""
         return
 
+
 ModuleDef = Module

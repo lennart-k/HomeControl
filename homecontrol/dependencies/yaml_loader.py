@@ -14,10 +14,7 @@ from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
 
 from homecontrol.dependencies.resolve_path import resolve_path
-from homecontrol.dependencies.entity_types import (
-    Item,
-    Module
-)
+from homecontrol.dependencies.entity_types import Item, Module
 
 LOGGER = logging.getLogger(__name__)
 

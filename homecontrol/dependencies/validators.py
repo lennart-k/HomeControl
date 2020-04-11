@@ -1,6 +1,6 @@
 """Config validators"""
-import voluptuous as vol
 from typing import TYPE_CHECKING
+import voluptuous as vol
 if TYPE_CHECKING:
     from homecontrol.core import Core
     from homecontrol.dependencies.entity_types import Item

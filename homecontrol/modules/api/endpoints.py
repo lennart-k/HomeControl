@@ -93,13 +93,13 @@ class ListItemsView(APIView):
         """"GET /items"""
         return self.json([
             {
-                "id": item.identifier,
+                "identifier": item.identifier,
+                "unique_identifier": item.unique_identifier,
                 "name": item.name,
                 "type": item.type,
                 "module": item.module.name,
                 "status": item.status.value,
-                "actions": list(item.actions.actions.keys()),
-                "states": await item.states.dump()
+                "actions": list(item.actions.actions.keys())
             } for item in self.core.item_manager.items.values()
         ])
 

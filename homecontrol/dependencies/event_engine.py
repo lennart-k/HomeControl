@@ -18,7 +18,7 @@ class Event:
     def __init__(self,
                  event_type: str,
                  data: dict = None,
-                 timestamp: int = None,
+                 timestamp: datetime = None,
                  kwargs: dict = None) -> None:
 
         self.event_type = event_type

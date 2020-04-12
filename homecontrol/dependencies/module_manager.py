@@ -213,8 +213,8 @@ class ModuleManager:
 
     async def stop(self) -> None:
         """Unloads all modules to prepare for a shutdown"""
-        for module in list(self.loaded_modules.values()):
-            await module.stop()
+        return await asyncio.gather(*(
+            module.stop() for module in self.loaded_modules.values()))
 
     # pylint: disable=no-self-use
     def resource_path(self, module: Module, path: str = "") -> str:

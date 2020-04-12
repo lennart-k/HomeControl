@@ -1,4 +1,5 @@
 """ItemManager for HomeControl"""
+import asyncio
 from typing import Optional
 from inspect import isclass
 import logging
@@ -165,10 +166,18 @@ class ItemManager:
                         item: Item,
                         status: ItemStatus = ItemStatus.STOPPED) -> None:
         """Stops an item"""
+        if item.status is not ItemStatus.ONLINE:
+            return
         await item.stop()
         LOGGER.info("Item %s has been stopped with status %s",
                     item.identifier, status)
         item.status = status
+
+    async def stop(self) -> None:
+        """Stops every item"""
+        await asyncio.gather(*(
+            self.stop_item(item)
+            for item in self.items.values()))
 
     async def remove_item(self, identifier: str) -> None:
         """

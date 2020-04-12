@@ -92,6 +92,7 @@ class Core:
         """Stops HomeControl"""
         LOGGER.warning("Shutting Down")
         await self.tick_engine.stop()
+        await self.item_manager.stop()
         await self.module_manager.stop()
 
         pending = [task

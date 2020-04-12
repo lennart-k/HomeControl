@@ -1,6 +1,0 @@
-name: History
-description: Logs states and events in a database
-
-pip-requirements:
-  - SQLAlchemy==1.3.11
-  - PyMySQL==0.9.3

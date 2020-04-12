@@ -4,7 +4,9 @@ import sys
 import importlib
 import importlib.util
 import os
+import asyncio
 import logging
+from typing import TYPE_CHECKING
 
 import pkg_resources
 import voluptuous as vol
@@ -17,6 +19,9 @@ from homecontrol.dependencies.ensure_pip_requirements import (
     ensure_pip_requirements
 )
 from homecontrol.exceptions import PipInstallError
+if TYPE_CHECKING:
+    from homecontrol.core import Core
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +49,7 @@ class ModuleManager:
 
     cfg: dict
 
-    def __init__(self, core):
+    def __init__(self, core: "Core"):
         self.core = core
         self.loaded_modules = {}
 
@@ -55,17 +60,18 @@ class ModuleManager:
             schema=CONFIG_SCHEMA,
             allow_reload=False)
 
-        for folder in self.cfg["folders"]:
-            await self.load_folder(folder)
-
         if self.cfg["load-internal-modules"]:
             internal_module_folder = pkg_resources.resource_filename(
                 homecontrol.__name__, "modules")
             await self.load_folder(internal_module_folder)
 
+        for folder in self.cfg["folders"]:
+            await self.load_folder(folder)
+
     async def load_folder(self, path: str) -> [object]:
         """Load every module in a folder"""
         out = []
+        load_tasks = []
         blacklist = self.cfg["blacklist"]
         whitelist = self.cfg["whitelist"]
 
@@ -82,14 +88,14 @@ class ModuleManager:
             if ((mod_name not in blacklist)
                     and (not whitelist or mod_name in whitelist)):
                 if os.path.isdir(mod_path):
-                    out.append(
-                        await self.load_folder_module(mod_path, mod_name))
+                    load_tasks.append(self.core.loop.create_task(
+                        self.load_folder_module(mod_path, mod_name)))
 
                 elif os.path.isfile(mod_path) and node.endswith(".py"):
-                    out.append(
-                        await self.load_file_module(mod_path, mod_name))
+                    load_tasks.append(self.core.loop.create_task(
+                        self.load_file_module(mod_path, mod_name)))
 
-        return out
+        return await asyncio.gather(*load_tasks)
 
     async def load_file_module(self,
                                mod_path: str,

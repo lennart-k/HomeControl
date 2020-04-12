@@ -27,7 +27,7 @@ class Event:
         self.kwargs = kwargs or {}
 
     def __repr__(self) -> str:
-        return f"<Event {self.event_type} kwargs={self.kwargs}>  {self.data}"
+        return f"<Event {self.event_type} kwargs={self.kwargs} {self.data}>"
 
 
 class EventEngine:

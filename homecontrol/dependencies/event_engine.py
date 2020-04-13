@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 # pylint: disable=too-few-public-methods
 class Event:
     """Representation for an Event"""
+    __slots__ = ("event_type", "data", "timestamp", "kwargs")
 
     def __init__(self,
                  event_type: str,

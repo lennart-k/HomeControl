@@ -18,10 +18,12 @@ class StateDef:
             self,
             poll_interval: Optional[float] = None,
             default: Any = None,
-            default_factory: Callable = None) -> None:
+            default_factory: Callable = None,
+            log_state: bool = True) -> None:
 
         self._poll_interval = poll_interval
         self._default = default_factory() if default_factory else default
+        self.log_state = log_state
         self._getter = None
         self._setter = None
         self._schema = None
@@ -54,7 +56,8 @@ class StateDef:
             MethodType(self._setter, item) if self._setter else None,
             name=name,
             poll_interval=self._poll_interval,
-            schema=self._schema
+            schema=self._schema,
+            log_state=self.log_state
         )
         state_engine.register_state(state)
         return state
@@ -134,7 +137,8 @@ class State:
                  name: str = None,
                  state_type: type = None,
                  schema: dict = None,
-                 poll_interval: float = None) -> None:
+                 poll_interval: float = None,
+                 log_state: bool = True) -> None:
         self.value = default if not state_type else state_type(default)
         self.name = name
         self.getter = getter
@@ -142,6 +146,7 @@ class State:
         self.state_engine = state_engine
         self.schema = vol.Schema(schema) if schema else None
         self.poll_interval = poll_interval
+        self.log_state = log_state
         if self.poll_interval:
             self.state_engine.core.tick_engine.tick(
                 self.poll_interval)(self.poll_value)

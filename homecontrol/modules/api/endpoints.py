@@ -1,6 +1,7 @@
 """"API endpoints"""
 
 from collections import ChainMap
+import json
 import voluptuous as vol
 from aiohttp import web
 from homecontrol.const import (
@@ -13,7 +14,6 @@ from homecontrol.const import (
 )
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.json_response import JSONResponse
-import json
 from homecontrol.exceptions import ItemNotOnlineError
 
 from .view import APIView

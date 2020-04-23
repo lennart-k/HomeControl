@@ -21,7 +21,7 @@ class Chromecast(Item):
     playing = StateDef(default=False)
     metadata = StateDef(default_factory=lambda: {})
     duration = StateDef(default=0)
-    playtime = StateDef(default=0, poll_interval=1)
+    playtime = StateDef(default=0, poll_interval=1, log_state=False)
     content_type = StateDef()
     muted = StateDef(default=False)
     volume = StateDef(default=0)

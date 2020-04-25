@@ -55,10 +55,14 @@ class TrustedClientsAuthProvider(AuthProvider):
         super().__init__(auth_manager, cfg)
         self.trusted_networks = {}
         for trusted_network in self.cfg["trusted-networks"]:
-            network = ipaddress.ip_network(trusted_network["address"])
-            self.trusted_networks[network] = {
-                "user": trusted_network["user"]
-            }
+            addresses = trusted_network.get("addresses", [])
+            if "address" in trusted_network:
+                addresses.append(trusted_network["address"])
+            for address in addresses:
+                network = ipaddress.ip_network(address)
+                self.trusted_networks[network] = {
+                    "user": trusted_network["user"]
+                }
 
     async def validate_request(self, request: web.Request) -> Optional[User]:
         remote = request.remote

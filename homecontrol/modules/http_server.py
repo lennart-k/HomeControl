@@ -15,7 +15,7 @@ SPEC = {
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("host", default=None): vol.Any(str, None),
-    vol.Required("port", default=8080): vol.Coerce(int),
+    vol.Required("port", default=8082): vol.Coerce(int),
     vol.Required("ssl", default=False): vol.Any(
         bool,
         {

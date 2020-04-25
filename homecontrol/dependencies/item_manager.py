@@ -91,7 +91,7 @@ class ItemManager:
     async def init(self) -> None:
         """Initialise the items from configuration"""
         self.yaml_cfg = await self.core.cfg.register_domain(
-            "items", schema=CONFIG_SCHEMA)
+            "items", schema=CONFIG_SCHEMA, default=[])
         self.load_yaml_config()
 
         for storage_entry in self.item_config.values():

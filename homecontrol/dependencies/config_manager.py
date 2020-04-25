@@ -133,6 +133,7 @@ class ConfigManager:
         Returns:
             A validated and approved version of the configuration
         """
+        default = {} if default is None else default
         if domain in self.registered_domains:
             raise ConfigDomainAlreadyRegistered(
                 f"The configuration domain {domain} is already registered")
@@ -145,4 +146,4 @@ class ConfigManager:
             self.domain_schemas[domain] = schema
 
         return await self.approve_domain_config(
-            domain, self.cfg.get(domain, default or {}), initial=True)
+            domain, self.cfg.get(domain, default), initial=True)

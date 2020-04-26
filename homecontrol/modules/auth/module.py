@@ -1,5 +1,5 @@
 """Provides OAuth2 for HomeControl"""
-from typing import Callable, cast
+from typing import Callable
 import logging
 from json import JSONDecodeError
 from datetime import timedelta

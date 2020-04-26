@@ -68,7 +68,6 @@ class ModuleManager:
 
     async def load_folder(self, path: str) -> [object]:
         """Load every module in a folder"""
-        out = []
         load_tasks = []
         blacklist = self.cfg["blacklist"]
         whitelist = self.cfg["whitelist"]

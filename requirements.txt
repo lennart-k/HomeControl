@@ -9,3 +9,4 @@ attrs==19.3.0
 PyJWT==1.7.1
 bcrypt==3.1.7
 pyotp==2.3.0
+colorlog==4.1.0

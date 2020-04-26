@@ -294,24 +294,23 @@ def setup_logging(verbose: bool = False,
     datefmt = '%Y-%m-%d %H:%M:%S'
 
     if color:
-        with suppress(ImportError):
-            from colorlog import ColoredFormatter
+        from colorlog import ColoredFormatter
 
-            logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO)
 
-            colorfmt = "%(log_color)s{}%(reset)s".format(fmt)
-            logging.getLogger().handlers[0].setFormatter(ColoredFormatter(
-                colorfmt,
-                datefmt=console_datefmt,
-                reset=True,
-                log_colors={
-                    'DEBUG': 'cyan',
-                    'INFO': 'white',
-                    'WARNING': 'yellow',
-                    'ERROR': 'red',
-                    'CRITICAL': 'red',
-                }
-            ))
+        colorfmt = "%(log_color)s{}%(reset)s".format(fmt)
+        logging.getLogger().handlers[0].setFormatter(ColoredFormatter(
+            colorfmt,
+            datefmt=console_datefmt,
+            reset=True,
+            log_colors={
+                'DEBUG': 'cyan',
+                'INFO': 'white',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red',
+            }
+        ))
 
     if logfile:
         file_handler = logging.FileHandler(logfile, mode="w")

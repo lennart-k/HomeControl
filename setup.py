@@ -3,11 +3,17 @@
 from setuptools import setup, find_namespace_packages
 
 from homecontrol import const
-from homecontrol.scripts.module_requirements import get_requirements
+
+MODULE_REQUIREMENTS = []
+# Try to extract pip requirements from modules
+# Only works if PyYAML is already installed
+try:
+    from homecontrol.scripts.module_requirements import get_requirements
+    MODULE_REQUIREMENTS = get_requirements()
+except ModuleNotFoundError:
+    pass
 
 REQUIREMENTS = open("requirements.txt").read().splitlines()
-MODULE_REQUIREMENTS = get_requirements()
-
 MINIMUM_PYTHON_VERSION = ">="+".".join(map(str, const.MINIMUM_PYTHON_VERSION))
 
 setup(

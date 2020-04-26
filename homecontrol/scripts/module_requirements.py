@@ -3,8 +3,8 @@ import os
 import pkg_resources
 
 import homecontrol
-from homecontrol.dependencies.yaml_loader import YAMLLoader
-
+from yaml.loader import SafeLoader
+import yaml
 
 MODULE_FOLDER = pkg_resources.resource_filename(
     homecontrol.__name__, "modules")
@@ -22,7 +22,7 @@ def get_requirements() -> list:
         spec_path = os.path.join(mod_path, "module.yaml")
 
         if os.path.isfile(spec_path):
-            spec = YAMLLoader.load(open(spec_path))
+            spec = yaml.load(open(spec_path), Loader=SafeLoader)
             output.extend(spec.get("pip-requirements", []))
 
     return output

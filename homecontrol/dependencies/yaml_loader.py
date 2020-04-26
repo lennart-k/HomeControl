@@ -174,8 +174,6 @@ class Constructor(SafeConstructor):
         /   for absolute paths
         anything else for paths relative to your config folder
         """
-        print(self.name, node.value)
-
         return resolve_path(
             node.value, file_path=self.name, config_dir=self.cfg_folder)
 

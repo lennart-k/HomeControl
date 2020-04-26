@@ -1,4 +1,0 @@
-name: IR Adapter
-description: Transceive IR codes
-pip-requirements:
-    - pigpio==1.42

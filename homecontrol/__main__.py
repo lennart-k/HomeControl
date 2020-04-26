@@ -362,9 +362,9 @@ def main() -> None:
 
     if not args["skip_pip"] and "pip-requirements" in cfg:
         from homecontrol.dependencies.ensure_pip_requirements import (
-            ensure_pip_requirements
+            ensure_packages
         )
-        ensure_pip_requirements(cfg["pip-requirements"])
+        ensure_packages(cfg["pip-requirements"])
 
     if args.get("daemon", False):
         LOGGER.info("Running as a daemon")

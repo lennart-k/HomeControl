@@ -15,9 +15,7 @@ import homecontrol
 from homecontrol.const import EVENT_MODULE_LOADED
 from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.dependencies.entity_types import Module
-from homecontrol.dependencies.ensure_pip_requirements import (
-    ensure_pip_requirements
-)
+from homecontrol.dependencies.ensure_pip_requirements import ensure_packages
 from homecontrol.exceptions import PipInstallError
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -156,7 +154,7 @@ class ModuleManager:
                 if os.path.isfile(spec_path) else {})
 
         try:
-            ensure_pip_requirements(spec.get("pip-requirements", []))
+            ensure_packages(spec.get("pip-requirements", []))
         except PipInstallError as e:
             LOGGER.warning(
                 "Module could not be loaded: %s at %s", name, path)

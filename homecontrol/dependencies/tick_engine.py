@@ -37,8 +37,7 @@ class TickEngine:
         """
         Removes a tick handler for an interval
         """
-        with suppress(KeyError):
-            self.intervals[interval].remove(coro)
+        self.intervals[interval].discard(coro)
 
     async def _do_tick(self, interval):
         while interval in self.intervals:

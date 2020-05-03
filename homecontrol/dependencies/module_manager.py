@@ -76,7 +76,7 @@ class ModuleManager:
         sys.modules[package_name] = ModuleFolder(package_name)
 
         for node in os.listdir(path):
-            if node == "__pycache__":
+            if node.startswith("__"):
                 continue
             mod_path = os.path.join(path, node)
             mod_name = node if os.path.isdir(

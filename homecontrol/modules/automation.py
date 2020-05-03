@@ -168,6 +168,7 @@ class Module:
         self.cfg = await self.core.cfg.register_domain(
             "automation",
             self,
+            default=[],
             schema=CONFIG_SCHEMA,
             allow_reload=True
         ) or []

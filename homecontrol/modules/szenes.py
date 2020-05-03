@@ -1,11 +1,29 @@
 """Szenes for HomeControl"""
 
 import logging
+import voluptuous as vol
 
 SPEC = {
     "name": "Szenes",
     "description": "Provides szene functionality"
 }
+
+CONFIG_SCHEMA = vol.Schema([
+    vol.Schema({
+        vol.Required("alias"): str,
+        vol.Optional("items", default=[]): vol.Schema({
+            vol.Optional("action", default=[]): [
+                vol.Schema({
+                    vol.Required("name"): str,
+                    vol.Optional("data"): object
+                })
+            ],
+            vol.Optional("states", default=dict): vol.Schema({
+                str: str
+            })
+        })
+    })
+])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +34,8 @@ class Module:
         """Initialise the szenes"""
         self.cfg = await self.core.cfg.register_domain(
             "szenes",
+            schema=CONFIG_SCHEMA,
+            default=[],
             handler=self,
             allow_reload=True)
         self.szenes = {szene["alias"]: Szene(self, szene)

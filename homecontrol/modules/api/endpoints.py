@@ -154,7 +154,7 @@ class ItemStatesView(APIView):
                 f"No item found with identifier {identifier}", 404)
 
         return self.json({
-            "item": item,
+            "item": item.identifier,
             "type": item.type,
             "states": await item.states.dump(),
         })
@@ -245,7 +245,7 @@ class ItemStateView(APIView):
                 f"Couldn't get state {state_name} from item {identifier}")
 
         return self.json({
-            "item": item,
+            "item": item.identifier,
             "type": item.type,
             "states": {
                 state_name: await item.states.get(state_name)
@@ -305,7 +305,7 @@ class ExecuteActionView(APIView):
 
         try:
             return self.json({
-                "item": item,
+                "item": item.identifier,
                 "action": action_name,
                 "result": await item.actions.execute(action_name, **kwargs)
             })

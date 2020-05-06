@@ -32,28 +32,20 @@ class JSONEncoder(json.JSONEncoder):
         return o
 
 
-def dumps(obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,
-          allow_nan=True, indent=None, separators=None, sort_keys=False,
-          core: "Core" = None, **kw):
+def dumps(obj, *, indent=None, sort_keys=False, core: "Core" = None, **kw):
     """
     Dumps an object into a JSON string with support
     for HomeControl's data types
     """
-    return json.dumps(obj, skipkeys=skipkeys, ensure_ascii=ensure_ascii,
-                      check_circular=check_circular,
-                      cls=partial(JSONEncoder, core=core),
-                      allow_nan=allow_nan, indent=indent,
-                      separators=separators, sort_keys=sort_keys, **kw)
+    return json.dumps(
+        obj, cls=partial(JSONEncoder, core=core),
+        indent=indent, sort_keys=sort_keys, **kw)
 
 
-def dump(obj, fp, *, skipkeys=False, ensure_ascii=True, check_circular=True,
-         allow_nan=True, indent=None, separators=None, sort_keys=False,
-         core: "Core" = None, **kw):
+def dump(obj, fp, *, indent=None, sort_keys=False, core: "Core" = None, **kw):
     """
     Dumps an object into a Writer with support for HomeControl's data types
     """
-    return json.dump(obj, fp, skipkeys=skipkeys, ensure_ascii=ensure_ascii,
-                     check_circular=check_circular,
-                     cls=partial(JSONEncoder, core=core),
-                     allow_nan=allow_nan, indent=indent,
-                     separators=separators, sort_keys=sort_keys, **kw)
+    return json.dump(
+        obj, fp, cls=partial(JSONEncoder, core=core),
+        indent=indent, sort_keys=sort_keys, **kw)

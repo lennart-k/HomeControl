@@ -3,7 +3,6 @@
 import itertools
 import os
 import logging
-import voluptuous as vol
 
 import yaml
 from yaml.reader import Reader
@@ -12,9 +11,9 @@ from yaml.parser import Parser
 from yaml.composer import Composer
 from yaml.constructor import SafeConstructor
 from yaml.resolver import Resolver
+import voluptuous as vol
 
 from homecontrol.dependencies.resolve_path import resolve_path
-from homecontrol.dependencies.entity_types import Item, Module
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ class Constructor(SafeConstructor):
         anything else for paths relative to your config folder
         """
         if not isinstance(node.value, str):
-            raise TypeError(f"folder must be of type str")
+            raise TypeError("folder must be of type str")
         path = resolve_path(
             node.value, file_path=self.name, config_dir=self.cfg_folder)
         if not os.path.isfile(path):
@@ -86,7 +85,7 @@ class Constructor(SafeConstructor):
         to their filenames
         """
         if not isinstance(node.value, str):
-            raise TypeError(f"folder must be of type str")
+            raise TypeError("folder must be of type str")
         folder = resolve_path(
             node.value, file_path=self.name, config_dir=self.cfg_folder)
         if not os.path.isdir(folder):
@@ -114,7 +113,7 @@ class Constructor(SafeConstructor):
         if isinstance(paths, str):
             paths = paths.split(" ")
         elif not isinstance(paths, list):
-            raise TypeError(f"paths must be either of type str or list")
+            raise TypeError("paths must be either of type str or list")
 
         paths = [
             resolve_path(path, file_path=self.name, config_dir=self.cfg_folder)

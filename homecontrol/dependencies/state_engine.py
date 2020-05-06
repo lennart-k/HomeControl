@@ -128,6 +128,7 @@ class State:
     value: Any
     mutable: bool
     poll_task: asyncio.Task = None
+    schema: vol.Schema
 
     # pylint: disable=too-many-arguments
     def __init__(self,

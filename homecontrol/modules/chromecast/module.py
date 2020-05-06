@@ -1,8 +1,8 @@
 "Chromecast module"
 
 import time
-import voluptuous as vol
 import pychromecast
+import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.action_engine import action

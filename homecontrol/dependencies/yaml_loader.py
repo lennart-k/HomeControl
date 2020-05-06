@@ -18,23 +18,6 @@ from homecontrol.dependencies.entity_types import Item, Module
 
 LOGGER = logging.getLogger(__name__)
 
-TYPES = {
-    "bool": bool,
-    "str": str,
-    "int": int,
-    "float": float,
-    "dict": dict,
-    "set": set,
-    "tuple": tuple,
-    "list": list,
-    "complex": complex,
-    "bytes": bytes,
-    "object": object,
-    # Custom types
-    "Item": Item,
-    "Module": Module,
-}
-
 FORMAT_STRING_SCHEMA = vol.Schema({
     "template": str
 }, extra=vol.ALLOW_EXTRA)
@@ -47,8 +30,6 @@ class Constructor(SafeConstructor):
     name: str
 
     def __init__(self):
-        self.add_multi_constructor("!vol/", self.__class__.vol_constructor)
-        self.add_multi_constructor("!type/", self.__class__.type_constructor)
         self.add_constructor(
             "!format",
             self.__class__.format_string_constructor)
@@ -201,18 +182,6 @@ class Constructor(SafeConstructor):
             return os.getenv(args[0], default=" ".join(args[1:]))
 
         return os.environ[args[0]]
-
-    def vol_constructor(self,
-                        suffix: str,
-                        node: yaml.Node = None) -> vol.Schema:
-        """Construct a voluptuous object"""
-        return self._obj(getattr(vol, suffix), node)
-
-    # pylint: disable=inconsistent-return-statements
-    def type_constructor(self, suffix: str, node: yaml.Node = None) -> type:
-        """Construct a custom object"""
-        if suffix in TYPES:
-            return self._obj(TYPES.get(suffix), node)
 
     def format_string_constructor(self,
                                   node: yaml.Node = None) -> str:

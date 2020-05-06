@@ -205,7 +205,7 @@ def run_homecontrol(config: dict, config_file: str, start_args: dict):
     elif start_args["pid_file"]:
         with suppress(FileNotFoundError):
             os.remove(start_args["pid_file"])
-        exit()
+        sys.exit()
 
 
 def start_command() -> List[str]:

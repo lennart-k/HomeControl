@@ -66,7 +66,6 @@ class Item:
 class Module:
     """A dummy Module"""
     name: str
-    folder_location: str = None
     spec: dict
     core: "Core"
     resource_folder: str

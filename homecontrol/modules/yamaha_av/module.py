@@ -1,6 +1,6 @@
 """Module for Yamaha AV receivers"""
-
 import logging
+import asyncio
 
 import voluptuous as vol
 import rxv
@@ -20,6 +20,7 @@ CTRL_URL = "http://{host}/YamahaRemoteControl/ctrl"
 
 class YamahaAVReceiver(Item):
     """The YamahaAVReceiver item"""
+    update_task = asyncio.Task
     config_schema = vol.Schema({
         vol.Required("host"): str
     }, extra=vol.ALLOW_EXTRA)
@@ -42,7 +43,7 @@ class YamahaAVReceiver(Item):
         except (ConnectionError, ConnectionRefusedError):
             return False
 
-        self.core.tick_engine.tick(2)(self.update)
+        self.update_task = self.core.loop.create_task(self.interval_update())
 
     @on.setter(vol.Schema(bool))
     async def set_on(self, value: bool) -> dict:
@@ -140,6 +141,12 @@ class YamahaAVReceiver(Item):
         """Getter for playback status"""
         return self.av_receiver.is_playback_supported()
 
+    async def interval_update(self):
+        """Triggers the update every 2 seconds"""
+        while True:
+            await self.update()
+            await asyncio.sleep(2)
+
     async def update(self):
         """Updates play_status and inputs"""
         try:
@@ -152,3 +159,7 @@ class YamahaAVReceiver(Item):
             for name, raw_name
             in self.av_receiver.inputs().get("available_inputs").items()}
         self.states.update("available_inputs", available_inputs)
+
+    async def stop(self) -> None:
+        """Stop the item"""
+        self.update_task.cancel()

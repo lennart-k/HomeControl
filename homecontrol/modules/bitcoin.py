@@ -1,5 +1,5 @@
 """Bitcoin stats"""
-
+import asyncio
 import voluptuous as vol
 import requests
 
@@ -26,6 +26,7 @@ DATA_URL = "https://api.blockchain.info/stats"
 class BitcoinStats(Item):
     """Item holding Bitcoin stats"""
 
+    update_task: asyncio.Task
     last_update = StateDef()
     market_price_usd = StateDef()
     hash_rate = StateDef()
@@ -33,14 +34,22 @@ class BitcoinStats(Item):
     block_interval = StateDef()
 
     config_schema = vol.Schema({
-        vol.Required("update_interval", default=3600):
+        vol.Required("update_interval", default=600):
         vol.Coerce(type=int)
     }, extra=vol.ALLOW_EXTRA)
 
     async def init(self):
         """Initialise the item"""
-        self.core.tick_engine.tick(
-            self.cfg["update_interval"])(self.update_stats)
+        self.update_task = self.core.loop.create_task(self.update_interval())
+
+    async def update_interval(self) -> None:
+        """Updates the states"""
+        while True:
+            await asyncio.sleep(self.cfg["update_interval"])
+            await self.update_stats()
+
+    async def stop(self) -> None:
+        self.update_task.cancel()
 
     @action("update")
     async def update_stats(self):

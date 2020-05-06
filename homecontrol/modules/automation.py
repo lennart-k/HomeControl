@@ -85,16 +85,17 @@ class TimerTriggerProvider:
         self.core = engine.core
 
         self.data = rule.data["trigger"]
-
-        self.core.tick_engine.tick(self.data["interval"])(self.trigger)
+        self.task = self.core.loop.create_task(self.trigger())
 
     async def trigger(self) -> None:
         """Trigger"""
         await self.rule.on_trigger({})
+        await asyncio.sleep(self.data["interval"])
+        self.task = self.core.loop.create_task(self.trigger())
 
     async def stop(self) -> None:
         """Stop the provider"""
-        self.core.tick_engine.remove_tick(self.data["interval"], self.trigger)
+        self.task.cancel()
 
 
 class StateActionProvider:

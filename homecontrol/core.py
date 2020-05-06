@@ -13,7 +13,6 @@ from typing import (
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
 from homecontrol.dependencies.item_manager import ItemManager
-from homecontrol.dependencies.tick_engine import TickEngine
 from homecontrol.dependencies.config_manager import ConfigManager
 
 from homecontrol.const import (
@@ -49,7 +48,6 @@ class Core:
         self.cfg_path = cfg_file
         self.cfg_dir = os.path.dirname(cfg_file)
         self.block_future = asyncio.Future()
-        self.tick_engine = TickEngine(core=self)
         self.event_engine = EventEngine(core=self)
         self.module_manager = ModuleManager(core=self)
         self.item_manager = ItemManager(core=self)
@@ -91,7 +89,6 @@ class Core:
     async def stop(self) -> None:
         """Stops HomeControl"""
         LOGGER.warning("Shutting Down")
-        await self.tick_engine.stop()
         await self.item_manager.stop()
         await self.module_manager.stop()
 

@@ -1,5 +1,5 @@
 """StateEngine module"""
-
+import asyncio
 import logging
 from typing import Any, Callable, Optional
 from types import MethodType
@@ -127,6 +127,7 @@ class State:
     setter: Callable
     value: Any
     mutable: bool
+    poll_task: asyncio.Task = None
 
     # pylint: disable=too-many-arguments
     def __init__(self,
@@ -144,18 +145,19 @@ class State:
         self.getter = getter
         self.setter = setter
         self.state_engine = state_engine
+        self.loop = self.state_engine.core.loop
         self.schema = vol.Schema(schema) if schema else None
         self.poll_interval = poll_interval
         self.log_state = log_state
         if self.poll_interval:
-            self.state_engine.core.tick_engine.tick(
-                self.poll_interval)(self.poll_value)
+            self.poll_task = self.loop.create_task(self.poll_value())
 
     async def poll_value(self) -> None:
         """Polls the current state and updates it"""
-        if self.state_engine.item.status != ItemStatus.ONLINE:
-            return None
-        self.update(await self.getter())
+        while True:
+            if self.state_engine.item.status == ItemStatus.ONLINE:
+                self.update(await self.getter())
+            await asyncio.sleep(self.poll_interval)
 
     async def get(self):
         """Gets a state"""

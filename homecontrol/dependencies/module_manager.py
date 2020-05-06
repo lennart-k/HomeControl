@@ -115,7 +115,6 @@ class ModuleManager:
         mod = importlib.util.module_from_spec(mod_spec)
         mod.resource_folder = None
         mod.event = self.core.event_engine.register
-        mod.tick = self.core.tick_engine.tick
         mod_spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})

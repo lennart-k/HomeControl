@@ -25,7 +25,7 @@ class YamahaAVReceiver(Item):
         vol.Required("host"): str
     }, extra=vol.ALLOW_EXTRA)
 
-    input = StateDef()
+    input_source = StateDef()
     volume = StateDef()
     muted = StateDef()
     available_inputs = StateDef(default=[])
@@ -56,13 +56,13 @@ class YamahaAVReceiver(Item):
         """Getter for on"""
         return self.av_receiver.on
 
-    @input.setter(vol.Schema(str))
+    @input_source.setter(vol.Schema(str))
     async def set_input(self, value: str) -> dict:
         """Setter for input"""
         self.av_receiver.input = value
         return {"input": value}
 
-    @input.getter()
+    @input_source.getter()
     async def get_input(self) -> str:
         """Getter for input"""
         return self.av_receiver.input

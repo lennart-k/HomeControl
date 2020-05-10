@@ -10,6 +10,7 @@ import voluptuous as vol
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.state_engine import StateEngine
 from homecontrol.dependencies.action_engine import ActionEngine
+from homecontrol.const import EVENT_ITEM_STATUS_CHANGED
 if TYPE_CHECKING:
     from homecontrol.core import Core
 
@@ -61,6 +62,15 @@ class Item:
     async def stop(self) -> None:
         """Default stop method"""
         return
+
+    def update_status(self, status: ItemStatus) -> None:
+        """Updates the item status and broadcasts an event"""
+        previous_status = self.status
+        if status is previous_status:
+            return
+        self.status = status
+        self.core.event_engine.broadcast(
+            EVENT_ITEM_STATUS_CHANGED, item=self, previous=previous_status)
 
 
 class Module:

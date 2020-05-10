@@ -22,6 +22,7 @@ EVENT_CORE_BOOTSTRAP_COMPLETE = "core_bootstrap_complete"
 EVENT_ITEM_CREATED = "item_created"
 EVENT_ITEM_REMOVED = "item_removed"
 EVENT_ITEM_NOT_WORKING = "item_not_working"
+EVENT_ITEM_STATUS_CHANGED = "item_status_changed"
 EVENT_MODULE_LOADED = "module_loaded"
 
 MAX_PENDING_WS_MSGS = 512

@@ -2,6 +2,7 @@
 
 from collections import ChainMap
 import json
+import logging
 import voluptuous as vol
 from aiohttp import web
 from homecontrol.const import (
@@ -18,6 +19,7 @@ from homecontrol.exceptions import ItemNotOnlineError
 
 from .view import APIView
 
+LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("headers", default={}): {vol.Coerce(str): vol.Coerce(str)}
@@ -40,6 +42,7 @@ def add_routes(app: web.Application):
     ItemStateView.register_view(app)
     ActionsView.register_view(app)
     ExecuteActionView.register_view(app)
+    ListModulesView.register_view(app)
 
 
 class PingView(APIView):
@@ -311,6 +314,22 @@ class ExecuteActionView(APIView):
             })
         # pylint: disable=broad-except
         except Exception as e:
+            LOGGER.error("An error occured executing an action", exc_info=True)
             return self.error(e)
 
     get = post
+
+@needs_auth()
+class ListModulesView(APIView):
+    """Lists the items"""
+    path = "/modules"
+
+    async def get(self) -> JSONResponse:
+        """"GET /modules"""
+        return self.json([
+            {
+                "name": module.name,
+                "path": module.path,
+                "spec": module.spec
+            } for module in self.core.module_manager.loaded_modules.values()
+        ])

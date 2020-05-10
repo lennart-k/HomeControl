@@ -1,0 +1,5 @@
+name: Minecraft Server
+description: Get status information about Minecraft servers
+
+pip-requirements:
+  - mcstatus==3.1.0

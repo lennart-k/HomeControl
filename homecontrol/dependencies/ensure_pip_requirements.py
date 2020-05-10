@@ -1,11 +1,9 @@
 """Helper module to ensure that pip requirements are installed"""
 
+import os
 import sys
 from subprocess import Popen
-from typing import Set
 from pkg_resources import require, VersionConflict, DistributionNotFound
-import pkgutil
-import os
 
 from homecontrol.exceptions import PipInstallError
 
@@ -19,6 +17,7 @@ def package_installed(package: str) -> bool:
         return False
 
 def install_for_user() -> bool:
+    """Checks if a package should be installed only for the user"""
     return not (
         hasattr(sys, "real_prefix")       # venv, virtualenv
         or os.path.isfile("/.dockerenv")  # Docker

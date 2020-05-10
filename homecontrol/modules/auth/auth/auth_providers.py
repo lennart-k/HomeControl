@@ -54,7 +54,7 @@ class TrustedClientsAuthProvider(AuthProvider):
     def __init__(self, auth_manager: AuthManager, cfg: dict) -> None:
         super().__init__(auth_manager, cfg)
         self.trusted_networks = {}
-        for trusted_network in self.cfg["trusted-networks"]:
+        for trusted_network in self.cfg.get("trusted-networks", []):
             addresses = trusted_network.get("addresses", [])
             if "address" in trusted_network:
                 addresses.append(trusted_network["address"])

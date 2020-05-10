@@ -27,12 +27,14 @@ class WatchStatesCommand(WebSocketCommand):
     command = "watch_states"
 
     async def handle(self) -> None:
+        """Handle the watch_states command"""
         self.core.event_engine.register(
             "state_change")(self.on_state_change)
         return self.success("Now listening to state changes")
 
     async def on_state_change(
             self, event: Event, item: Item, changes: dict) -> None:
+        """Handle the state_change event"""
         self.send_message({
             "event": "state_change",
             "item": item.unique_identifier,
@@ -40,5 +42,6 @@ class WatchStatesCommand(WebSocketCommand):
         })
 
     async def close(self) -> None:
+        """Remove the event listener"""
         self.core.event_engine.remove_handler(
             "state_change", self.on_state_change)

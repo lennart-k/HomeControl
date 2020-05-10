@@ -1,11 +1,11 @@
 """Module for Yamaha AV receivers"""
 import logging
 import asyncio
-
-import voluptuous as vol
-import rxv
-# pylint: disable=redefined-builtin
 from requests.exceptions import ConnectionError
+
+import rxv
+import voluptuous as vol
+# pylint: disable=redefined-builtin
 
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef

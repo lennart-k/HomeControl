@@ -1,6 +1,7 @@
 """ActionEngine for HomeControl"""
 
 from typing import Callable, Union
+from asyncio import iscoroutinefunction
 
 
 def action(arg: Union[Callable, str]) -> Callable:
@@ -17,7 +18,7 @@ def action(arg: Union[Callable, str]) -> Callable:
         action_func.action_name = arg
         return action_func
 
-    if isinstance(arg, Callable):
+    if iscoroutinefunction(arg):
         arg.action_name = arg.__name__
         return arg
 

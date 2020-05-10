@@ -41,6 +41,8 @@ class ActionEngine:
     async def execute(self, name: str, *args, **kwargs) -> bool:
         """Executes an action, optionally with parameters"""
         if name in self.actions:
-            await self.actions[name](*args, **kwargs)
+            result = await self.actions[name](*args, **kwargs)
+            if result is False:
+                return False
             return True
         return False

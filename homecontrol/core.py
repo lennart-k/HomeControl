@@ -6,9 +6,7 @@ import signal
 import asyncio
 import logging
 
-from typing import (
-    Optional, Dict
-)
+from typing import Optional, Dict
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager

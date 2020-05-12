@@ -23,79 +23,10 @@ docker run -it --net=host -v CONFIG_FOLDER:/config --name="HomeControl" lennartk
 The minimum Python version for HomeControl is Python 3.7
 You can install it the following:
 ```
-python -m pip install git+https://github.com/lennart-k/HomeControl
-
-homecontrol
+python3 -m pip install git+https://github.com/lennart-k/HomeControl
 ```
 
 #### Note
 
-- Ensure that `python` refers to Python 3 and not Python 2
 - Run homecontrol as `root` or install it with the `-U` parameter for HomeControl to install pip modules automatically
 
-
-If you want to participate in developing HomeControl consider following techniques:
-```
-git clone https://github.com/lennart-k/HomeControl
-cd HomeControl
-
-
-python setup.py develop
-homecontrol --help
-
-OR
-
-pip install -r requirements.txt
-python -m homecontrol --help
-```
-
-```
-usage: homecontrol [-h] [--cfgdir CFGDIR] [--pid-file PID_FILE] [--clearport]
-                   [--verbose] [--nocolor] [--logfile LOGFILE] [--killprev]
-                   [--skip-pip] [--daemon]
-
-HomeControl
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --cfgdir CFGDIR, -cd CFGDIR
-                        Directory storing the HomeControl configuration
-  --pid-file PID_FILE   Location of the PID file.Ensures that only one session
-                        is running. Defaults to the configuration path
-  --clearport           Frees the port for the API server using fuser.
-                        Therefore only available on Linux
-  --verbose             Sets the loglevel for the logfile to INFO
-  --nocolor             Disables colored console output
-  --logfile LOGFILE     Logfile location
-  --killprev, -kp       Kills the previous HomeControl instance
-  --skip-pip, -sp       Skips the installation of configured pip requirements
-  --daemon, -d          Start HomeControl as a daemon process [posix only]
-
-  ```
-
-## Documentation
-
-Documentation is currently in the works.
-You can find it [here](https://homecontrol.readthedocs.io/en/latest/).
-
-
-## Features
-
-- Automation
-- Szenes
-- API
-  - WebHooks
-  - WebSockets
-  - SSL
-- Docker builds
-
-[Homecontrol v1.0.0 Project board](https://github.com/lennart-k/HomeControl/projects/3)
-
-## Compatible Devices/Protocols
-
-- Chromecast
-- Raspberry Pi (GPIO)
-  - MCP3008 ADC
-  - 433MHz adapter
-- Yamaha AV receivers
-- Pushbullet (Send message)

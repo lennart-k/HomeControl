@@ -11,7 +11,7 @@ RUN mkdir -p /usr/src
 WORKDIR /usr/src
 COPY . .
 
-RUN sh -c scripts/docker_pip_requirements
+RUN scripts/docker_pip_requirements
 RUN pip install --compile --no-cache-dir --prefer-binary -e ./
 RUN python -m compileall homecontrol
 

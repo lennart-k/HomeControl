@@ -5,6 +5,7 @@ docs/build
 dist
 *.egg
 *.egg-info
+build
 
 # venv
 venv

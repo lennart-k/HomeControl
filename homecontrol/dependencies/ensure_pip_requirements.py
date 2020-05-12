@@ -26,7 +26,10 @@ def install_for_user() -> bool:
         or os.geteuid() == 0              # Root
     )
 
-def ensure_packages(packages: Iterable[str], upgrade: bool = True) -> None:
+def ensure_packages(
+        packages: Iterable[str],
+        upgrade: bool = True,
+        test_index: bool = False) -> None:
     """Ensures that a package is installed"""
     unsatisfied = {package for package in packages
                    if not package_installed(package)}
@@ -38,6 +41,8 @@ def ensure_packages(packages: Iterable[str], upgrade: bool = True) -> None:
         args.append("--upgrade")
     if install_for_user():
         args.append("--user")
+    if test_index:
+        args.extend(["-i", "https://test.pypi.org/simple/"])
     subprocess = Popen(args, env=env)
     if subprocess.wait():
         raise PipInstallError(

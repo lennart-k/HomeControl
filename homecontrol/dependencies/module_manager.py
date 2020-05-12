@@ -153,6 +153,8 @@ class ModuleManager:
 
         try:
             ensure_packages(spec.get("pip-requirements", []))
+            ensure_packages(
+                spec.get("pip-test-requirements", []), test_index=True)
         except PipInstallError as e:
             LOGGER.warning(
                 "Module could not be loaded: %s at %s", name, path)

@@ -13,6 +13,7 @@ COPY . .
 
 RUN pip install --compile --no-cache-dir --prefer-binary -r requirements.txt
 RUN pip install --compile --no-cache-dir --prefer-binary $(python -m homecontrol.scripts.module_requirements)
+RUN pip install -i https://test.pypi.org/simple/ --compile --no-cache-dir --prefer-binary $(python -m homecontrol.scripts.module_requirements -t)
 RUN pip install --compile --no-cache-dir --prefer-binary -e ./
 RUN python -m compileall homecontrol
 

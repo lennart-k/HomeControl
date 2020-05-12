@@ -3,9 +3,10 @@ module-manager:
   load-internal-modules: true
   install-pip-requirements: true
 
-http-server:
-  host: null
-  port: 8080
+# http-server:
+  # Uncomment to change port
+  # host: null
+  # port: 8082
   # Uncomment to use ssl
   # ssl:
     # key: !path ssl/private_key.pem

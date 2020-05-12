@@ -1,15 +1,21 @@
+# Build folders
+docs/_build
+docs/_homecontrol
 docs/build
-venv_linux
-venv_win
+dist
+*.egg
+*.egg-info
+
+# venv
+venv
+
+# IntelliJ, PyCharm
 .idea
+
+# VSCode
+.vscode
+
+# Cache folders
 __pycache__/
 .pytest_cache
-.vscode
-webapp
-homecontrol.lock
-.github
-dist
-build
-homecontrol.egg-info
-**/_build
-docs/_homecontrol
+

@@ -1,13 +1,27 @@
+# Docs
 docs
-.pytest_cache
+
+# Build folders
+dist
+*.egg
+*.egg-info
+build
+
+# venv
+venv
+
+# IntelliJ, PyCharm
 .idea
+
+# VSCode
 .vscode
+
 homecontrol.sh
 .gitignore
-webapp
-.idea/*
+
+# Cache folders
 __pycache__/
 .pytest_cache
-homecontrol.lock
-.github
+
+# Git
 .git

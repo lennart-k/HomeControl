@@ -67,7 +67,7 @@ def get_argparser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--killprev", "-kp",
         action="store_true",
-        default=True,
+        default=False,
         help="Kills the previous HomeControl instance")
     parser.add_argument(
         "--skip-pip", "-sp",

@@ -130,7 +130,6 @@ class GetItemView(APIView):
             "unique_identifier": item.unique_identifier,
             "type": item.type,
             "module": item.module.name,
-            # "config": item.cfg,
             "status": item.status.value,
             "storage_entry": {
                 "cfg": storage_entry.cfg,

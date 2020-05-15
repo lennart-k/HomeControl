@@ -30,7 +30,7 @@ CONFIG_FILE_NAME = "configuration.yaml"
 LOGGER = logging.getLogger(__name__)
 
 
-def get_argparser() -> argparse.ArgumentParser:
+def parse_args() -> argparse.Namespace:
     """Returns the ArgumentParser"""
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description="HomeControl")
@@ -80,12 +80,7 @@ def get_argparser() -> argparse.ArgumentParser:
             action="store_true",
             default=None,
             help="Start HomeControl as a daemon process [posix only]")
-    return parser
-
-
-def get_arguments() -> dict:
-    """Parse commandline arguments"""
-    return vars(get_argparser().parse_args())
+    return parser.parse_args()
 
 
 def copy_folder(src: str, dest: str, merge_folders: bool = False) -> None:
@@ -168,16 +163,10 @@ def validate_python_version() -> None:
         sys.exit(1)
 
 
-def run_homecontrol(config: dict, config_file: str, start_args: dict):
+def run_homecontrol(
+        config: dict, config_file: str, start_args: argparse.Namespace):
     """
     Runs HomeControl
-
-    config: dict
-        The loaded config file
-    config_file: str
-        Path to the config file
-    start_args: dict
-        The commandline arguments by ArgumentParser
     """
     loop = asyncio.get_event_loop()
     if os.name == "nt":
@@ -202,9 +191,9 @@ def run_homecontrol(config: dict, config_file: str, start_args: dict):
         LOGGER.warning("Restarting now%s", 4 * "\n")
         args = start_command()
         os.execv(args[0], args)
-    elif start_args["pid_file"]:
+    elif start_args.pid_file:
         with suppress(FileNotFoundError):
-            os.remove(start_args["pid_file"])
+            os.remove(start_args.pid_file)
         sys.exit()
 
 
@@ -340,43 +329,42 @@ def main() -> None:
     """The main function"""
     validate_python_version()
 
-    args = get_arguments()
-    logfile = (args["logfile"]
-               or os.path.join(args["cfgdir"], "homecontrol.log"))
+    args = parse_args()
+    logfile = args.logfile or os.path.join(args.cfgdir, "homecontrol.log")
 
-    setup_logging(verbose=args["verbose"],
-                  color=not args["nocolor"],
+    setup_logging(verbose=args.verbose,
+                  color=not args.nocolor,
                   logfile=logfile)
 
-    cfg = get_config(args["cfgdir"])
-    cfg_file = os.path.join(args["cfgdir"], CONFIG_FILE_NAME)
+    cfg = get_config(args.cfgdir)
+    cfg_file = os.path.join(args.cfgdir, CONFIG_FILE_NAME)
 
-    setup_logging(verbose=args["verbose"],
-                  color=not args["nocolor"],
+    setup_logging(verbose=args.verbose,
+                  color=not args.nocolor,
                   logfile=logfile)
 
-    if not args["pid_file"]:
-        args["pid_file"] = os.path.join(args["cfgdir"], "homecontrol.pid")
-    check_pid_file(args["pid_file"], kill=args["killprev"])
+    if not args.pid_file:
+        args.pid_file = os.path.join(args.cfgdir, "homecontrol.pid")
+    check_pid_file(args.pid_file, kill=args.killprev)
 
-    if not args["skip_pip"] and "pip-requirements" in cfg:
+    if not args.skip_pip and "pip-requirements" in cfg:
         from homecontrol.dependencies.ensure_pip_requirements import (
             ensure_packages
         )
         ensure_packages(cfg["pip-requirements"])
 
-    if args.get("daemon", False):
+    if args.daemon:
         LOGGER.info("Running as a daemon")
         daemonize()
 
-    if args["pid_file"]:
+    if args.pid_file:
         try:
-            with open(args["pid_file"], "w") as file:
+            with open(args.pid_file, "w") as file:
                 file.write(str(os.getpid()))
         except IOError:
-            LOGGER.warning("Cannot write pid file %s", args["pid_file"])
+            LOGGER.warning("Cannot write pid file %s", args.pid_file)
 
-    if args["clearport"] and cfg.get("http-server", {}).get("port"):
+    if args.clearport and cfg.get("http-server", {}).get("port"):
         clear_port(cfg["http-server"]["port"])
 
     set_loop_policy()

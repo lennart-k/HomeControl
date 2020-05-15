@@ -49,7 +49,7 @@ class Module:
         self.cfg = await self.core.cfg.register_domain(
             "http-server", self, schema=CONFIG_SCHEMA)
 
-        if not self.core.start_args["verbose"]:
+        if not self.core.start_args.verbose:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())
 
         self.core.event_engine.register(

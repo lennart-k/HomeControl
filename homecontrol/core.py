@@ -6,7 +6,8 @@ import signal
 import asyncio
 import logging
 
-from typing import Optional, Dict
+from typing import Optional
+import argparse
 
 from homecontrol.dependencies.event_engine import EventEngine
 from homecontrol.dependencies.module_manager import ModuleManager
@@ -33,14 +34,14 @@ class Core:
                  cfg: dict,
                  cfg_file: str,
                  loop: Optional[asyncio.AbstractEventLoop] = None,
-                 start_args: Optional[Dict] = None) -> None:
+                 start_args: Optional[argparse.Namespace] = None) -> None:
         """
         :param cfg: config dictionary
         :param cfg_file: configuration file
         :param loop: asyncio EventLoop
         :param start_args: start parameters
         """
-        self.start_args = start_args or {}
+        self.start_args = start_args or argparse.Namespace()
         self.loop = loop or asyncio.get_event_loop()
         self.cfg = ConfigManager(cfg, cfg_file)
         self.cfg_path = cfg_file

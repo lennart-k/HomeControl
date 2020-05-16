@@ -48,6 +48,7 @@ def add_routes(app: web.Application):
     BindCredentialsView.register_view(app)
     CreateUserView.register_view(app)
     TokenView.register_view(app)
+    UserInfoView.register_view(app)
 
 
 class AuthView(APIView):
@@ -337,4 +338,20 @@ class TokenView(AuthView):
             "refresh_token": refresh_token.token,
         }, headers={
             hdrs.CACHE_CONTROL: "no-store"
+        })
+
+@needs_auth()
+class UserInfoView(APIView):
+    """Returns information about the current user"""
+    path = "/user_info"
+
+    async def get(self) -> JSONResponse:
+        """GET /user_info"""
+        user = self.request["user"]
+
+        return self.json({
+            "name": user.name,
+            "owner": user.owner,
+            "system_generated": user.system_generated,
+            "id": user.id
         })

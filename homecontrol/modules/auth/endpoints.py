@@ -49,6 +49,7 @@ def add_routes(app: web.Application):
     CreateUserView.register_view(app)
     TokenView.register_view(app)
 
+
 class AuthView(APIView):
     """An APIView with access to the auth module"""
     auth: "Module"
@@ -309,10 +310,11 @@ class TokenView(AuthView):
                                              "needs a 'refresh_token'"
                                              "parameter"
                     }, status_code=400)
+
+                invalid = ', '.join(e.path)
                 return self.json({
                     "error": "invalid_request",
-                    "error_description": "Invalid parameters: "
-                    f"{', '.join(e.path)}"
+                    "error_description": f"Invalid parameters: {invalid}"
                 }, status_code=400)
 
             refresh_token = self.auth_manager.get_refresh_token_by_string(

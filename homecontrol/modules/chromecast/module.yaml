@@ -3,3 +3,6 @@ description: Adds support for Chromecast
 
 pip-requirements:
   - PyChromecast==2.5.2
+
+zeroconf:
+  - _googlecast._tcp.local.

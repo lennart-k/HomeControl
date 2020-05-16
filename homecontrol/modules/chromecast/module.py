@@ -1,12 +1,47 @@
 "Chromecast module"
 
 import time
+from typing import TYPE_CHECKING
+from contextlib import suppress
 import pychromecast
 import voluptuous as vol
 
-from homecontrol.dependencies.entity_types import Item
+if TYPE_CHECKING:
+    from zeroconf import Zeroconf
+
+with suppress(ImportError):
+    from zeroconf import ServiceStateChange
+
+from homecontrol.dependencies.item_manager import StorageEntry
+from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.state_engine import StateDef
+
+
+class Module(ModuleDef):
+    """The Chromecast module"""
+    async def handle_zeroconf(
+            self, zeroconf: "Zeroconf", name: str,
+            state_change: "ServiceStateChange") -> None:
+        """Handles Zeroconf"""
+        if state_change is not ServiceStateChange.Added:
+            return
+
+        info = zeroconf.get_service_info("_googlecast._tcp.local.", name)
+        host = ".".join([str(byte) for byte in info.addresses[0]])
+        friendly_name = info.properties[b"fn"].decode()
+        uuid = info.properties[b"id"].decode()
+        identifier = ("chromecast_" + friendly_name.lower().replace(" ", "_")
+                      + "_" + uuid[:4])
+
+        await self.core.item_manager.register_entry(StorageEntry(
+            type="chromecast.Chromecast",
+            cfg={"host": host, "port": info.port},
+            unique_identifier=uuid,
+            name=friendly_name,
+            identifier=identifier,
+            provider="chromecast"
+        ))
 
 
 class Chromecast(Item):

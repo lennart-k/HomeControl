@@ -3,8 +3,8 @@
 import logging
 
 from typing import Callable
-import voluptuous as vol
 from aiohttp import web
+import voluptuous as vol
 
 from .endpoints import add_routes
 
@@ -42,6 +42,8 @@ class Module:
             route_table = web.RouteTableDef()
             await self.core.event_engine.gather(
                 "http_add_api_routes", router=route_table)
+            await self.core.event_engine.gather(
+                "http_add_api_subapps", app=self.api_app)
             self.api_app.add_routes(route_table)
             add_routes(self.api_app)
             main_app.add_subapp("/api", self.api_app)

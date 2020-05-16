@@ -6,7 +6,7 @@ import importlib.util
 import os
 import asyncio
 import logging
-from typing import TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 import pkg_resources
 import voluptuous as vol
@@ -46,6 +46,7 @@ class ModuleManager:
     """Manages your modules"""
 
     cfg: dict
+    loaded_modules: Dict[str, Module]
 
     def __init__(self, core: "Core"):
         self.core = core

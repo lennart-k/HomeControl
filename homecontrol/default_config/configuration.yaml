@@ -21,13 +21,13 @@ api-server:
 
 auth:
   providers:
+    - type: oauth
     - type: trusted-clients
       trusted-networks:
         - address: 127.0.0.1
           user: system
         - address: ::1/128
           user: system
-    - type: oauth
 
   login-flows:
     password:

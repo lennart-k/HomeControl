@@ -332,10 +332,6 @@ def main() -> None:
     args = parse_args()
     logfile = args.logfile or os.path.join(args.cfgdir, "homecontrol.log")
 
-    setup_logging(verbose=args.verbose,
-                  color=not args.nocolor,
-                  logfile=logfile)
-
     cfg = get_config(args.cfgdir)
     cfg_file = os.path.join(args.cfgdir, CONFIG_FILE_NAME)
 

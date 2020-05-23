@@ -42,15 +42,26 @@ class ModuleFolder:
         self.__name__ = name
 
 
+class ModuleAccessor(object):
+    """Wrapper for ModuleManager.loaded_modules"""
+    def __init__(self, module_manager: "ModuleManager") -> None:
+        self._module_manager = module_manager
+
+    def __getattr__(self, name: str):
+        return self._module_manager.loaded_modules.get(name)
+
+
 class ModuleManager:
     """Manages your modules"""
 
     cfg: dict
     loaded_modules: Dict[str, Module]
+    module_accessor: ModuleAccessor
 
     def __init__(self, core: "Core"):
         self.core = core
         self.loaded_modules = {}
+        self.module_accessor = ModuleAccessor(self)
 
     async def init(self) -> None:
         """Initialise the modules"""

@@ -49,6 +49,7 @@ class Core:
         self.block_future = asyncio.Future()
         self.event_engine = EventEngine(core=self)
         self.module_manager = ModuleManager(core=self)
+        self.modules = self.module_manager.module_accessor
         self.item_manager = ItemManager(core=self)
 
     async def bootstrap(self) -> None:

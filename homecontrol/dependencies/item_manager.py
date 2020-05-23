@@ -237,7 +237,7 @@ class ItemManager:
         """Registers a storage entry"""
         existing_item = self.get_by_unique_identifier(
             storage_entry.unique_identifier)
-        existing_entry = self.item_config[storage_entry.unique_identifier]
+        existing_entry = self.item_config.get(storage_entry.unique_identifier)
 
         if not override and existing_entry:
             return existing_item

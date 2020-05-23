@@ -12,6 +12,7 @@ def add_commands(add_command):
     add_command(PingCommand)
     add_command(WatchStatesCommand)
     add_command(AuthCommand)
+    add_command(CurrentUserCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -67,3 +68,18 @@ class AuthCommand(WebSocketCommand):
         self.session.user = refresh_token.user
 
         return self.success("authenticated")
+
+
+@needs_auth()
+class CurrentUserCommand(WebSocketCommand):
+    """Gives information about the current user"""
+    command = "current_user"
+
+    async def handle(self) -> None:
+        """Handle the current_user command"""
+        return self.success({
+            "name": self.session.user.name,
+            "owner": self.session.user.owner,
+            "system_generated": self.session.user.system_generated,
+            "id": self.session.user.id
+        })

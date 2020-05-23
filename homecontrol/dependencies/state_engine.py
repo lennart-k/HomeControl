@@ -111,7 +111,10 @@ class StateEngine:
     def bulk_update(self, **kwargs):
         """Called from an item to update multiple states"""
         for state, value in kwargs.items():
-            self.states[state].update(value)
+            self.states[state].value = value
+        self.core.event_engine.broadcast(
+            "state_change", item=self.item, changes=kwargs)
+        LOGGER.debug("State change: %s %s", self.item.identifier, kwargs)
 
     async def dump(self) -> dict:
         """Return a JSON serialisable object"""

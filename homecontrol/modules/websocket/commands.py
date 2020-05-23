@@ -1,5 +1,6 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
+import voluptuous as vol
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.event_engine import Event
@@ -10,9 +11,9 @@ def add_commands(add_command):
     """Adds the commands"""
     add_command(PingCommand)
     add_command(WatchStatesCommand)
+    add_command(AuthCommand)
 
 
-@needs_auth(owner_only=True)
 class PingCommand(WebSocketCommand):
     """A basic ping command"""
     command = "ping"
@@ -45,3 +46,24 @@ class WatchStatesCommand(WebSocketCommand):
         """Remove the event listener"""
         self.core.event_engine.remove_handler(
             "state_change", self.on_state_change)
+
+class AuthCommand(WebSocketCommand):
+    """Auth command"""
+    command = "auth"
+    schema = {
+        vol.Required("token"): str
+    }
+
+    async def handle(self) -> None:
+        """Handle the auth command"""
+        token: str = self.data["token"]
+        auth_manager = self.core.modules.auth.auth_manager
+
+        refresh_token = await auth_manager.validate_access_token(token)
+
+        if not refresh_token:
+            return self.error("auth_invalid", "Invalid token")
+
+        self.session.user = refresh_token.user
+
+        return self.success("authenticated")

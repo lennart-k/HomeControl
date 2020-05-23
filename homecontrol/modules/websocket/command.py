@@ -17,13 +17,18 @@ class WebSocketCommand:
     core: "Core"
     message: "WebSocketMessage"
     session: "WebSocketSession"
+    use_auth: bool = False
+    owner_only: bool = False
+    data: dict = None
 
     def __init__(self, message: "WebSocketMessage",
-                 core: "Core", session: "WebSocketSession") -> None:
+                 core: "Core", session: "WebSocketSession",
+                 data: dict = None) -> None:
         self.message = message
         self.core = core
         self.session = session
         self.session.writer_task.add_done_callback(self._close)
+        self.data = data
 
     async def handle(self):
         """Handle a command"""

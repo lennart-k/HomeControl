@@ -8,13 +8,14 @@ from aiohttp import web
 import voluptuous as vol
 
 from homecontrol.const import MAX_PENDING_WS_MSGS
-from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.entity_types import ModuleDef
 
 from .commands import add_commands, WebSocketCommand
 from .message import WebSocketMessage
 
 if TYPE_CHECKING:
+    from homecontrol.modules.auth.module import AuthManager
+    from homecontrol.modules.auth.auth.models import User
     from homecontrol.core import Core
 
 
@@ -28,17 +29,11 @@ LOGGER = logging.getLogger(__name__)
 MESSAGE_SCHEMA = vol.Schema({
     "type": str,
     vol.Optional("id"): str,
-    vol.Optional("data"): object,
     vol.Optional("reply", default=True): bool
-}, required=True)
+}, required=True, extra=vol.ALLOW_EXTRA)
 
 EVENT_MESSAGE_SCHEMA = MESSAGE_SCHEMA.extend({"event": str})
 RESPONSE_MESSAGE_SCHEMA = MESSAGE_SCHEMA.extend({"success": bool})
-
-COMMAND_SCHEMA = vol.Schema({
-    vol.Required("type"): str,
-    vol.Optional("id"): str
-})
 
 
 class Module(ModuleDef):
@@ -62,7 +57,6 @@ class Module(ModuleDef):
         add_commands(self.add_command_handler)
 
         @router.get("/websocket")
-        @needs_auth(require_user=True)
         async def events_websockets(
                 request: web.Request) -> web.WebSocketResponse:
             """The WebSocket route"""
@@ -76,7 +70,7 @@ class Module(ModuleDef):
         Adds a command handler
         The handler must be decorated if no command parameter is given
         """
-        schema = COMMAND_SCHEMA.extend(
+        schema = MESSAGE_SCHEMA.extend(
             handler.schema or {}).extend({"type": handler.command})
         handler.schema = schema
         self.command_handlers[handler.command] = handler
@@ -95,6 +89,7 @@ class WebSocketSession:
     websocket: web.WebSocketResponse
     writer_task: asyncio.Task
     handler_task: asyncio.Task
+    user: "User"
 
     def __init__(
             self, core: "Core", module: Module, request: web.Request) -> None:
@@ -103,7 +98,7 @@ class WebSocketSession:
         self.module = module
         self.command_handlers = self.module.command_handlers
         self.request = request
-        self.user = self.request["user"]
+        self.user = self.request["user"] or None
         self.writing_queue = asyncio.Queue(maxsize=MAX_PENDING_WS_MSGS)
 
     async def writer(self):
@@ -121,6 +116,7 @@ class WebSocketSession:
     def dispatch_message(self, message: WebSocketMessage) -> None:
         """Dispatches an incoming WS message"""
         command = message.type
+        handler = self.command_handlers.get(command, None)
 
         async def _dispatch_message(handler: WebSocketCommand):
             try:
@@ -130,11 +126,25 @@ class WebSocketSession:
                 self.send_message(message.error(
                     type(error).__name__, str(error)))
 
-        handler = self.command_handlers.get(command, None)
+        if not self.user and handler.use_auth:
+            # Not authenticated
+            return self.send_message(
+                message.error("no_auth", "Please authenticate"))
+
+        if handler.owner_only and not self.user.owner:
+            return self.send_message(
+                message.error(
+                    "owner_only", "Only owners can access this command"))
+
         if handler:
+            try:
+                data = handler.schema(message.data)
+            except vol.Invalid as e:
+                return self.send_message(
+                    message.error("invalid_parameters", e.error_message))
             asyncio.run_coroutine_threadsafe(
                 _dispatch_message(
-                    handler(message, self.core, self)),
+                    handler(message, self.core, self, data)),
                 loop=self.core.loop)
         else:
             self.send_message(
@@ -161,7 +171,7 @@ class WebSocketSession:
                     break
                 try:
                     data = MESSAGE_SCHEMA(message.json())
-                    self.dispatch_message(WebSocketMessage(**data))
+                    self.dispatch_message(WebSocketMessage(data))
                 except ValueError:
                     LOGGER.debug("Invalid JSON received")
                     break

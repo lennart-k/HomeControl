@@ -6,12 +6,11 @@ class WebSocketMessage:
     # pylint: disable=redefined-builtin,invalid-name
     __slots__ = ["type", "id", "data", "reply"]
 
-    def __init__(self, type: str, id: str = None,
-                 data: object = None, reply: bool = True) -> None:
-        self.type = type
-        self.id = id
+    def __init__(self, data: dict) -> None:
+        self.type = data["type"]
+        self.id = data.get("id")
         self.data = data
-        self.reply = reply
+        self.reply = data.get("reply")
 
     def success(self, data: object) -> dict:
         """Generates a success response"""

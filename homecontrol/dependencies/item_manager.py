@@ -95,6 +95,8 @@ class ItemManager:
         self.load_yaml_config()
 
         for storage_entry in self.item_config.values():
+            if not storage_entry.enabled:
+                continue
             await self.create_from_storage_entry(storage_entry)
 
     def load_yaml_config(self) -> None:
@@ -235,12 +237,14 @@ class ItemManager:
         """Registers a storage entry"""
         existing_item = self.get_by_unique_identifier(
             storage_entry.unique_identifier)
+        existing_entry = self.item_config[storage_entry.unique_identifier]
 
-        if not override and existing_item:
+        if not override and existing_entry:
             return existing_item
 
         if existing_item:
             await self.remove_item(existing_item.identifier)
+            storage_entry.enabled = existing_item
 
         self.item_config[storage_entry.unique_identifier] = storage_entry
         self.storage.schedule_save(self.item_config)

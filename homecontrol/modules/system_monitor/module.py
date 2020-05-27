@@ -1,5 +1,5 @@
+"""system monitor module"""
 import asyncio
-import voluptuous as vol
 import psutil
 
 from homecontrol.dependencies.state_engine import StateDef

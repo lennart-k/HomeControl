@@ -2,9 +2,11 @@
 # pylint: disable=relative-beyond-top-level
 import voluptuous as vol
 from homecontrol.modules.auth.decorator import needs_auth
-from homecontrol.dependencies.entity_types import Item
+from homecontrol.dependencies.entity_types import Item, ItemStatus
 from homecontrol.dependencies.event_engine import Event
-from homecontrol.const import ERROR_ITEM_NOT_FOUND, ITEM_ACTION_NOT_FOUND
+from homecontrol.const import (
+    ERROR_ITEM_NOT_FOUND, ITEM_ACTION_NOT_FOUND, ERROR_INVALID_ITEM_STATES
+)
 from .command import WebSocketCommand
 
 
@@ -135,6 +137,12 @@ class ActionCommand(WebSocketCommand):
             return self.error(
                 ERROR_ITEM_NOT_FOUND,
                 f"No item found with identifier {identifier}")
+
+        if item.status != ItemStatus.ONLINE:
+            return self.error(
+                "item_not_online",
+                f"The item {item.identifier} is not online"
+            )
 
         if action not in item.actions.actions:
             return self.error(

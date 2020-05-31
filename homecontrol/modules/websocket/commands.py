@@ -4,6 +4,7 @@ import voluptuous as vol
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.event_engine import Event
+from homecontrol.const import ERROR_ITEM_NOT_FOUND, ITEM_ACTION_NOT_FOUND
 from .command import WebSocketCommand
 
 
@@ -14,6 +15,7 @@ def add_commands(add_command):
     add_command(AuthCommand)
     add_command(CurrentUserCommand)
     add_command(GetItemsCommand)
+    add_command(ActionCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -110,3 +112,40 @@ class GetItemsCommand(WebSocketCommand):
                 "states": await item.states.dump()
             } for item in self.core.item_manager.items.values()
         ])
+
+
+@needs_auth()
+class ActionCommand(WebSocketCommand):
+    """Executes an item action"""
+    command = "action"
+    schema = {
+        vol.Required("action"): str,
+        vol.Required("item"): str,
+        vol.Optional("kwargs"): dict
+    }
+
+    async def handle(self) -> None:
+        """Handle the action command"""
+        identifier = self.data["item"]
+        action = self.data["action"]
+        kwargs = self.data.get("kwargs", {})
+
+        item = self.core.item_manager.get_item(identifier)
+        if not item:
+            return self.error(
+                ERROR_ITEM_NOT_FOUND,
+                f"No item found with identifier {identifier}")
+
+        if action not in item.actions.actions:
+            return self.error(
+                ITEM_ACTION_NOT_FOUND,
+                f"Item {identifier} of type {item.type} "
+                f"does not have an action {action}")
+
+        try:
+            return self.success({
+                "result": await item.actions.execute(action, **kwargs)
+            })
+        # pylint: disable=broad-except
+        except Exception as err:
+            return self.error(err)

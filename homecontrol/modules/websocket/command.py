@@ -1,9 +1,8 @@
 """The WebSocket command class"""
-from typing import TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 import asyncio
 if TYPE_CHECKING:
     # pylint: disable=relative-beyond-top-level
-    from typing import Union
     from homecontrol.core import Core
     import voluptuous as vol
     from .message import WebSocketMessage
@@ -40,7 +39,7 @@ class WebSocketCommand:
     async def close(self):
         """Triggered when websocket is closing"""
 
-    def send_message(self, message: "Union[dict, str]") -> None:
+    def send_message(self, message: Union[dict, str]) -> None:
         """Sends a message"""
         self.session.send_message(message)
 
@@ -51,3 +50,10 @@ class WebSocketCommand:
     def error(self, error_type: str, message: str) -> dict:
         """Return a error"""
         return self.message.error(error_type, message)
+
+    def error(
+            self, error: Union[str, Exception], message: str = None) -> dict:
+        """Return an error"""
+        if isinstance(error, Exception):
+            return self.message.error(type(error).__name__, str(error))
+        return self.message.error(error, message)

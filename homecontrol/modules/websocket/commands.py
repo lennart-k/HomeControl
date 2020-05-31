@@ -6,7 +6,10 @@ from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.entity_types import Item, ItemStatus
 from homecontrol.dependencies.event_engine import Event
 from homecontrol.const import (
-    ERROR_ITEM_NOT_FOUND, ITEM_ACTION_NOT_FOUND, ERROR_INVALID_ITEM_STATES
+    ERROR_ITEM_NOT_FOUND,
+    ITEM_ACTION_NOT_FOUND,
+    ERROR_INVALID_ITEM_STATES,
+    EVENT_ITEM_STATUS_CHANGED
 )
 from .command import WebSocketCommand
 
@@ -15,11 +18,15 @@ def add_commands(add_command):
     """Adds the commands"""
     add_command(PingCommand)
     add_command(WatchStatesCommand)
+    add_command(WatchStatusCommand)
     add_command(AuthCommand)
     add_command(CurrentUserCommand)
     add_command(GetItemsCommand)
+    add_command(GetModulesCommand)
     add_command(ActionCommand)
     add_command(SetStatesCommand)
+    add_command(CoreShutdownCommand)
+    add_command(CoreRestartCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -58,6 +65,36 @@ class WatchStatesCommand(WebSocketCommand):
         """Remove the event listener"""
         self.core.event_engine.remove_handler(
             "state_change", self.on_state_change)
+
+
+@needs_auth()
+class WatchStatusCommand(WebSocketCommand):
+    """Command to watch the item status"""
+    command = "watch_status"
+
+    async def handle(self) -> None:
+        """Handle the watch_status command"""
+        if not self.command in self.session.subscriptions:
+            self.core.event_engine.register(
+                EVENT_ITEM_STATUS_CHANGED)(self.on_status_change)
+
+        self.session.subscriptions.add(self.command)
+        return self.success("Now listening to status changes")
+
+    async def on_status_change(
+            self, event: Event, item: Item, previous: ItemStatus) -> None:
+        """Handle the status_change event"""
+        self.send_message({
+            "event": "status_change",
+            "item": item.unique_identifier,
+            "previous": previous.value,
+            "status": item.status.value
+        })
+
+    async def close(self) -> None:
+        """Remove the event listener"""
+        self.core.event_engine.remove_handler(
+            EVENT_ITEM_STATUS_CHANGED, self.on_status_change)
 
 
 class AuthCommand(WebSocketCommand):
@@ -115,6 +152,22 @@ class GetItemsCommand(WebSocketCommand):
                 "actions": list(item.actions.actions.keys()),
                 "states": await item.states.dump()
             } for item in self.core.item_manager.items.values()
+        ])
+
+
+@needs_auth()
+class GetModulesCommand(WebSocketCommand):
+    """Returns information about the current modules"""
+    command = "get_modules"
+
+    async def handle(self) -> None:
+        """Handle the get_modules command"""
+        return self.success([
+            {
+                "name": module.name,
+                "path": module.path,
+                "spec": module.spec
+            } for module in self.core.module_manager.loaded_modules.values()
         ])
 
 
@@ -206,3 +259,25 @@ class SetStatesCommand(WebSocketCommand):
         # pylint: disable=broad-except
         except Exception as err:
             return self.error(err)
+
+
+@needs_auth(owner_only=True)
+class CoreShutdownCommand(WebSocketCommand):
+    """Shuts HomeControl down"""
+    command = "core_shutdown"
+
+    async def handle(self) -> None:
+        """Handle the shutdown command"""
+        self.core.loop.call_soon(self.core.shutdown)
+        return self.success("Shutting down")
+
+
+@needs_auth(owner_only=True)
+class CoreRestartCommand(WebSocketCommand):
+    """Shuts HomeControl down"""
+    command = "core_restart"
+
+    async def handle(self) -> None:
+        """Handle the restart command"""
+        self.core.loop.call_soon(self.core.restart)
+        return self.success("Restarting")

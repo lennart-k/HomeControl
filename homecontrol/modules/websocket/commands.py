@@ -13,6 +13,7 @@ def add_commands(add_command):
     add_command(WatchStatesCommand)
     add_command(AuthCommand)
     add_command(CurrentUserCommand)
+    add_command(GetItemsCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -22,6 +23,7 @@ class PingCommand(WebSocketCommand):
     async def handle(self) -> None:
         """Handle the ping command"""
         return self.success("pong")
+
 
 @needs_auth()
 class WatchStatesCommand(WebSocketCommand):
@@ -47,6 +49,7 @@ class WatchStatesCommand(WebSocketCommand):
         """Remove the event listener"""
         self.core.event_engine.remove_handler(
             "state_change", self.on_state_change)
+
 
 class AuthCommand(WebSocketCommand):
     """Auth command"""
@@ -83,3 +86,24 @@ class CurrentUserCommand(WebSocketCommand):
             "system_generated": self.session.user.system_generated,
             "id": self.session.user.id
         })
+
+
+@needs_auth()
+class GetItemsCommand(WebSocketCommand):
+    """Returns information about the current items"""
+    command = "get_items"
+
+    async def handle(self) -> None:
+        """Handle the get_items command"""
+        return self.success([
+            {
+                "identifier": item.identifier,
+                "unique_identifier": item.unique_identifier,
+                "name": item.name,
+                "type": item.type,
+                "module": item.module.name,
+                "status": item.status.value,
+                "actions": list(item.actions.actions.keys()),
+                "states": await item.states.dump()
+            } for item in self.core.item_manager.items.values()
+        ])

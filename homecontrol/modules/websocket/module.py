@@ -126,6 +126,10 @@ class WebSocketSession:
                 self.send_message(message.error(
                     type(error).__name__, str(error)))
 
+        if not handler:
+            return self.send_message(
+                message.error("unknown_command", f"Command {command} unknown"))
+
         if not self.user and handler.use_auth:
             # Not authenticated
             return self.send_message(
@@ -136,19 +140,15 @@ class WebSocketSession:
                 message.error(
                     "owner_only", "Only owners can access this command"))
 
-        if handler:
-            try:
-                data = handler.schema(message.data)
-            except vol.Invalid as e:
-                return self.send_message(
-                    message.error("invalid_parameters", e.error_message))
-            asyncio.run_coroutine_threadsafe(
-                _dispatch_message(
-                    handler(message, self.core, self, data)),
-                loop=self.core.loop)
-        else:
-            self.send_message(
-                message.error("unknown_command", f"Command {command} unknown"))
+        try:
+            data = handler.schema(message.data)
+        except vol.Invalid as e:
+            return self.send_message(
+                message.error("invalid_parameters", e.error_message))
+        asyncio.run_coroutine_threadsafe(
+            _dispatch_message(
+                handler(message, self.core, self, data)),
+            loop=self.core.loop)
 
     async def close(self):
         """Closes the connection"""

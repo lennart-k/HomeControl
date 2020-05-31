@@ -1,5 +1,6 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
+from collections import ChainMap
 import voluptuous as vol
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.dependencies.entity_types import Item, ItemStatus
@@ -18,6 +19,7 @@ def add_commands(add_command):
     add_command(CurrentUserCommand)
     add_command(GetItemsCommand)
     add_command(ActionCommand)
+    add_command(SetStatesCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -153,6 +155,53 @@ class ActionCommand(WebSocketCommand):
         try:
             return self.success({
                 "result": await item.actions.execute(action, **kwargs)
+            })
+        # pylint: disable=broad-except
+        except Exception as err:
+            return self.error(err)
+
+
+@needs_auth()
+class SetStatesCommand(WebSocketCommand):
+    """Sets item states"""
+    command = "set_states"
+    schema = {
+        vol.Required("item"): str,
+        vol.Required("changes"): {
+            str: object
+        }
+    }
+
+    async def handle(self) -> None:
+        """Handle the set_states command"""
+        identifier = self.data["item"]
+        changes = self.data["changes"]
+
+        item = self.core.item_manager.get_item(identifier)
+        if not item:
+            return self.error(
+                ERROR_ITEM_NOT_FOUND,
+                f"No item found with identifier {identifier}")
+
+        if changes.keys() - item.states.states.keys():
+            return self.error(
+                ERROR_INVALID_ITEM_STATES,
+                f"States {changes.keys() - item.states.states.keys()}"
+                "don't exist on item {item.name}"
+            )
+
+        if item.status != ItemStatus.ONLINE:
+            return self.error(
+                "item_not_online",
+                f"The item {item.identifier} is not online"
+            )
+
+        try:
+            result = dict(ChainMap(
+                *[await item.states.set(state, value)
+                  for state, value in changes.items()]))
+            return self.success({
+                "result": result
             })
         # pylint: disable=broad-except
         except Exception as err:

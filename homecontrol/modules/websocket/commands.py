@@ -32,8 +32,11 @@ class WatchStatesCommand(WebSocketCommand):
 
     async def handle(self) -> None:
         """Handle the watch_states command"""
-        self.core.event_engine.register(
-            "state_change")(self.on_state_change)
+        if not self.command in self.session.subscriptions:
+            self.core.event_engine.register(
+                "state_change")(self.on_state_change)
+
+        self.session.subscriptions.add(self.command)
         return self.success("Now listening to state changes")
 
     async def on_state_change(

@@ -90,6 +90,7 @@ class WebSocketSession:
     writer_task: asyncio.Task
     handler_task: asyncio.Task
     user: "User"
+    subscriptions: set
 
     def __init__(
             self, core: "Core", module: Module, request: web.Request) -> None:
@@ -100,6 +101,7 @@ class WebSocketSession:
         self.request = request
         self.user = self.request["user"] or None
         self.writing_queue = asyncio.Queue(maxsize=MAX_PENDING_WS_MSGS)
+        self.subscriptions = set()
 
     async def writer(self):
         """Write the messages from the queue"""

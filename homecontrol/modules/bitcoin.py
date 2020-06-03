@@ -45,8 +45,8 @@ class BitcoinStats(Item):
     async def update_interval(self) -> None:
         """Updates the states"""
         while True:
-            await asyncio.sleep(self.cfg["update_interval"])
             await self.update_stats()
+            await asyncio.sleep(self.cfg["update_interval"])
 
     async def stop(self) -> None:
         self.update_task.cancel()

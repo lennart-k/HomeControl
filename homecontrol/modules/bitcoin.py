@@ -1,7 +1,7 @@
 """Bitcoin stats"""
 import asyncio
-import voluptuous as vol
 import requests
+import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.action_engine import action

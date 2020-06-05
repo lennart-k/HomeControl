@@ -120,8 +120,8 @@ class AuthManager:
 
     def _load_refresh_tokens(self, data) -> None:
         refresh_tokens = {}
-        for id, token_data in data.items():
-            refresh_tokens[id] = RefreshToken(
+        for token_data in data:
+            refresh_tokens[token_data["id"]] = RefreshToken(
                 client_id=token_data["client_id"],
                 access_token_expiration=timedelta(
                     seconds=token_data["access_token_expiration"]),
@@ -134,8 +134,8 @@ class AuthManager:
         return refresh_tokens
 
     def _dump_refresh_tokens(self, data: dict) -> dict:
-        return {
-            refresh_token.id: {
+        return [
+            {
                 "client_id": refresh_token.client_id,
                 "access_token_expiration":
                     refresh_token.access_token_expiration.total_seconds(),
@@ -146,7 +146,7 @@ class AuthManager:
                 "client_name": refresh_token.client_name
             }
             for refresh_token in data.values()
-        }
+        ]
 
     async def create_refresh_token(
             self,

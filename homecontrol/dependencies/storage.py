@@ -69,7 +69,8 @@ class Storage:
             return self._data["data"]
         if os.path.isfile(self.path):
             try:
-                data = FILE_SCHEMA(load(open(self.path, "r")))
+                with open(self.path, "r") as file:
+                    data = FILE_SCHEMA(load(file))
             except (vol.Error, JSONDecodeError):
                 LOGGER.error(
                     "Storage data for storage %s invalid. "
@@ -152,7 +153,9 @@ class Storage:
         if not os.path.isdir(storage_dir):
             os.makedirs(storage_dir)
 
-        dump(self._data, open(self.path, "w"), sort_keys=True, indent=4)
+        with open(self.path, "w") as file:
+            # TODO Use json's normal dump function
+            dump(self._data, file, sort_keys=True, indent=4)
 
 
 class DictWrapper(dict):

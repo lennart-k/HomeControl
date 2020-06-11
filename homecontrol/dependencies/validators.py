@@ -29,4 +29,4 @@ class IsItem:
         return item
 
     def __repr__(self):
-        return f"IsItem"
+        return "IsItem"

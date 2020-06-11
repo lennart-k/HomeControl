@@ -46,6 +46,7 @@ disable=unused-argument,  # Event handlers might not need every argument
         unused-variable,  # State getters/setters and actions are unused-variables
         relative-beyond-top-level,  # Relative imports in modules
         no-method-argument,  # Weird bugs with lambdas
+        cyclic-import
 
 [SIMILARITIES]
 min-similarity-lines=6

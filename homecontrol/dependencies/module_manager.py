@@ -44,7 +44,7 @@ class ModuleFolder:
         self.__name__ = name
 
 
-class ModuleAccessor(object):
+class ModuleAccessor:
     """Wrapper for ModuleManager.loaded_modules"""
 
     def __init__(self, module_manager: "ModuleManager") -> None:

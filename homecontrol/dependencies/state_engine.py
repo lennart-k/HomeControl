@@ -177,6 +177,7 @@ class State:
         if self.state_engine.item.status != ItemStatus.ONLINE:
             raise ItemNotOnlineError(self.state_engine.item.identifier)
         if self.schema:  # Apply schema to new value
+            # pylint: disable=not-callable
             value = self.schema(value)
         if self.setter:
             result: dict = await self.setter(value)
@@ -193,6 +194,7 @@ class State:
         """Checks if a value is valid for a state"""
         if self.schema:
             try:
+                # pylint: disable=not-callable
                 self.schema(value)
                 return True
             except vol.error.Error as error:

@@ -125,6 +125,7 @@ def get_config(directory: str) -> dict:
             LOGGER.info(
                 "Installing the default configuration to %s",
                 directory)
+            # pylint: disable=import-outside-toplevel
             from homecontrol import __name__ as package_name
             source = pkg_resources.resource_filename(
                 package_name, "default_config")
@@ -277,6 +278,7 @@ def setup_logging(verbose: bool = False,
     datefmt = '%Y-%m-%d %H:%M:%S'
 
     if color:
+        # pylint: disable=import-outside-toplevel
         from colorlog import ColoredFormatter
 
         logging.basicConfig(level=logging.INFO)
@@ -314,6 +316,7 @@ def set_loop_policy() -> None:
 
     else:
         with suppress(ImportError):
+            # pylint: disable=import-outside-toplevel
             import uvloop
             asyncio.set_event_loop_policy(
                 uvloop.EventLoopPolicy())
@@ -338,6 +341,7 @@ def main() -> None:
     check_pid_file(args.pid_file, kill=args.killprev)
 
     if not args.skip_pip and "pip-requirements" in cfg:
+        # pylint: disable=import-outside-toplevel
         from homecontrol.dependencies.ensure_pip_requirements import (
             ensure_packages
         )

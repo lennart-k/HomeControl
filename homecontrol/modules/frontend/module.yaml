@@ -1,0 +1,4 @@
+name: "Frontend"
+
+pip-test-requirements:
+  - homecontrol_frontend

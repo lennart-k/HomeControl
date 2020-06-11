@@ -3,12 +3,11 @@ import asyncio
 import logging
 import os
 from datetime import datetime
-from json import JSONDecodeError, load
+from json import JSONDecodeError, dump, load
 from shutil import copyfile
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import voluptuous as vol
-from homecontrol.dependencies.json import dump
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -140,7 +139,7 @@ class Storage:
         """Saves the data"""
         self._data.update({
             "data": data if not self.dumper else self.dumper(data),
-            "last_update": datetime.now()
+            "last_update": datetime.now().isoformat()
         })
         if not self._save_task or self._save_task.done():
             self._save_task = self.core.loop.run_in_executor(
@@ -155,7 +154,6 @@ class Storage:
             os.makedirs(storage_dir)
 
         with open(self.path, "w") as file:
-            # TODO Use json's normal dump function
             dump(self._data, file, sort_keys=True, indent=4)
 
 

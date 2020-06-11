@@ -1,15 +1,13 @@
 """config_manager module"""
 
-from collections import defaultdict
 import logging
 import os
-import voluptuous as vol
+from collections import defaultdict
 
+import voluptuous as vol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
-from homecontrol.exceptions import (
-    ConfigDomainAlreadyRegistered,
-    ConfigurationNotApproved
-)
+from homecontrol.exceptions import (ConfigDomainAlreadyRegistered,
+                                    ConfigurationNotApproved)
 
 LOGGER = logging.getLogger(__name__)
 

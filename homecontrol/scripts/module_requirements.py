@@ -1,11 +1,12 @@
 """Helper to find the pip requirements for a builtin module"""
 import os
-import pkg_resources
 from argparse import ArgumentParser
 
-import homecontrol
-from yaml.loader import SafeLoader
+import pkg_resources
 import yaml
+from yaml.loader import SafeLoader
+
+import homecontrol
 
 MODULE_FOLDER = pkg_resources.resource_filename(
     homecontrol.__name__, "modules")

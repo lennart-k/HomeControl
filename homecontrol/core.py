@@ -1,24 +1,19 @@
 """The core instance for HomeControl"""
 
-import os
-from contextlib import suppress
-import signal
+import argparse
 import asyncio
 import logging
-
+import os
+import signal
+from contextlib import suppress
 from typing import Optional
-import argparse
 
-from homecontrol.dependencies.event_engine import EventEngine
-from homecontrol.dependencies.module_manager import ModuleManager
-from homecontrol.dependencies.item_manager import ItemManager
+from homecontrol.const import (EVENT_CORE_BOOTSTRAP_COMPLETE, EXIT_RESTART,
+                               EXIT_SHUTDOWN)
 from homecontrol.dependencies.config_manager import ConfigManager
-
-from homecontrol.const import (
-    EXIT_SHUTDOWN,
-    EXIT_RESTART,
-    EVENT_CORE_BOOTSTRAP_COMPLETE
-)
+from homecontrol.dependencies.event_engine import EventEngine
+from homecontrol.dependencies.item_manager import ItemManager
+from homecontrol.dependencies.module_manager import ModuleManager
 
 LOGGER = logging.getLogger(__name__)
 

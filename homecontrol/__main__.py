@@ -1,29 +1,23 @@
 """The entrypoint for HomeControl"""
 
-import subprocess
-import shutil
-from contextlib import suppress
+import argparse
+import asyncio
 import logging
 import logging.config
-import asyncio
-import sys
-import argparse
 import os
-
-from typing import (
-    List, Optional
-)
+import shutil
+import subprocess
+import sys
+from contextlib import suppress
+from typing import List, Optional
 
 import aiomonitor
 import pkg_resources
 import yaml
 
+from homecontrol.const import EXIT_RESTART, MINIMUM_PYTHON_VERSION
 from homecontrol.core import Core
 from homecontrol.dependencies.yaml_loader import YAMLLoader
-from homecontrol.const import (
-    MINIMUM_PYTHON_VERSION,
-    EXIT_RESTART
-)
 
 CONFIG_FILE_NAME = "configuration.yaml"
 

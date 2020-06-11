@@ -1,14 +1,10 @@
 """Data models required by the auth module"""
-import uuid
 import secrets
+import uuid
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
-from typing import (
-    Optional,
-    Dict,
-    Any
-)
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 # pylint: disable=too-few-public-methods
 

@@ -1,12 +1,16 @@
 """The auth endpoints"""
-from typing import TYPE_CHECKING
 from datetime import timedelta
 from json import JSONDecodeError
-from aiohttp import web, hdrs
+from typing import TYPE_CHECKING
+
+from aiohttp import hdrs, web
+
 import voluptuous as vol
-from homecontrol.modules.api.view import APIView
 from homecontrol.dependencies.json_response import JSONResponse
+from homecontrol.modules.api.view import APIView
+
 from .decorator import needs_auth
+
 if TYPE_CHECKING:
     from .auth import AuthManager
     from .auth.login_flows import FlowManager

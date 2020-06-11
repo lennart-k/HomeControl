@@ -1,10 +1,11 @@
 """system monitor module"""
 import asyncio
+
 import psutil
 
-from homecontrol.dependencies.state_engine import StateDef
 from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
+from homecontrol.dependencies.state_engine import StateDef
 
 SPEC = {
     "name": "System Monitor",

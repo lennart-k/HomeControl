@@ -2,9 +2,10 @@
 
 import os
 import sys
-from typing import Iterable
 from subprocess import Popen
-from pkg_resources import require, VersionConflict, DistributionNotFound
+from typing import Iterable
+
+from pkg_resources import DistributionNotFound, VersionConflict, require
 
 from homecontrol.exceptions import PipInstallError
 

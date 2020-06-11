@@ -1,7 +1,7 @@
 """ActionEngine for HomeControl"""
 
-from typing import Callable, Union
 from asyncio import iscoroutinefunction
+from typing import Callable, Union
 
 
 def action(arg: Union[Callable, str]) -> Callable:

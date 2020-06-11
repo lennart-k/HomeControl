@@ -1,24 +1,26 @@
 """The Frontend module"""
 
-import os
-import logging
-
 import json
-from typing import Iterator, List, TYPE_CHECKING
-from aiohttp import web, web_urldispatcher
-import voluptuous as vol
+import logging
+import os
+from typing import TYPE_CHECKING, Iterator, List
 
-from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
-from homecontrol_frontend import RESOURCE_PATH
-from homecontrol.modules.websocket.command import WebSocketCommand
+from aiohttp import web, web_urldispatcher
 from yarl import URL
-from homecontrol.modules.api.view import APIView
+
+import voluptuous as vol
+from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.dependencies.entity_types import Module as ModuleType
-if TYPE_CHECKING:
-    from homecontrol.core import Core
+from homecontrol.modules.api.view import APIView
+from homecontrol.modules.websocket.command import WebSocketCommand
+from homecontrol_frontend import RESOURCE_PATH
 
 from .commands import add_commands
 from .panel import Panel
+
+if TYPE_CHECKING:
+    from homecontrol.core import Core
+
 
 LOGGER = logging.getLogger(__name__)
 

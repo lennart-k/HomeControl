@@ -1,7 +1,9 @@
 """JSONResponse module"""
 
 from typing import Any
+
 from aiohttp import web
+
 from homecontrol.dependencies import json
 
 

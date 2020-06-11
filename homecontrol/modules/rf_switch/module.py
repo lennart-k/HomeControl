@@ -1,12 +1,12 @@
 """A module for the old Intertechno switches"""
 
-from typing import (Dict)
-import voluptuous as vol
+from typing import Dict
 
+import voluptuous as vol
+from homecontrol.const import ItemStatus
+from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.state_engine import StateDef
-from homecontrol.dependencies.action_engine import action
-from homecontrol.const import ItemStatus
 
 from .dependencies.intertechno_codes import from_code, to_code
 

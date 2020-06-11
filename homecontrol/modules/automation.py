@@ -4,9 +4,8 @@ import asyncio
 import logging
 
 import voluptuous as vol
-
-from homecontrol.core import Core
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
+from homecontrol.core import Core
 
 LOGGER = logging.getLogger(__name__)
 

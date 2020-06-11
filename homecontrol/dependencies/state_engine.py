@@ -1,13 +1,12 @@
 """StateEngine module"""
 import asyncio
 import logging
-from typing import Any, Callable, Optional
 from types import MethodType
+from typing import Any, Callable, Optional
+
 import voluptuous as vol
 from homecontrol.const import ItemStatus
-from homecontrol.exceptions import (
-    ItemNotOnlineError
-)
+from homecontrol.exceptions import ItemNotOnlineError
 
 LOGGER = logging.getLogger(__name__)
 

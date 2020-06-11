@@ -2,10 +2,11 @@
 
 # pylint: disable=invalid-name,too-few-public-methods,import-self
 import json
-from functools import partial
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from functools import partial
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from homecontrol.core import Core
 

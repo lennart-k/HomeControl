@@ -1,12 +1,12 @@
 """The http server"""
 
-import os
 import logging
+import os
 import ssl
 
-import voluptuous as vol
 from aiohttp import web
 
+import voluptuous as vol
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 
 SPEC = {

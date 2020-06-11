@@ -3,8 +3,9 @@ This extension currently copies docs from the homecontrol package
 to _homecontrol so that module documentations are automatically included
 """
 
-import shutil
 import os
+import shutil
+
 import pkg_resources
 from sphinx.application import Sphinx
 

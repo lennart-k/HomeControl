@@ -1,6 +1,8 @@
 """The API view module"""
 from typing import Any, Union
+
 from aiohttp import web
+
 from homecontrol.core import Core
 from homecontrol.dependencies.json_response import JSONResponse
 

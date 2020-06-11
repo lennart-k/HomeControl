@@ -1,22 +1,23 @@
 """ModuleManager module"""
 
-import sys
+import asyncio
 import importlib
 import importlib.util
-import os
-import asyncio
 import logging
-from typing import Dict, TYPE_CHECKING
+import os
+import sys
+from typing import TYPE_CHECKING, Dict
 
 import pkg_resources
-import voluptuous as vol
 
 import homecontrol
+import voluptuous as vol
 from homecontrol.const import EVENT_MODULE_LOADED
-from homecontrol.dependencies.yaml_loader import YAMLLoader
-from homecontrol.dependencies.entity_types import Module
 from homecontrol.dependencies.ensure_pip_requirements import ensure_packages
+from homecontrol.dependencies.entity_types import Module
+from homecontrol.dependencies.yaml_loader import YAMLLoader
 from homecontrol.exceptions import PipInstallError
+
 if TYPE_CHECKING:
     from homecontrol.core import Core
 

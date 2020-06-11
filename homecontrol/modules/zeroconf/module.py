@@ -1,14 +1,14 @@
 """zeroconf support for HomeControl"""
 
 import asyncio
-from functools import partial
 import logging
-from zeroconf import ServiceBrowser, Zeroconf, ServiceStateChange
-from homecontrol.dependencies.entity_types import ModuleDef
+from functools import partial
 
-from homecontrol.const import (
-    EVENT_CORE_BOOTSTRAP_COMPLETE, EVENT_MODULE_LOADED
-)
+from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
+
+from homecontrol.const import (EVENT_CORE_BOOTSTRAP_COMPLETE,
+                               EVENT_MODULE_LOADED)
+from homecontrol.dependencies.entity_types import ModuleDef
 
 LOGGER = logging.getLogger(__name__)
 

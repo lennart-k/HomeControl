@@ -3,11 +3,13 @@
 import base64
 import hashlib
 from typing import Optional
+
 import bcrypt
 import pyotp
+
 import voluptuous as vol
 
-from ..models import User, Credentials
+from ..models import Credentials, User
 
 DUMMY_HASH = b'$2b$12$aZFoxzj4axZgsa1oyGYQmecFwGYFzX/YvObOTCNE6Za9r9ixdUm/y'
 

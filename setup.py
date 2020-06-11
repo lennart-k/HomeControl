@@ -1,6 +1,6 @@
 """Setup script to install HomeControl as a package"""
 
-from setuptools import setup, find_namespace_packages
+from setuptools import find_namespace_packages, setup
 
 from homecontrol import const
 

@@ -1,10 +1,11 @@
 """Bitcoin stats"""
 import asyncio
-import requests
-import voluptuous as vol
 
-from homecontrol.dependencies.entity_types import Item
+import requests
+
+import voluptuous as vol
 from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef
 
 SPEC = {

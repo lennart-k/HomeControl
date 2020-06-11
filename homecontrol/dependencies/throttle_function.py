@@ -1,7 +1,7 @@
 """throttle_function"""
 
-from functools import wraps
 import time
+from functools import wraps
 from typing import Callable
 
 

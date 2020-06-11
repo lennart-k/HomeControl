@@ -1,6 +1,7 @@
 """WebHooks for HomeControl"""
 
 import json
+
 from aiohttp import web
 
 SPEC = {

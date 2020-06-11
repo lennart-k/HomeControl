@@ -1,7 +1,9 @@
 """Frontend websocket commands"""
 from typing import TYPE_CHECKING
-from homecontrol.modules.websocket.command import WebSocketCommand
+
 from homecontrol.modules.auth.decorator import needs_auth
+from homecontrol.modules.websocket.command import WebSocketCommand
+
 if TYPE_CHECKING:
     from .module import Module
 

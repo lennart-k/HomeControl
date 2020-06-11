@@ -1,9 +1,10 @@
 """The API for HomeControl"""
 
 import logging
-
 from typing import Callable
+
 from aiohttp import web
+
 import voluptuous as vol
 
 from .endpoints import add_routes

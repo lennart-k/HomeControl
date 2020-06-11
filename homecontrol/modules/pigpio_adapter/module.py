@@ -2,14 +2,15 @@
 
 import asyncio
 from contextlib import suppress
-import pigpio
-import voluptuous as vol
 
-from homecontrol.dependencies.throttle_function import throttle
+import pigpio
+
+import voluptuous as vol
+from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.data_types import Color
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef
-from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.throttle_function import throttle
 
 from .dependencies.lcd import LCD
 

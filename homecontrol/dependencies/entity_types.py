@@ -3,14 +3,14 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
-from typing import Optional, TYPE_CHECKING
-
 import logging
+from typing import TYPE_CHECKING, Optional
+
 import voluptuous as vol
-from homecontrol.const import ItemStatus
-from homecontrol.dependencies.state_engine import StateEngine
+from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
 from homecontrol.dependencies.action_engine import ActionEngine
-from homecontrol.const import EVENT_ITEM_STATUS_CHANGED
+from homecontrol.dependencies.state_engine import StateEngine
+
 if TYPE_CHECKING:
     from homecontrol.core import Core
 

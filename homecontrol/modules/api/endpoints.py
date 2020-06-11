@@ -1,21 +1,19 @@
 """"API endpoints"""
 
-from collections import ChainMap
 import json
 import logging
-import voluptuous as vol
+from collections import ChainMap
+
 from aiohttp import web
-from homecontrol.const import (
-    ERROR_ITEM_NOT_FOUND,
-    ITEM_STATE_NOT_FOUND,
-    ITEM_ACTION_NOT_FOUND,
-    ERROR_INVALID_ITEM_STATES,
-    ERROR_INVALID_ITEM_STATE,
-    ItemStatus
-)
-from homecontrol.modules.auth.decorator import needs_auth
+
+import voluptuous as vol
+from homecontrol.const import (ERROR_INVALID_ITEM_STATE,
+                               ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
+                               ITEM_ACTION_NOT_FOUND, ITEM_STATE_NOT_FOUND,
+                               ItemStatus)
 from homecontrol.dependencies.json_response import JSONResponse
 from homecontrol.exceptions import ItemNotOnlineError
+from homecontrol.modules.auth.decorator import needs_auth
 
 from .view import APIView
 

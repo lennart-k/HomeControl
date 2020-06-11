@@ -1,25 +1,17 @@
 """Auth module"""
-from datetime import datetime, timedelta
-
-from typing import (
-    Dict,
-    Optional
-)
-
 import logging
 import time
+from datetime import datetime, timedelta
+from typing import Dict, Optional
+
 import jwt
 
 from homecontrol.core import Core
-from homecontrol.dependencies.storage import Storage, DictWrapper
-from .models import (
-    AccessToken,
-    RefreshToken,
-    User,
-    AuthorizationCode,
-    Credentials
-)
+from homecontrol.dependencies.storage import DictWrapper, Storage
+
 from .credential_provider import CREDENTIAL_PROVIDERS
+from .models import (AccessToken, AuthorizationCode, Credentials, RefreshToken,
+                     User)
 
 LOGGER = logging.getLogger(__name__)
 ACCESS_TOKEN_EXPIRATION = timedelta(minutes=30)

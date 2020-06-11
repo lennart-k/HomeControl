@@ -1,20 +1,17 @@
 """Provides login flows"""
 
-from typing import (
-    Union,
-    Optional,
-    Callable
-)
-from functools import partial
 import uuid
+from functools import partial
+from typing import Callable, Optional, Union
+
 import bcrypt
+
 import voluptuous as vol
 
 from .. import AuthManager
+from ..credential_provider import (CredentialProvider,
+                                   PasswordCredentialProvider)
 from ..models import User
-from ..credential_provider import (
-    PasswordCredentialProvider, CredentialProvider
-)
 
 # pylint: disable=redefined-builtin,invalid-name
 

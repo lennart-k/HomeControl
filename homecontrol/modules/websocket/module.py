@@ -1,16 +1,17 @@
 """WebSocket module"""
 
+import asyncio
 # pylint: disable=relative-beyond-top-level
 import logging
-import asyncio
-from typing import Union, TYPE_CHECKING
-from aiohttp import web
-import voluptuous as vol
+from typing import TYPE_CHECKING, Union
 
+from aiohttp import web
+
+import voluptuous as vol
 from homecontrol.const import MAX_PENDING_WS_MSGS
 from homecontrol.dependencies.entity_types import ModuleDef
 
-from .commands import add_commands, WebSocketCommand
+from .commands import WebSocketCommand, add_commands
 from .message import WebSocketMessage
 
 if TYPE_CHECKING:

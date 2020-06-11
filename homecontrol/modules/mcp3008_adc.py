@@ -1,11 +1,11 @@
 """Supports the MCP3008 ADC using PiGPIO"""
 
 import logging
+
 import voluptuous as vol
+from homecontrol.const import ItemStatus
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_engine import StateDef
-from homecontrol.const import ItemStatus
-
 
 SPEC = {
     "name": "MCP3008",

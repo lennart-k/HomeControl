@@ -1,14 +1,16 @@
 """Provides OAuth2 for HomeControl"""
-from typing import Callable
 import logging
+from typing import Callable
+
 from aiohttp import web
+
 import voluptuous as vol
 from homecontrol.core import Core
 
-from .endpoints import add_routes
 from .auth import AuthManager
-from .auth.login_flows import FlowManager
 from .auth.auth_providers import AUTH_PROVIDERS
+from .auth.login_flows import FlowManager
+from .endpoints import add_routes
 
 LOGGER = logging.getLogger(__name__)
 

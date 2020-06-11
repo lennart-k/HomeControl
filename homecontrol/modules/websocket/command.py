@@ -1,6 +1,7 @@
 """The WebSocket command class"""
-from typing import Union, TYPE_CHECKING
 import asyncio
+from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     # pylint: disable=relative-beyond-top-level
     from homecontrol.core import Core

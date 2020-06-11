@@ -1,18 +1,18 @@
 """Provides a YAML loader"""
 
 import itertools
-import os
 import logging
+import os
 
 import yaml
-from yaml.reader import Reader
-from yaml.scanner import Scanner
-from yaml.parser import Parser
 from yaml.composer import Composer
 from yaml.constructor import SafeConstructor
+from yaml.parser import Parser
+from yaml.reader import Reader
 from yaml.resolver import Resolver
-import voluptuous as vol
+from yaml.scanner import Scanner
 
+import voluptuous as vol
 from homecontrol.dependencies.resolve_path import resolve_path
 
 LOGGER = logging.getLogger(__name__)

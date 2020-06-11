@@ -1,16 +1,15 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
 from collections import ChainMap
+
 import voluptuous as vol
-from homecontrol.modules.auth.decorator import needs_auth
+from homecontrol.const import (ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
+                               EVENT_ITEM_STATUS_CHANGED,
+                               ITEM_ACTION_NOT_FOUND)
 from homecontrol.dependencies.entity_types import Item, ItemStatus
 from homecontrol.dependencies.event_engine import Event
-from homecontrol.const import (
-    ERROR_ITEM_NOT_FOUND,
-    ITEM_ACTION_NOT_FOUND,
-    ERROR_INVALID_ITEM_STATES,
-    EVENT_ITEM_STATUS_CHANGED
-)
+from homecontrol.modules.auth.decorator import needs_auth
+
 from .command import WebSocketCommand
 
 

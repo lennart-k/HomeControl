@@ -1,12 +1,10 @@
 """EventEngine for HomeControl"""
 
-from typing import (
-    List, Callable, Any, Union
-)
 import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
+from typing import Any, Callable, List, Union
 
 LOGGER = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """Helper module to resolve paths relative to the config folder"""
 
-import os
 import logging
+import os
 
 LOGGER = logging.getLogger(__name__)
 

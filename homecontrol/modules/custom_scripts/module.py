@@ -1,8 +1,8 @@
 """Custom python scripts in HomeControl"""
 
-import os
-import logging
 import importlib
+import logging
+import os
 
 import voluptuous as vol
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE

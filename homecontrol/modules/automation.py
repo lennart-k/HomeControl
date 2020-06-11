@@ -79,6 +79,7 @@ class StateTriggerProvider:
 
 class TimerTriggerProvider:
     """A timer as a trigger provider"""
+
     def __init__(self, rule, engine) -> None:
         self.rule = rule
         self.engine = engine

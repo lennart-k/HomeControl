@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 class StateDef:
     """A state definition for automatic setup"""
+
     def __init__(
             self,
             poll_interval: Optional[float] = None,
@@ -65,6 +66,7 @@ class StateDef:
 
 class StateEngine:
     """Holds the states of an item"""
+
     def __init__(
             self,
             item: "homecontrol.dependencies.entity_types.Item",

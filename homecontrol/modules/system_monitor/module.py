@@ -11,6 +11,7 @@ SPEC = {
     "description": "Monitor your CPU and memory usage"
 }
 
+
 class Module(ModuleDef):
     """Automatically register SystemMonitor"""
     async def init(self) -> None:
@@ -20,6 +21,7 @@ class Module(ModuleDef):
             name="System Monitor",
             provider="system_monitor"
         ))
+
 
 class SystemMonitor(Item):
     """The SystemMonitor item"""

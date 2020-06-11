@@ -12,6 +12,7 @@ class AuthProvider:
     An authentication provider is an object that takes an HTTP request
     and optionally returns a User
     """
+
     def __init__(self, auth_manager: AuthManager, cfg) -> None:
         self.auth_manager = auth_manager
         self.cfg = cfg
@@ -51,6 +52,7 @@ class OauthAuthProvider(AuthProvider):
 
 class TrustedClientsAuthProvider(AuthProvider):
     """Allows clients to identify by their network address"""
+
     def __init__(self, auth_manager: AuthManager, cfg: dict) -> None:
         super().__init__(auth_manager, cfg)
         self.trusted_networks = {}

@@ -17,6 +17,7 @@ def package_installed(package: str) -> bool:
     except (DistributionNotFound, VersionConflict):
         return False
 
+
 def install_for_user() -> bool:
     """Checks if a package should be installed only for the user"""
     return not (
@@ -25,6 +26,7 @@ def install_for_user() -> bool:
         or os.path.isfile("/.dockerenv")  # Docker
         or os.geteuid() == 0              # Root
     )
+
 
 def ensure_packages(
         packages: Iterable[str],

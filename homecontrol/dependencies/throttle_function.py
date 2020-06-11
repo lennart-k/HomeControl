@@ -9,6 +9,7 @@ from typing import Callable
 # pylint: disable=too-few-public-methods
 class throttle:
     """Throttles a function so it only gets called at a fixed frequency"""
+
     def __init__(self, s: float = 1):
         self.throttle_period = s
         self.time_of_last_call = time.time()

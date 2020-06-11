@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 class IsItem:
     """A validator to get an item"""
+
     def __init__(self, core: "Core", msg: str = None) -> None:
         self.core = core
         self.msg = msg

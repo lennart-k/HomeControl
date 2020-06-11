@@ -85,7 +85,7 @@ class Chromecast(Item):
     async def get_playtime(self) -> float:
         """Getter for playtime"""
         return (self.media_controller.status.current_time
-                + (time.time()-self.last_status
+                + (time.time() - self.last_status
                    if await self.states.get('playing') else 0))
 
     @playtime.setter()

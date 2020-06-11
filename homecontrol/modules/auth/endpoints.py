@@ -340,6 +340,7 @@ class TokenView(AuthView):
             hdrs.CACHE_CONTROL: "no-store"
         })
 
+
 @needs_auth()
 class UserInfoView(APIView):
     """Returns information about the current user"""

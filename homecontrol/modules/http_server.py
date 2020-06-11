@@ -30,6 +30,7 @@ logging.getLogger("aiohttp").setLevel(logging.WARNING)
 
 class SSLLogFilter(logging.Filter):
     """Filter ssl.SSLError from logs"""
+
     def filter(self, record: logging.LogRecord) -> bool:
         """Filter function"""
         return not (record.exc_info and record.exc_info[0] == ssl.SSLError)

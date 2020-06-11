@@ -45,7 +45,7 @@ class WatchStatesCommand(WebSocketCommand):
 
     async def handle(self) -> None:
         """Handle the watch_states command"""
-        if not self.command in self.session.subscriptions:
+        if self.command not in self.session.subscriptions:
             self.core.event_engine.register(
                 "state_change")(self.on_state_change)
 
@@ -74,7 +74,7 @@ class WatchStatusCommand(WebSocketCommand):
 
     async def handle(self) -> None:
         """Handle the watch_status command"""
-        if not self.command in self.session.subscriptions:
+        if self.command not in self.session.subscriptions:
             self.core.event_engine.register(
                 EVENT_ITEM_STATUS_CHANGED)(self.on_status_change)
 

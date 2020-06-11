@@ -70,6 +70,7 @@ class SzeneActionProvider:
     """
     A wrapper for invoke_szene to properly handle config reloads
     """
+
     def __init__(self, name: str, module: Module) -> None:
         self.name = name
         self.module = module
@@ -84,6 +85,7 @@ class Szene:
     A Szene is a set of states that should be set
     of triggers and actions that should be executed when invoked
     """
+
     def __init__(self, module, data):
         self.core = module.core
         self.data = data

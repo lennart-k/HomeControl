@@ -43,6 +43,7 @@ class Module:
 
 class WebhookTriggerProvider:
     """The trigger provider for automation"""
+
     def __init__(self, rule, engine):
         self.rule = rule
         self.engine = engine

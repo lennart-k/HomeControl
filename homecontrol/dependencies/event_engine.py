@@ -33,6 +33,7 @@ class Event:
 
 class EventEngine:
     """Dispatcher for events"""
+
     def __init__(self, core) -> None:
         self.core = core
         self.handlers = defaultdict(set)

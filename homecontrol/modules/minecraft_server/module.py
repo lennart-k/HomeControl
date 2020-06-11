@@ -50,7 +50,7 @@ class MinecraftServer(Item):
         except OSError:
             self.update_status(ItemStatus.OFFLINE)
             return False
-        except:  # pylint: disable=bare-except
+        except BaseException:  # pylint: disable=bare-except
             LOGGER.error("Error:", exc_info=True)
             return False
 

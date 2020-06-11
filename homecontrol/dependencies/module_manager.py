@@ -38,12 +38,14 @@ class ModuleFolder:
     module folder representation to create
     a dummy package in sys.modules
     """
+
     def __init__(self, name: str) -> None:
         self.__name__ = name
 
 
 class ModuleAccessor(object):
     """Wrapper for ModuleManager.loaded_modules"""
+
     def __init__(self, module_manager: "ModuleManager") -> None:
         self._module_manager = module_manager
 

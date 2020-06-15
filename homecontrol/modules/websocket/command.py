@@ -48,10 +48,6 @@ class WebSocketCommand:
         """Return a success response"""
         return self.message.success(data)
 
-    def error(self, error_type: str, message: str) -> dict:
-        """Return a error"""
-        return self.message.error(error_type, message)
-
     def error(
             self, error: Union[str, Exception], message: str = None) -> dict:
         """Return an error"""

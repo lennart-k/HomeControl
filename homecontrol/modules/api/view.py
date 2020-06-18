@@ -1,17 +1,19 @@
 """The API view module"""
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from aiohttp import web
 
-from homecontrol.core import Core
 from homecontrol.dependencies.json_response import JSONResponse
+
+if TYPE_CHECKING:
+    from homecontrol.core import Core
 
 
 class APIView(web.View):
     """
     An API view
     """
-    core: Core
+    core: "Core"
     path: str
 
     def __init__(self, request):

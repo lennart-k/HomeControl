@@ -12,7 +12,6 @@ import voluptuous as vol
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.dependencies.entity_types import Module as ModuleType
 from homecontrol.modules.api.view import APIView
-from homecontrol.modules.websocket.command import WebSocketCommand
 from homecontrol_frontend import RESOURCE_PATH
 
 from .commands import add_commands

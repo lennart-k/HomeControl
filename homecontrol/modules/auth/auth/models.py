@@ -50,7 +50,6 @@ class User:
     """Represents a user"""
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
-    salted_password: str = attrib(default=None)
     credentials: Dict[str, "Credentials"] = attrib(default={})
     system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)

@@ -12,12 +12,13 @@ module-manager:
     # key: !path ssl/private_key.pem
     # certificate: !path ssl/certificate.pem
 
-api-server:
-  headers:
-    Allow: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS
-    Access-Control-Request-Method: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS
-    Access-Control-Allow-Origin: "*"
-    Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
+# api-server:
+#   Uncomment for CORS
+#   headers:
+#     Allow: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS
+#     Access-Control-Request-Method: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS
+#     Access-Control-Allow-Origin: "*"
+#     Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
 
 auth:
   providers:

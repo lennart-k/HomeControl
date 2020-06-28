@@ -1,0 +1,5 @@
+name: Speedtest
+description: Checks the internet speed with speedtest.net
+
+pip-requirements:
+  - speedtest-cli==2.1.2

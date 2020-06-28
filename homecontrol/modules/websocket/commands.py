@@ -1,6 +1,7 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
 from collections import ChainMap
+from typing import TYPE_CHECKING
 
 import voluptuous as vol
 from homecontrol.const import (ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
@@ -11,6 +12,10 @@ from homecontrol.dependencies.event_engine import Event
 from homecontrol.modules.auth.decorator import needs_auth
 
 from .command import WebSocketCommand
+
+if TYPE_CHECKING:
+    from homecontrol.modules.auth.module import Module as AuthModule
+    from homecontrol.modules.auth.auth.models import User
 
 
 def add_commands(add_command):
@@ -26,6 +31,7 @@ def add_commands(add_command):
     add_command(SetStatesCommand)
     add_command(CoreShutdownCommand)
     add_command(CoreRestartCommand)
+    add_command(GetUsersCommand)
 
 
 class PingCommand(WebSocketCommand):
@@ -280,3 +286,23 @@ class CoreRestartCommand(WebSocketCommand):
         """Handle the restart command"""
         self.core.loop.call_soon(self.core.restart)
         return self.success("Restarting")
+
+
+@needs_auth(owner_only=True)
+class GetUsersCommand(WebSocketCommand):
+    """Returns the users"""
+    command = "get_users"
+
+    async def handle(self) -> None:
+        """Handle the get_users command"""
+        auth_module: "AuthModule" = self.core.modules.auth
+        out = []
+        for user in auth_module.auth_manager.users.values():
+            user: "User" = user
+            out.append({
+                "name": user.name,
+                "system_generated": user.system_generated,
+                "identifier": user.id,
+                "owner": user.owner
+            })
+        return self.success(out)

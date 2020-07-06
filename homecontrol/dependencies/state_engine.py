@@ -141,11 +141,10 @@ class State:
                  getter: Callable = None,
                  setter: Callable = None,
                  name: str = None,
-                 state_type: type = None,
                  schema: dict = None,
                  poll_interval: float = None,
                  log_state: bool = True) -> None:
-        self.value = default if not state_type else state_type(default)
+        self.value = default
         self.name = name
         self.getter = getter
         self.setter = setter

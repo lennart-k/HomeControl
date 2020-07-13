@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Optional
 import voluptuous as vol
 from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
 from homecontrol.dependencies.action_engine import ActionEngine
-from homecontrol.dependencies.state_engine import StateEngine
+from homecontrol.dependencies.state_proxy import StateProxy
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -28,7 +28,7 @@ class Item:
     cfg: dict
     config_schema: vol.Schema = vol.Schema(object)
     module: Optional["Module"]
-    states: StateEngine
+    states: StateProxy
     actions: ActionEngine
 
     @classmethod
@@ -46,7 +46,7 @@ class Item:
         item.cfg = item.config_schema(cfg or {})
         item.status = ItemStatus.OFFLINE
 
-        item.states = StateEngine(
+        item.states = StateProxy(
             item, core, state_defaults=state_defaults or {})
         item.actions = ActionEngine(item, core)
         return item

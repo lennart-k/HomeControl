@@ -5,7 +5,7 @@ import logging
 import voluptuous as vol
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.state_proxy import StateDef
 
 SPEC = {
     "name": "MCP3008",

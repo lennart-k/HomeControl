@@ -6,7 +6,7 @@ import voluptuous as vol
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.entity_types import Item, ModuleDef
-from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.state_proxy import StateDef
 
 from .dependencies.intertechno_codes import from_code, to_code
 

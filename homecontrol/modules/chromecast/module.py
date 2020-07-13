@@ -10,14 +10,13 @@ import voluptuous as vol
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
-from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.state_proxy import StateDef
 
 if TYPE_CHECKING:
     from zeroconf import Zeroconf
 
 with suppress(ImportError):
     from zeroconf import ServiceStateChange
-
 
 
 class Module(ModuleDef):

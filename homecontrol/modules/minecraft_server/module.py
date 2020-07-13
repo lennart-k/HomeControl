@@ -7,7 +7,7 @@ from mcstatus import MinecraftServer as MCServer
 import voluptuous as vol
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.entity_types import Item, ItemStatus
-from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.state_proxy import StateDef
 
 LOGGER = logging.getLogger(__name__)
 

@@ -8,10 +8,9 @@ from requests.exceptions import ConnectionError
 import voluptuous as vol
 from homecontrol.dependencies.action_engine import action
 from homecontrol.dependencies.entity_types import Item
-from homecontrol.dependencies.state_engine import StateDef
+from homecontrol.dependencies.state_proxy import StateDef
 
 # pylint: disable=redefined-builtin
-
 
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)

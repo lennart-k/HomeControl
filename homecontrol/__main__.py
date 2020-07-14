@@ -38,12 +38,6 @@ def parse_args() -> argparse.Namespace:
               "Ensures that only one session is running. "
               "Defaults to the configuration path"))
     parser.add_argument(
-        "--clearport",
-        action="store_true",
-        default=None,
-        help=("Frees the port for the API server using fuser. "
-              "Therefore only available on Linux"))
-    parser.add_argument(
         "--verbose",
         action="store_true",
         default=None,
@@ -73,6 +67,13 @@ def parse_args() -> argparse.Namespace:
             action="store_true",
             default=None,
             help="Start HomeControl as a daemon process [posix only]")
+        parser.add_argument(
+            "--freeport",
+            action="store_true",
+            default=None,
+            help=("Frees the port for the API server using fuser. "
+                  "Therefore only available on Linux"))
+
     return parser.parse_args()
 
 
@@ -357,7 +358,7 @@ def main() -> None:
         except IOError:
             LOGGER.warning("Cannot write pid file %s", args.pid_file)
 
-    if args.clearport and cfg.get("http-server", {}).get("port"):
+    if args.freeport and cfg.get("http-server", {}).get("port"):
         clear_port(cfg["http-server"]["port"])
 
     set_loop_policy()

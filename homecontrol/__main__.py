@@ -25,8 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def parse_args() -> argparse.Namespace:
-    """Returns the ArgumentParser"""
-    # pylint: disable=line-too-long
+    """Returns the command-line arguments"""
     parser = argparse.ArgumentParser(description="HomeControl")
     parser.add_argument(
         "--cfgdir", "-cd",

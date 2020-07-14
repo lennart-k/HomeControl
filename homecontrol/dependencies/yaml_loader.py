@@ -3,7 +3,7 @@
 import itertools
 import logging
 import os
-from typing import Dict, List, Union
+from typing import Union
 
 import yaml
 from yaml.composer import Composer

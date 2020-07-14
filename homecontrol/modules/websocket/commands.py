@@ -154,7 +154,7 @@ class GetItemsCommand(WebSocketCommand):
                 "type": item.type,
                 "module": item.module.name,
                 "status": item.status.value,
-                "actions": list(item.actions.actions.keys()),
+                "actions": list(item.actions.keys()),
                 "states": await item.states.dump()
             } for item in self.core.item_manager.items.values()
         ])
@@ -204,7 +204,7 @@ class ActionCommand(WebSocketCommand):
                 f"The item {item.identifier} is not online"
             )
 
-        if action not in item.actions.actions:
+        if action not in item.actions:
             return self.error(
                 ITEM_ACTION_NOT_FOUND,
                 f"Item {identifier} of type {item.type} "
@@ -212,7 +212,7 @@ class ActionCommand(WebSocketCommand):
 
         try:
             return self.success({
-                "result": await item.actions.execute(action, **kwargs)
+                "result": await item.run_action(action, **kwargs)
             })
         # pylint: disable=broad-except
         except Exception as err:

@@ -4,7 +4,7 @@ import logging
 
 import speedtest
 
-from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.action_decorator import action
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_proxy import StateDef
 

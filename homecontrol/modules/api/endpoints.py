@@ -100,7 +100,7 @@ class ListItemsView(APIView):
                 "type": item.type,
                 "module": item.module.name,
                 "status": item.status.value,
-                "actions": list(item.actions.actions.keys())
+                "actions": list(item.actions.keys())
             } for item in self.core.item_manager.items.values()
         ])
 
@@ -269,7 +269,7 @@ class ActionsView(APIView):
                 ERROR_ITEM_NOT_FOUND,
                 f"No item found with identifier {identifier}", status_code=404)
 
-        return self.json(data=list(item.actions.actions.keys()))
+        return self.json(data=list(item.actions.keys()))
 
 
 @needs_auth()
@@ -297,7 +297,7 @@ class ExecuteActionView(APIView):
         except json.JSONDecodeError as e:
             return self.error(e)
 
-        if action_name not in item.actions.actions:
+        if action_name not in item.actions:
             return self.error(
                 ITEM_ACTION_NOT_FOUND,
                 f"Item {identifier} of type {item.type} "
@@ -307,7 +307,7 @@ class ExecuteActionView(APIView):
             return self.json({
                 "item": item.identifier,
                 "action": action_name,
-                "result": await item.actions.execute(action_name, **kwargs)
+                "result": await item.run_action(action_name, **kwargs)
             })
         # pylint: disable=broad-except
         except Exception as e:

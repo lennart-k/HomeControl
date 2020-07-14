@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pychromecast
 
 import voluptuous as vol
-from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.action_decorator import action
 from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
 from homecontrol.dependencies.state_proxy import StateDef

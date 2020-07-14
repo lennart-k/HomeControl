@@ -4,11 +4,10 @@ Every new Item or Module will get one of these classes as a base class
 """
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import Callable, Dict, TYPE_CHECKING, Optional
 
 import voluptuous as vol
 from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
-from homecontrol.dependencies.action_engine import ActionEngine
 from homecontrol.dependencies.state_proxy import StateProxy
 
 if TYPE_CHECKING:
@@ -29,7 +28,7 @@ class Item:
     config_schema: vol.Schema = vol.Schema(object)
     module: Optional["Module"]
     states: StateProxy
-    actions: ActionEngine
+    actions: Dict[str, Callable]
 
     @classmethod
     async def constructor(
@@ -48,7 +47,13 @@ class Item:
 
         item.states = StateProxy(
             item, core, state_defaults=state_defaults or {})
-        item.actions = ActionEngine(item, core)
+
+        item.actions = {}
+        for attribute in dir(item):
+            func = getattr(item, attribute)
+            if hasattr(func, "action_name"):
+                item.actions[getattr(func, "action_name")] = func
+
         return item
 
     def __repr__(self) -> str:
@@ -71,6 +76,15 @@ class Item:
         self.status = status
         self.core.event_engine.broadcast(
             EVENT_ITEM_STATUS_CHANGED, item=self, previous=previous_status)
+
+    async def run_action(self, name: str, *args, **kwargs) -> bool:
+        """Runs an action"""
+        if name in self.actions:
+            result = await self.actions[name](*args, **kwargs)
+            if result is False:
+                return False
+            return True
+        return False
 
 
 class Module:

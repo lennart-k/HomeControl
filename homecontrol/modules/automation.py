@@ -143,7 +143,7 @@ class ItemActionProvider:
                for key, ref in self.data.get("var-data", {}).items()}
         }
 
-        await target.actions.execute(self.data["action"], **params)
+        await target.run_action(self.data["action"], **params)
 
 
 class Module:

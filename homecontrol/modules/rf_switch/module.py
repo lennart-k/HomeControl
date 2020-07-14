@@ -4,7 +4,7 @@ from typing import Dict
 
 import voluptuous as vol
 from homecontrol.const import ItemStatus
-from homecontrol.dependencies.action_engine import action
+from homecontrol.dependencies.action_decorator import action
 from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.state_proxy import StateDef
 

@@ -100,6 +100,6 @@ class Szene:
                 await item.states.set(state_name, value)
 
             for action_instruction in data.get("action", []):
-                await item.actions.execute(
+                await item.run_action(
                     action_instruction["name"],
                     **action_instruction.get("data", {}))

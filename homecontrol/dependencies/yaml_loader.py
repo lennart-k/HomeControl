@@ -3,6 +3,7 @@
 import itertools
 import logging
 import os
+from typing import Dict, List, Union
 
 import yaml
 from yaml.composer import Composer
@@ -100,7 +101,7 @@ class Constructor(SafeConstructor):
         }
 
     def include_merge_constructor(self,
-                                  node: yaml.Node = None) -> (list, dict):
+                                  node: yaml.Node = None) -> Union[list, dict]:
         """
         !include <file|folder> ...
 

@@ -6,12 +6,12 @@ import importlib.util
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Union
 
 import pkg_resources
 
-import homecontrol
 import voluptuous as vol
+import homecontrol
 from homecontrol.const import EVENT_MODULE_LOADED
 from homecontrol.dependencies.ensure_pip_requirements import ensure_packages
 from homecontrol.dependencies.entity_types import Module
@@ -81,7 +81,7 @@ class ModuleManager:
         for folder in self.cfg["folders"]:
             await self.load_folder(folder)
 
-    async def load_folder(self, path: str) -> [object]:
+    async def load_folder(self, path: str) -> None:
         """Load every module in a folder"""
         load_tasks = []
         blacklist = self.cfg["blacklist"]
@@ -107,11 +107,10 @@ class ModuleManager:
                     load_tasks.append(self.core.loop.create_task(
                         self.load_file_module(mod_path, mod_name)))
 
-        return await asyncio.gather(*load_tasks)
+        await asyncio.gather(*load_tasks)
 
-    async def load_file_module(self,
-                               mod_path: str,
-                               name: str) -> (Module, Exception):
+    async def load_file_module(
+            self, mod_path: str, name: str) -> Union[Module, Exception]:
         """
         Loads a module from a file and initialises it
 
@@ -140,9 +139,8 @@ class ModuleManager:
 
         return await self._load_module_object(spec, name, mod_path, mod)
 
-    async def load_folder_module(self,
-                                 path: str,
-                                 name: str) -> (Module, Exception):
+    async def load_folder_module(
+            self, path: str, name: str) -> Union[Module, Exception]:
         """
         Loads a module from a folder and initialises it
 
@@ -190,11 +188,8 @@ class ModuleManager:
         mod_spec.loader.exec_module(mod)
         return await self._load_module_object(mod.SPEC, name, path, mod)
 
-    async def _load_module_object(self,
-                                  spec: dict,
-                                  name: str,
-                                  path: str,
-                                  mod) -> Module:
+    async def _load_module_object(
+            self, spec: dict, name: str, path: str, mod) -> Module:
         """
         Initialises a module object
         This method should only be invoked by ModuleManager

@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import TYPE_CHECKING, Iterator, List
+from typing import Optional, TYPE_CHECKING, Iterator, List
 
 from aiohttp import web, web_urldispatcher
 from yarl import URL
@@ -87,7 +87,7 @@ class AppView(web_urldispatcher.AbstractResource):
     def raw_match(self, path: str) -> bool:
         """Perform a raw match against path"""
 
-    async def get(self, request: web.Request) -> web.Response:
+    async def get(self, request: web.Request) -> Optional[web.FileResponse]:
         """GET /frontend/{path}"""
         path = request.path
         if path.startswith(self.prefix):
@@ -105,7 +105,7 @@ class ManifestView(APIView):
     """Serves the WebManifest"""
     path = "/manifest.webmanifest"
 
-    async def get(self) -> None:
+    async def get(self) -> web.Response:
         """GET /manifest.webmanifest"""
         data = json.dumps({
             "name": "HomeControl",

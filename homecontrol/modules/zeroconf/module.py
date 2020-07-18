@@ -29,7 +29,7 @@ class Module(ModuleDef):
         """
         Registers all loaded modules when core bootstrap is complete
         """
-        for module in self.core.module_manager.loaded_modules.values():
+        for module in self.core.modules:
             self.register_module(module)
 
     async def on_module_loaded(self, event, module: ModuleDef) -> None:

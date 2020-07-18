@@ -1,4 +1,4 @@
-"""EventEngine for HomeControl"""
+"""EventBus for HomeControl"""
 
 import asyncio
 import logging
@@ -29,7 +29,7 @@ class Event:
         return f"<Event {self.event_type} kwargs={self.kwargs} {self.data}>"
 
 
-class EventEngine:
+class EventBus:
     """Dispatcher for events"""
 
     def __init__(self, core) -> None:

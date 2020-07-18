@@ -163,7 +163,7 @@ class Chromecast(Item):
 
     def new_cast_status(self, status) -> None:
         """Handle new cast status"""
-        self.core.event_engine.broadcast(
+        self.core.event_bus.broadcast(
             "chromecast_cast_status", status=status)
 
     def new_media_status(self, status) -> None:

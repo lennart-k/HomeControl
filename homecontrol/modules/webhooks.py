@@ -15,14 +15,14 @@ class Module:
     async def init(self):
         """Initialise the module"""
 
-        @self.core.event_engine.register("http_add_api_routes")
+        @self.core.event_bus.register("http_add_api_routes")
         async def add_route(event, router):
             """Add an API route"""
 
             @router.get("/webhook/{target}")
             @router.post("/webhook/{target}")
             async def webhook_route(request):
-                self.core.event_engine.broadcast(
+                self.core.event_bus.broadcast(
                     "webhook_event",
                     target=request.match_info["target"], params={})
                 return web.Response(
@@ -31,7 +31,7 @@ class Module:
                         indent=4, sort_keys=True),
                     content_type="application/json")
 
-        @self.core.event_engine.register("gather_automation_providers")
+        @self.core.event_bus.register("gather_automation_providers")
         async def on_gather_automation_providers(event, engine, callback):
             """Register as an automation provider"""
             callback(trigger={"webhook": self.provider_factory})
@@ -53,7 +53,7 @@ class WebhookTriggerProvider:
         self.data = rule.data["trigger"]
         self.event = self.data["target"]
 
-        self.core.event_engine.register("webhook_event")(self.on_webhook)
+        self.core.event_bus.register("webhook_event")(self.on_webhook)
 
     async def on_webhook(self, event, target, params):
         """Handle WebHook event"""
@@ -62,4 +62,4 @@ class WebhookTriggerProvider:
 
     async def stop(self) -> None:
         """Stops the WebhookTriggerProvider"""
-        self.core.event_engine.remove_handler("webhook_event", self.on_webhook)
+        self.core.event_bus.remove_handler("webhook_event", self.on_webhook)

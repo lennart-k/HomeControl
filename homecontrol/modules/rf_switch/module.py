@@ -15,13 +15,13 @@ class Module(ModuleDef):
     """The module translating RF codes to Intertechno codes"""
     async def init(self):
         """Initialise the module"""
-        @self.core.event_engine.register("rf_code_received")
+        @self.core.event_bus.register("rf_code_received")
         async def on_rf_code(event, code, length):
             """Handle RF code"""
             if length == 12:
                 it_code = from_code(code)
                 if it_code:
-                    self.core.event_engine.broadcast(
+                    self.core.event_bus.broadcast(
                         "intertechno_code_received",
                         **dict(zip(("house", "id", "state"), it_code)))
 
@@ -51,7 +51,7 @@ class IntertechnoSwitch(Item):
         if not self.rf_adapter:
             return ItemStatus.WAITING_FOR_DEPENDENCY
 
-        @self.core.event_engine.register("intertechno_code_received")
+        @self.core.event_bus.register("intertechno_code_received")
         async def on_it_code(event, house, identifier, state):
             if (self.cfg["house"].lower(), self.cfg["id"]) \
                     == (house, identifier):

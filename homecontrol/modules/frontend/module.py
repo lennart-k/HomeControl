@@ -157,17 +157,17 @@ class Module(ModuleType):
         PanelsView.register_view(self.frontend_app)
         self.frontend_app.router.register_resource(AppView(self))
 
-        @self.core.event_engine.register(EVENT_CORE_BOOTSTRAP_COMPLETE)
+        @self.core.event_bus.register(EVENT_CORE_BOOTSTRAP_COMPLETE)
         async def add_websocket_commands(event) -> None:
             add_commands(self.core.modules.websocket.add_command_handler)
 
-        @self.core.event_engine.register("http_add_main_routes")
+        @self.core.event_bus.register("http_add_main_routes")
         async def add_route(event, router: web.RouteTableDef) -> None:
             @router.get("/")
             async def get_index(request: web.Request) -> web.Response:
                 return web.HTTPPermanentRedirect(URL_BASE)
 
-        @self.core.event_engine.register("http_add_main_subapps")
+        @self.core.event_bus.register("http_add_main_subapps")
         async def add_subapp(event, main_app: web.Application) -> None:
             main_app.add_subapp(URL_BASE, self.frontend_app)
 

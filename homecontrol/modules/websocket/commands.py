@@ -8,7 +8,7 @@ from homecontrol.const import (ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
                                EVENT_ITEM_STATUS_CHANGED,
                                ITEM_ACTION_NOT_FOUND)
 from homecontrol.dependencies.entity_types import Item, ItemStatus
-from homecontrol.dependencies.event_engine import Event
+from homecontrol.dependencies.event_bus import Event
 from homecontrol.modules.auth.decorator import needs_auth
 
 from .command import WebSocketCommand
@@ -51,7 +51,7 @@ class WatchStatesCommand(WebSocketCommand):
     async def handle(self) -> None:
         """Handle the watch_states command"""
         if self.command not in self.session.subscriptions:
-            self.core.event_engine.register(
+            self.core.event_bus.register(
                 "state_change")(self.on_state_change)
 
         self.session.subscriptions.add(self.command)
@@ -68,7 +68,7 @@ class WatchStatesCommand(WebSocketCommand):
 
     async def close(self) -> None:
         """Remove the event listener"""
-        self.core.event_engine.remove_handler(
+        self.core.event_bus.remove_handler(
             "state_change", self.on_state_change)
 
 
@@ -80,7 +80,7 @@ class WatchStatusCommand(WebSocketCommand):
     async def handle(self) -> None:
         """Handle the watch_status command"""
         if self.command not in self.session.subscriptions:
-            self.core.event_engine.register(
+            self.core.event_bus.register(
                 EVENT_ITEM_STATUS_CHANGED)(self.on_status_change)
 
         self.session.subscriptions.add(self.command)
@@ -98,7 +98,7 @@ class WatchStatusCommand(WebSocketCommand):
 
     async def close(self) -> None:
         """Remove the event listener"""
-        self.core.event_engine.remove_handler(
+        self.core.event_bus.remove_handler(
             EVENT_ITEM_STATUS_CHANGED, self.on_status_change)
 
 

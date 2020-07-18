@@ -53,7 +53,7 @@ class Module:
         if not self.core.start_args.verbose:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())
 
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
     @web.middleware
@@ -68,10 +68,10 @@ class Module:
         self.main_app = web.Application(middlewares=[self.middleware])
         self.route_table_def = web.RouteTableDef()
 
-        await self.core.event_engine.gather(
+        await self.core.event_bus.gather(
             "http_add_main_routes",
             router=self.route_table_def)
-        await self.core.event_engine.gather(
+        await self.core.event_bus.gather(
             "http_add_main_subapps",
             main_app=self.main_app)
 

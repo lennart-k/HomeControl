@@ -34,11 +34,11 @@ class Module:
         """Initialises the module"""
         self.cfg = await self.core.cfg.register_domain(
             "auth", schema=CONFIG_SCHEMA)
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             "http_add_main_middlewares")(self.add_middlewares)
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             "http_add_api_middlewares")(self.add_middlewares)
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             "http_add_api_subapps")(self.add_subapp)
 
         self.auth_app = web.Application(

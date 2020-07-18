@@ -127,14 +127,14 @@ class ModuleManager:
         except AssertionError as error:
             LOGGER.warning(
                 "Module could not be loaded: %s at %s", name, mod_path)
-            self.core.event_engine.broadcast(
+            self.core.event_bus.broadcast(
                 "module_not_loaded", exception=error)
             return error
 
         mod_spec = importlib.util.spec_from_file_location(name, mod_path)
         mod = importlib.util.module_from_spec(mod_spec)
         mod.resource_folder = None
-        mod.event = self.core.event_engine.register
+        mod.event = self.core.event_bus.register
         mod_spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
@@ -163,7 +163,7 @@ class ModuleManager:
             assert os.path.isfile(mod_path)
         except AssertionError as error:
             LOGGER.warning("Module could not be loaded: %s at %s", name, path)
-            self.core.event_engine.broadcast(
+            self.core.event_bus.broadcast(
                 "module_not_loaded", exception=error, name=name)
             return error
 
@@ -177,7 +177,7 @@ class ModuleManager:
         except PipInstallError as e:
             LOGGER.warning(
                 "Module could not be loaded: %s at %s", name, path)
-            self.core.event_engine.broadcast(
+            self.core.event_bus.broadcast(
                 "module_not_loaded",
                 exception=e,
                 name=name)
@@ -222,7 +222,7 @@ class ModuleManager:
         await self.core.item_manager.add_from_module(mod_obj)
         if hasattr(mod_obj, "init"):
             await mod_obj.init()
-        self.core.event_engine.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
+        self.core.event_bus.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
         return mod_obj
 
     async def stop(self) -> None:

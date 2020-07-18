@@ -194,7 +194,7 @@ class ItemManager:
             await self.stop_item(item)
 
         del self.items[identifier]
-        self.core.event_engine.broadcast(EVENT_ITEM_REMOVED, item=item)
+        self.core.event_bus.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 
     async def create_from_storage_entry(
@@ -271,12 +271,12 @@ class ItemManager:
 
         await self.init_item(item)
 
-        self.core.event_engine.broadcast(EVENT_ITEM_CREATED, item=item)
+        self.core.event_bus.broadcast(EVENT_ITEM_CREATED, item=item)
         LOGGER.debug("Item created: %s", item.identifier)
         if item.status != ItemStatus.ONLINE:
             LOGGER.warning(
                 "Item could not be initialised: %s [%s]",
                 identifier, item_type)
-            self.core.event_engine.broadcast(EVENT_ITEM_NOT_WORKING, item=item)
+            self.core.event_bus.broadcast(EVENT_ITEM_NOT_WORKING, item=item)
 
         return item

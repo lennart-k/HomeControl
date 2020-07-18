@@ -11,7 +11,7 @@ from typing import Optional
 from homecontrol.const import (EVENT_CORE_BOOTSTRAP_COMPLETE, EXIT_RESTART,
                                EXIT_SHUTDOWN)
 from homecontrol.dependencies.config_manager import ConfigManager
-from homecontrol.dependencies.event_engine import EventEngine
+from homecontrol.dependencies.event_bus import EventBus
 from homecontrol.dependencies.item_manager import ItemManager
 from homecontrol.dependencies.module_manager import ModuleManager
 
@@ -42,7 +42,7 @@ class Core:
         self.cfg_path = cfg_file
         self.cfg_dir = os.path.dirname(cfg_file)
         self.block_future = asyncio.Future()
-        self.event_engine = EventEngine(core=self)
+        self.event_bus = EventBus(core=self)
         self.module_manager = ModuleManager(core=self)
         self.modules = self.module_manager.module_accessor
         self.item_manager = ItemManager(core=self)
@@ -65,7 +65,7 @@ class Core:
         # Init items
         await self.item_manager.init()
 
-        self.event_engine.broadcast(EVENT_CORE_BOOTSTRAP_COMPLETE)
+        self.event_bus.broadcast(EVENT_CORE_BOOTSTRAP_COMPLETE)
         LOGGER.info("Core bootstrap complete")
 
     async def block_until_stop(self) -> int:

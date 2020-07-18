@@ -44,16 +44,16 @@ class Module(ModuleDef):
         """Initialise the WebSocket module"""
         self.sessions = set()
         self.command_handlers = {}
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             "http_add_api_routes")(self._add_api_route)
-        self.core.event_engine.broadcast(
+        self.core.event_bus.broadcast(
             "add_websocket_commands",
             add_command_handler=self.add_command_handler)
 
     async def _add_api_route(self, event, router):
         """Add an API route"""
 
-        await self.core.event_engine.gather(
+        await self.core.event_bus.gather(
             "websocket_add_commands", add_command=self.add_command_handler)
         add_commands(self.add_command_handler)
 

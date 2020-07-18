@@ -38,7 +38,7 @@ class EventTriggerProvider:
         self.event_data = self.data.get("data", {})
 
         # Subscribe to trigger event
-        self.core.event_engine.register(self.data["type"])(self.on_event)
+        self.core.event_bus.register(self.data["type"])(self.on_event)
 
     async def on_event(self, event: str, **kwargs) -> None:
         """Handle event"""
@@ -47,7 +47,7 @@ class EventTriggerProvider:
 
     async def stop(self) -> None:
         """Stops the EventTriggerProvider for reload"""
-        self.core.event_engine.remove_handler(self.data["type"], self.on_event)
+        self.core.event_bus.remove_handler(self.data["type"], self.on_event)
 
 
 class StateTriggerProvider:
@@ -61,7 +61,7 @@ class StateTriggerProvider:
         self.data = rule.data["trigger"]
 
         # Subscribe to state changes
-        self.core.event_engine.register("state_change")(self.on_state)
+        self.core.event_bus.register("state_change")(self.on_state)
 
     async def on_state(self, event: str, item, changes: dict) -> None:
         """Handle new state"""
@@ -73,7 +73,7 @@ class StateTriggerProvider:
 
     async def stop(self) -> None:
         """Stops the StateTriggerProvider for reload"""
-        self.core.event_engine.remove_handler("state_change", self.on_state)
+        self.core.event_bus.remove_handler("state_change", self.on_state)
 
 
 class TimerTriggerProvider:
@@ -174,12 +174,12 @@ class Module:
             allow_reload=True
         ) or []
 
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             EVENT_CORE_BOOTSTRAP_COMPLETE)(self.start)
 
     async def start(self, event: str) -> None:
         """Start when core bootstrap is complete"""
-        await self.core.event_engine.gather(
+        await self.core.event_bus.gather(
             "gather_automation_providers",
             engine=self,
             callback=self.register_automation_providers)

@@ -20,9 +20,9 @@ class Module(ModuleDef):
         self.registered_modules = set()
         self.zeroconf = Zeroconf()
 
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             EVENT_CORE_BOOTSTRAP_COMPLETE)(self.register_modules)
-        self.core.event_engine.register(
+        self.core.event_bus.register(
             EVENT_MODULE_LOADED)(self.on_module_loaded)
 
     async def register_modules(self, event) -> None:

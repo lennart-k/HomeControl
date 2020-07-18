@@ -119,7 +119,7 @@ class StateProxy:
         """Called from an item to update multiple states"""
         for state, value in kwargs.items():
             self.states[state].value = value
-        self.core.event_engine.broadcast(
+        self.core.event_bus.broadcast(
             "state_change", item=self.item, changes=kwargs)
         LOGGER.debug("State change: %s %s", self.item.identifier, kwargs)
 
@@ -188,7 +188,7 @@ class State:
             result: dict = await self.setter(value)
             for state, change in result.items():
                 self.state_proxy.states[state].value = change
-            self.state_proxy.core.event_engine.broadcast(
+            self.state_proxy.core.event_bus.broadcast(
                 "state_change", item=self.state_proxy.item, changes=result)
             LOGGER.debug("State change: %s %s",
                          self.state_proxy.item.identifier, result)
@@ -210,7 +210,7 @@ class State:
         """Updates a state"""
         if not self.value == value:
             self.value = value
-            self.state_proxy.core.event_engine.broadcast(
+            self.state_proxy.core.event_bus.broadcast(
                 "state_change", item=self.state_proxy.item, changes={
                     self.name: self.value
                 })

@@ -26,7 +26,7 @@ class RFRXAdapter(Item):
 
     # pylint: disable=invalid-name
     def _callback_helper(self, code, length, gap, t0, t1):
-        self.core.event_engine.broadcast(
+        self.core.event_bus.broadcast(
             "rf_code_received", code=code, length=length)
 
     async def stop(self):

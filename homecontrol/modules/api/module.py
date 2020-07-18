@@ -32,18 +32,18 @@ class Module:
         self.cfg = await self.core.cfg.register_domain(
             "api-server", schema=CONFIG_SCHEMA)
 
-        @self.core.event_engine.register("http_add_main_subapps")
+        @self.core.event_bus.register("http_add_main_subapps")
         async def add_subapp(event, main_app):
             middlewares = self.middlewares()
-            await self.core.event_engine.gather(
+            await self.core.event_bus.gather(
                 "http_add_api_middlewares", middlewares=middlewares)
             self.api_app = web.Application(middlewares=middlewares)
             self.api_app["core"] = self.core
             self.api_app["module"] = self
             route_table = web.RouteTableDef()
-            await self.core.event_engine.gather(
+            await self.core.event_bus.gather(
                 "http_add_api_routes", router=route_table)
-            await self.core.event_engine.gather(
+            await self.core.event_bus.gather(
                 "http_add_api_subapps", app=self.api_app)
             self.api_app.add_routes(route_table)
             add_routes(self.api_app)

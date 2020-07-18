@@ -76,7 +76,7 @@ class Item:
         if status is previous_status:
             return
         self.status = status
-        self.core.event_engine.broadcast(
+        self.core.event_bus.broadcast(
             EVENT_ITEM_STATUS_CHANGED, item=self, previous=previous_status)
 
     async def run_action(self, name: str, *args, **kwargs) -> bool:

@@ -4,9 +4,11 @@ Every new Item or Module will get one of these classes as a base class
 """
 
 import logging
-from typing import Callable, Dict, TYPE_CHECKING, Optional
+from types import ModuleType
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Type
 
 import voluptuous as vol
+
 from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
 from homecontrol.dependencies.state_proxy import StateProxy
 
@@ -94,8 +96,8 @@ class Module:
     core: "Core"
     resource_folder: str
     path: str
-    item_specs: dict
-    mod: "module"
+    item_specs: Dict[str, dict]
+    mod: Type[ModuleType]
 
     def __repr__(self) -> str:
         return f"<Module {self.name}>"

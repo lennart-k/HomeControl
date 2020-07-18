@@ -6,11 +6,11 @@ import importlib.util
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Dict, Iterator, List, Union
 
 import pkg_resources
-
 import voluptuous as vol
+
 import homecontrol
 from homecontrol.const import EVENT_MODULE_LOADED
 from homecontrol.dependencies.ensure_pip_requirements import ensure_packages
@@ -47,11 +47,16 @@ class ModuleFolder:
 class ModuleAccessor:
     """Wrapper for ModuleManager.loaded_modules"""
 
+    _module_manager: "ModuleManager"
+
     def __init__(self, module_manager: "ModuleManager") -> None:
         self._module_manager = module_manager
 
     def __getattr__(self, name: str):
         return self._module_manager.loaded_modules.get(name)
+
+    def __iter__(self) -> Iterator[Module]:
+        return iter(self._module_manager.loaded_modules.values())
 
 
 class ModuleManager:
@@ -59,6 +64,7 @@ class ModuleManager:
 
     cfg: dict
     loaded_modules: Dict[str, Module]
+    available_modules: List[str]
     module_accessor: ModuleAccessor
 
     def __init__(self, core: "Core"):

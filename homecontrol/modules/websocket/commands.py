@@ -172,7 +172,7 @@ class GetModulesCommand(WebSocketCommand):
                 "name": module.name,
                 "path": module.path,
                 "spec": module.spec
-            } for module in self.core.module_manager.loaded_modules.values()
+            } for module in self.core.modules
         ])
 
 

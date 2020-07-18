@@ -3,6 +3,7 @@
 import logging
 import os
 from collections import defaultdict
+from typing import Any
 
 import voluptuous as vol
 from homecontrol.dependencies.yaml_loader import YAMLLoader
@@ -104,7 +105,7 @@ class ConfigManager:
                               handler: object = None,
                               schema: vol.Schema = None,
                               allow_reload: bool = False,
-                              default: dict = None) -> object:
+                              default: Any = None) -> object:
         """
         Registers a configuration domain
 

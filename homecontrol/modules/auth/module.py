@@ -2,10 +2,11 @@
 import logging
 from typing import Callable
 
+import voluptuous as vol
 from aiohttp import web
 
-import voluptuous as vol
 from homecontrol.core import Core
+from homecontrol.dependencies.entity_types import ModuleDef
 
 from .auth import AuthManager
 from .auth.auth_providers import AUTH_PROVIDERS
@@ -24,7 +25,7 @@ CONFIG_SCHEMA = vol.Schema({
 })
 
 
-class Module:
+class Module(ModuleDef):
     """The authentication module"""
     core: Core
     auth_manager: AuthManager

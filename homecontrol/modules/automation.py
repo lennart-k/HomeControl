@@ -4,8 +4,10 @@ import asyncio
 import logging
 
 import voluptuous as vol
+
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.core import Core
+from homecontrol.dependencies.entity_types import ModuleDef
 
 LOGGER = logging.getLogger(__name__)
 
@@ -146,7 +148,7 @@ class ItemActionProvider:
         await target.run_action(self.data["action"], **params)
 
 
-class Module:
+class Module(ModuleDef):
     """Automation module"""
     core: Core
 

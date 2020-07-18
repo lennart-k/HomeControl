@@ -2,15 +2,18 @@
 import asyncio
 import logging
 from inspect import isclass
-from typing import Optional
-
-from attr import asdict, attrib, attrs
+from typing import Iterator, TYPE_CHECKING, Generator, List, Optional, cast
 
 import voluptuous as vol
+from attr import asdict, attrib, attrs
+
 from homecontrol.const import (EVENT_ITEM_CREATED, EVENT_ITEM_NOT_WORKING,
                                EVENT_ITEM_REMOVED, ItemStatus)
 from homecontrol.dependencies.entity_types import Item, Module
 from homecontrol.dependencies.storage import Storage
+
+if TYPE_CHECKING:
+    from homecontrol.core import Core
 
 LOGGER = logging.getLogger(__name__)
 
@@ -70,8 +73,10 @@ class ItemManager:
     """
     ItemManager manages all your stateful items
     """
+    core: "Core"
+    yaml_cfg: List[dict]
 
-    def __init__(self, core):
+    def __init__(self, core: "Core"):
         self.core = core
         self.items = {}
         self.item_constructors = {}
@@ -85,8 +90,8 @@ class ItemManager:
 
     async def init(self) -> None:
         """Initialise the items from configuration"""
-        self.yaml_cfg = await self.core.cfg.register_domain(
-            "items", schema=CONFIG_SCHEMA, default=[])
+        self.yaml_cfg = cast(List[dict], await self.core.cfg.register_domain(
+            "items", schema=CONFIG_SCHEMA, default=[]))
         self.load_yaml_config()
 
         for storage_entry in self.item_config.values():
@@ -141,27 +146,26 @@ class ItemManager:
                 self.item_constructors[
                     item_class.type] = item_class.constructor
 
-    def iter_items_by_id(self, iterable) -> [Item]:
+    def iter_items_by_id(self, iterable) -> Iterator[Item]:
         """Translates item identifiers into item instances"""
         for identifier in iterable:
             if identifier in self.items:
                 yield self.items[identifier]
 
-    def get_by_unique_identifier(self, unique_identifier: str) -> Item:
+    def get_by_unique_identifier(
+            self, unique_identifier: str) -> Optional[Item]:
         """Returns an item by its unique identifier"""
         for item in self.items.values():
             if item.unique_identifier == unique_identifier:
                 return item
-        return None
 
-    def get_item(self, identifier: str) -> Item:
+    def get_item(self, identifier: str) -> Optional[Item]:
         """Returns an item by identifier or unique_identifier"""
         return (self.items.get(identifier, None)
                 or self.get_by_unique_identifier(identifier))
 
-    async def stop_item(self,
-                        item: Item,
-                        status: ItemStatus = ItemStatus.STOPPED) -> None:
+    async def stop_item(
+            self, item: Item, status: ItemStatus = ItemStatus.STOPPED) -> None:
         """Stops an item"""
         if item.status is not ItemStatus.ONLINE:
             return
@@ -198,7 +202,7 @@ class ItemManager:
         LOGGER.info("Item %s has been removed", identifier)
 
     async def create_from_storage_entry(
-            self, storage_entry: StorageEntry) -> Item:
+            self, storage_entry: StorageEntry) -> Optional[Item]:
         """Creates an Item from a storage entry"""
         return await self.create_item(
             identifier=storage_entry.identifier,
@@ -239,7 +243,7 @@ class ItemManager:
 
         if existing_item:
             await self.remove_item(existing_item.identifier)
-            storage_entry.enabled = existing_item
+            storage_entry.enabled = bool(existing_item)
 
         self.item_config[storage_entry.unique_identifier] = storage_entry
         self.storage.schedule_save(self.item_config)
@@ -252,7 +256,7 @@ class ItemManager:
             self, identifier: str, item_type: str,
             cfg: dict = None, state_defaults: dict = None, name: str = None,
             unique_identifier: str = None
-    ) -> Item:
+    ) -> Optional[Item]:
         """Creates a HomeControl item"""
         if item_type not in self.item_constructors:
             LOGGER.error("Item type not found: %s", item_type)

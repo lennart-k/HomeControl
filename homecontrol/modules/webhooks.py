@@ -4,13 +4,15 @@ import json
 
 from aiohttp import web
 
+from homecontrol.dependencies.entity_types import ModuleDef
+
 SPEC = {
     "name": "WebHooks",
     "description": "Provides WebHook endpoints"
 }
 
 
-class Module:
+class Module(ModuleDef):
     """The WebHook module"""
     async def init(self):
         """Initialise the module"""

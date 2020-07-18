@@ -5,7 +5,9 @@ import logging
 import os
 
 import voluptuous as vol
+
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
+from homecontrol.dependencies.entity_types import ModuleDef
 
 SPEC = {
     "name": "Custom Scripts",
@@ -19,7 +21,7 @@ CONFIG_SCHEMA = vol.Schema({
 LOGGER = logging.getLogger(__name__)
 
 
-class Module:
+class Module(ModuleDef):
     """Executes custom scripts"""
     async def init(self) -> None:
         """Inits the module"""

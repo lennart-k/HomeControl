@@ -3,11 +3,13 @@
 import logging
 import os
 import ssl
-
-from aiohttp import web
+from typing import Any, Dict, cast
 
 import voluptuous as vol
+from aiohttp import web
+
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
+from homecontrol.dependencies.entity_types import ModuleDef
 
 SPEC = {
     "name": "HTTP Server"
@@ -36,19 +38,20 @@ class SSLLogFilter(logging.Filter):
         return not (record.exc_info and record.exc_info[0] == ssl.SSLError)
 
 
-class Module:
+class Module(ModuleDef):
     """The HTTP server module"""
     runner: web.AppRunner
     site: web.TCPSite
     route_table_def: web.RouteTableDef
     main_app: web.Application
+    cfg: Dict[str, Any]
 
     """HTTPServer exposes HTTP endpoints for interaction from outside"""
 
     async def init(self):
         """Sets up an HTTPServer"""
-        self.cfg = await self.core.cfg.register_domain(
-            "http-server", self, schema=CONFIG_SCHEMA)
+        self.cfg = cast(Dict[str, Any], await self.core.cfg.register_domain(
+            "http-server", self, schema=CONFIG_SCHEMA))
 
         if not self.core.start_args.verbose:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())

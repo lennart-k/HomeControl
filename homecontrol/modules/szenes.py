@@ -4,6 +4,8 @@ import logging
 
 import voluptuous as vol
 
+from homecontrol.dependencies.entity_types import ModuleDef
+
 SPEC = {
     "name": "Szenes",
     "description": "Provides szene functionality"
@@ -29,7 +31,7 @@ CONFIG_SCHEMA = vol.Schema([
 LOGGER = logging.getLogger(__name__)
 
 
-class Module:
+class Module(ModuleDef):
     """The Szene module holding the szene settings"""
     async def init(self) -> None:
         """Initialise the szenes"""

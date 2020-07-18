@@ -3,11 +3,11 @@
 import asyncio
 # pylint: disable=relative-beyond-top-level
 import logging
-from typing import TYPE_CHECKING, Union
-
-from aiohttp import web
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 import voluptuous as vol
+from aiohttp import web
+
 from homecontrol.const import MAX_PENDING_WS_MSGS
 from homecontrol.dependencies.entity_types import ModuleDef
 
@@ -15,7 +15,6 @@ from .commands import WebSocketCommand, add_commands
 from .message import WebSocketMessage
 
 if TYPE_CHECKING:
-    from homecontrol.modules.auth.module import AuthManager
     from homecontrol.modules.auth.auth.models import User
     from homecontrol.core import Core
 
@@ -90,7 +89,7 @@ class WebSocketSession:
     websocket: web.WebSocketResponse
     writer_task: asyncio.Task
     handler_task: asyncio.Task
-    user: "User"
+    user: Optional["User"]
     subscriptions: set
 
     def __init__(
@@ -165,7 +164,7 @@ class WebSocketSession:
         await self.websocket.prepare(self.request)
         LOGGER.debug("Connected to %s", self.request.host)
         self.writer_task = self.core.loop.create_task(self.writer())
-        self.handler_task = asyncio.current_task()
+        self.handler_task = cast(asyncio.Task, asyncio.current_task())
 
         try:
             async for message in self.websocket:

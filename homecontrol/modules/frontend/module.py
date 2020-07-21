@@ -103,11 +103,16 @@ class AppView(web_urldispatcher.AbstractResource):
 
 class ManifestView(APIView):
     """Serves the WebManifest"""
-    path = "/manifest.webmanifest"
+    path: str = "/manifest.webmanifest"
 
     async def get(self) -> web.Response:
         """GET /manifest.webmanifest"""
+        module: "Module" = self.core.modules.frontend
+        manifest = json.load(
+            open(module.resource_path.rstrip("/") + self.path))
+
         data = json.dumps({
+            **manifest,
             "name": "HomeControl",
             "short_name": "HomeControl",
             "start_url": "/frontend",

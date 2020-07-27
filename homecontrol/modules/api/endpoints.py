@@ -223,7 +223,7 @@ class ItemStateView(APIView):
             value = json.loads(content) if content else {}
             result = await item.states.set(state_name, value)
         # pylint: disable=broad-except
-        except (Exception, vol.error.Error) as e:
+        except (Exception, vol.Error) as e:
             return self.error(e)
 
         return self.json(result)

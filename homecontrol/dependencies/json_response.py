@@ -1,6 +1,6 @@
 """JSONResponse module"""
 
-from typing import Any
+from typing import Any, Optional, Union
 
 from aiohttp import web
 
@@ -14,7 +14,7 @@ class JSONResponse(web.Response):
     def __init__(
             self,
             data: Any = None,
-            error: str = None,
+            error: Optional[Union[Exception, str]] = None,
             status_code: int = 200,
             core=None,
             headers: dict = None) -> None:

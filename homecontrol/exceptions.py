@@ -1,7 +1,7 @@
 """Exceptions"""
 
 
-class HomeControlException(BaseException):
+class HomeControlException(Exception):
     """The base exception for HomeControl"""
 
 

@@ -31,12 +31,12 @@ class SystemMonitor(Item):
     cpu_count = StateDef(default=psutil.cpu_count())
     cpu_percent = StateDef(default=psutil.cpu_percent(percpu=True))
     memory = psutil.virtual_memory()
-    total_memory = StateDef(default=memory.total)
+    memory_total = StateDef(default=memory.total)
     memory_usage = StateDef(default=memory.used)
     memory_percent = StateDef(default=memory.percent)
     del memory
     swap = psutil.swap_memory()
-    total_swap = StateDef(default=swap.total)
+    swap_total = StateDef(default=swap.total)
     swap_usage = StateDef(default=swap.used)
     swap_percent = StateDef(default=swap.percent)
     del swap

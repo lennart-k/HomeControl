@@ -138,8 +138,6 @@ class ModuleManager:
         mod_spec.loader.exec_module(mod)
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
-        else:
-            mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
         spec = getattr(mod, "SPEC", {})
 

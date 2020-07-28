@@ -72,7 +72,7 @@ class ConfigManager:
     async def approve_domain_config(self,
                                     domain: str,
                                     config: dict,
-                                    initial: bool = True) -> dict:
+                                    initial: bool = True) -> Any:
         """
         Returns an approved and validated version of config for a domain
         """
@@ -105,7 +105,7 @@ class ConfigManager:
                               handler: object = None,
                               schema: vol.Schema = None,
                               allow_reload: bool = False,
-                              default: Any = None) -> object:
+                              default: Any = None) -> Any:
         """
         Registers a configuration domain
 

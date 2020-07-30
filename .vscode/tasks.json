@@ -1,0 +1,23 @@
+{
+    "tasks": [
+        {
+            "label": "Install HomeControl for development",
+            "type": "shell",
+            "group": "build",
+            "command": "python setup.py develop --user",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+            }
+        },
+        {
+            "label": "isort",
+            "type": "shell",
+            "group": "test",
+            "command": "isort ${file}",
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+    ]
+}

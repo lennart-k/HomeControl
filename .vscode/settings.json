@@ -1,0 +1,11 @@
+{
+    "python.linting.pylintEnabled": true,
+    "editor.rulers": [
+        80,
+        100
+    ],
+    "python.languageServer": "Pylance",
+    "editor.formatOnSave": true,
+    "editor.renderWhitespace": "all",
+    "files.trimTrailingWhitespace": true
+}

@@ -14,7 +14,12 @@ venv
 .idea
 
 # VSCode
-.vscode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/homecontrol.code-snippets
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 
 # Cache folders
 __pycache__/

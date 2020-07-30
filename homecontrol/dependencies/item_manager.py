@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from inspect import isclass
-from typing import Iterator, TYPE_CHECKING, Generator, List, Optional, cast
+from typing import Dict, Iterator, TYPE_CHECKING, Generator, List, Optional, cast
 
 import voluptuous as vol
 from attr import asdict, attrib, attrs
@@ -74,6 +74,7 @@ class ItemManager:
     ItemManager manages all your stateful items
     """
     core: "Core"
+    items: Dict[str, Item]
     yaml_cfg: List[dict]
 
     def __init__(self, core: "Core"):

@@ -10,5 +10,14 @@
     "files.trimTrailingWhitespace": true,
     "files.associations": {
         "requirements_*.txt": "pip-requirements"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "homecontrol.egg-info": true,
+        "**/__pycache__": true
     }
 }

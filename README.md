@@ -24,8 +24,3 @@ You can install it the following:
 ```
 python3 -m pip install git+https://github.com/lennart-k/HomeControl
 ```
-
-#### Note
-
-- Run homecontrol as `root` or install it with the `-U` parameter for HomeControl to install pip modules automatically
-

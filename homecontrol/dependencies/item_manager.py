@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from inspect import isclass
-from typing import Dict, Iterator, TYPE_CHECKING, Generator, List, Optional, cast
+from typing import Dict, Iterator, TYPE_CHECKING, List, Optional, cast
 
 import voluptuous as vol
 from attr import asdict, attrib, attrs

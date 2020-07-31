@@ -202,8 +202,6 @@ class ModuleManager:
             mod._setup_module(self.core)  # pylint: disable=protected-access
         if not hasattr(mod, "Module"):
             mod.Module = type("Module_" + name, (Module,), {})
-        else:
-            mod.Module = type("Module_" + name, (mod.Module, Module), {})
 
         mod_obj = mod.Module.__new__(mod.Module)
 

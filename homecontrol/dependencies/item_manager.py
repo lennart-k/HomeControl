@@ -264,24 +264,28 @@ class ItemManager:
             return
 
         item_constructor = self.item_constructors[item_type]
+        unique_identifier = unique_identifier or identifier
 
         item = await item_constructor(
             identifier, name, cfg,
             state_defaults=state_defaults,
             core=self.core,
-            unique_identifier=unique_identifier or identifier
+            unique_identifier=unique_identifier
         )
 
-        self.items[identifier] = item
+        await self.register_item(item)
+        return item
+
+    async def register_item(self, item: Item) -> None:
+        """Registers and initialises an already HomeControl item"""
+        self.items[item.identifier] = item
 
         await self.init_item(item)
 
         self.core.event_bus.broadcast(EVENT_ITEM_CREATED, item=item)
-        LOGGER.debug("Item created: %s", item.identifier)
+        LOGGER.debug("Item registered: %s", item.unique_identifier)
         if item.status != ItemStatus.ONLINE:
             LOGGER.warning(
                 "Item could not be initialised: %s [%s]",
-                identifier, item_type)
+                item.unique_identifier, item.type)
             self.core.event_bus.broadcast(EVENT_ITEM_NOT_WORKING, item=item)
-
-        return item

@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from types import MethodType
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
 
 import voluptuous as vol
 
@@ -73,10 +73,8 @@ class StateProxy:
     """Holds the states of an item"""
 
     def __init__(
-            self,
-            item: "Item",
-            core: "Core",
-            state_defaults: dict = None):
+            self, item: "Item", core: "Core",
+            state_defaults: Dict[str, Any] = None) -> None:
         state_defaults = state_defaults or {}
 
         self.item = item
@@ -100,22 +98,19 @@ class StateProxy:
         if state in self.states:
             return await self.states[state].get()
 
-    async def set(self, state: str, value) -> dict:
+    async def set(self, state: str, value) -> Dict[str, Any]:
         """Sets an item's state"""
-        if state in self.states:
-            return await self.states[state].set(value)
+        return await self.states[state].set(value)
 
-    def check_value(self, state: str, value) -> vol.error.Error:
+    def check_value(self, state: str, value) -> vol.Error:
         """Checks if a value is valid for a state"""
         return self.states[state].check_value(value)
 
-    def update(self, state: str, value):
+    def update(self, state: str, value) -> bool:
         """Called from an item to update its state"""
-        if state in self.states:
-            return self.states[state].update(value)
-        return None
+        return self.states[state].update(value)
 
-    def bulk_update(self, **kwargs):
+    def bulk_update(self, **kwargs) -> None:
         """Called from an item to update multiple states"""
         for state, value in kwargs.items():
             self.states[state].value = value
@@ -123,7 +118,7 @@ class StateProxy:
             "state_change", item=self.item, changes=kwargs)
         LOGGER.debug("State change: %s %s", self.item.identifier, kwargs)
 
-    async def dump(self) -> dict:
+    async def dump(self) -> Dict[str, Any]:
         """Return a JSON serialisable object"""
         return {
             name: await self.states[name].get() for name in self.states
@@ -133,23 +128,23 @@ class StateProxy:
 class State:
     """Holds one state of an item"""
 
-    getter: Callable
-    setter: Callable
+    getter: Optional[Callable]
+    setter: Optional[Callable]
     value: Any
     mutable: bool
-    poll_task: asyncio.Task = None
-    schema: vol.Schema
+    poll_task: Optional[asyncio.Task] = None
+    schema: Optional[vol.Schema]
 
     # pylint: disable=too-many-arguments
     def __init__(self,
                  state_proxy: StateProxy,
                  default,
-                 getter: Callable = None,
-                 setter: Callable = None,
-                 name: str = None,
-                 schema: dict = None,
-                 poll_interval: float = None,
-                 log_state: bool = True) -> None:
+                 getter: Optional[Callable] = None,
+                 setter: Optional[Callable] = None,
+                 name: Optional[str] = None,
+                 schema: Optional[Dict[Any, Any]] = None,
+                 poll_interval: Optional[float] = None,
+                 log_state: Optional[bool] = True) -> None:
         self.value = default
         self.name = name
         self.getter = getter
@@ -167,7 +162,7 @@ class State:
         while True:
             if self.state_proxy.item.status == ItemStatus.ONLINE:
                 self.update(await self.getter())
-            await asyncio.sleep(self.poll_interval)
+            await asyncio.sleep(cast(float, self.poll_interval))
 
     async def get(self):
         """Gets a state"""
@@ -177,7 +172,7 @@ class State:
             return await self.getter()
         return self.value
 
-    async def set(self, value) -> dict:
+    async def set(self, value) -> Dict[str, Any]:
         """Sets a state"""
         if self.state_proxy.item.status != ItemStatus.ONLINE:
             raise ItemNotOnlineError(self.state_proxy.item.identifier)
@@ -195,18 +190,18 @@ class State:
             return result
         return {}
 
-    def check_value(self, value) -> vol.error.Error:
+    def check_value(self, value) -> Union[bool, vol.Error]:
         """Checks if a value is valid for a state"""
         if self.schema:
             try:
                 # pylint: disable=not-callable
                 self.schema(value)
                 return True
-            except vol.error.Error as error:
+            except vol.Error as error:
                 return error
         return True
 
-    def update(self, value):
+    def update(self, value) -> bool:
         """Updates a state"""
         if not self.value == value:
             self.value = value

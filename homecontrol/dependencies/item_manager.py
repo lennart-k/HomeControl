@@ -94,14 +94,18 @@ class ItemManager:
         self.yaml_cfg = cast(List[dict], await self.core.cfg.register_domain(
             "items", schema=CONFIG_SCHEMA, default=[]))
         self.load_yaml_config()
+        self.core.loop.create_task(self.init_from_storage())
 
-        for storage_entry in self.item_config.values():
-            if not storage_entry.enabled:
-                continue
-            await self.create_from_storage_entry(storage_entry)
+    async def init_from_storage(self) -> None:
+        """Initializes the items configured in the storage"""
+        await asyncio.gather(*(
+            self.create_from_storage_entry(storage_entry)
+            for storage_entry in self.item_config.values()
+            if storage_entry.enabled
+        ))
 
     def load_yaml_config(self) -> None:
-        """Loads the YAML configuration"""
+        """Loads the YAML configuration to the storage"""
         for key in tuple(self.item_config.keys()):
             if self.item_config[key].provider == "yaml":
                 del self.item_config[key]

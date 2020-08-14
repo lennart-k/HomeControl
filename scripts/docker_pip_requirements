@@ -4,6 +4,7 @@ set -e
 cd "$(dirname $(readlink -f "$0"))/.."
 
 pip install --compile --no-cache-dir --prefer-binary -r requirements.txt
+pip install --compile --no-cache-dir --prefer-binary -r requirements_dev.txt
 
 REQUIREMENTS=$(python -m homecontrol.scripts.module_requirements)
 TEST_REQUIREMENTS=$(python -m homecontrol.scripts.module_requirements -t)

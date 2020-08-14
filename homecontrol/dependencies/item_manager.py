@@ -205,14 +205,18 @@ class ItemManager:
     async def create_from_storage_entry(
             self, storage_entry: StorageEntry) -> Optional[Item]:
         """Creates an Item from a storage entry"""
-        return await self.create_item(
-            identifier=storage_entry.identifier,
-            unique_identifier=storage_entry.unique_identifier,
-            name=storage_entry.name,
-            item_type=storage_entry.type,
-            cfg=storage_entry.cfg,
-            state_defaults=storage_entry.state_defaults
-        )
+        try:
+            return await self.create_item(
+                identifier=storage_entry.identifier,
+                unique_identifier=storage_entry.unique_identifier,
+                name=storage_entry.name,
+                item_type=storage_entry.type,
+                cfg=storage_entry.cfg,
+                state_defaults=storage_entry.state_defaults
+            )
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.error("Could not create item %s",
+                         storage_entry.identifier, exc_info=True)
 
     async def init_item(self, item: Item) -> None:
         """Initialises an item"""

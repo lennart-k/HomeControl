@@ -19,5 +19,6 @@
         "**/.DS_Store": true,
         "homecontrol.egg-info": true,
         "**/__pycache__": true
-    }
+    },
+    "restructuredtext.confPath": "${workspaceFolder}/docs"
 }

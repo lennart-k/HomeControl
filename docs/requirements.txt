@@ -1,6 +1,0 @@
-sphinxcontrib-napoleon
-sphinxcontrib-asyncio
-sphinxcontrib-httpdomain
-sphinxcontrib-trio
-voluptuous
-recommonmark

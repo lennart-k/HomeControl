@@ -1,5 +1,5 @@
 """HomeControl representation of ESPHome entities"""
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 import voluptuous as vol
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
         BinarySensorInfo, BinarySensorState,
         EntityInfo, EntityState,
         FanInfo, FanState,
+        LightInfo, LightState,
         SensorInfo, SensorState,
         SwitchInfo, SwitchState)
 
@@ -99,9 +100,57 @@ class FanItem(ESPHomeItem):
         )
 
 
+class LightItem(ESPHomeItem):
+    """An esphome light"""
+    entity: "LightInfo"
+
+    on = StateDef()
+    brightness = StateDef()
+    color_temperature = StateDef()
+    rgb = StateDef()
+    white = StateDef()
+
+    @on.setter(vol.Schema(bool))
+    async def set_on(self, value: bool) -> Dict[str, Any]:
+        """Sets the on state"""
+        await self.device.api.light_command(self.entity.key, value)
+        return {}
+
+    @brightness.setter(vol.Schema(vol.Coerce(float)))
+    async def set_brightness(self, brightness: float) -> Dict[str, Any]:
+        """Sets the brightness state"""
+        await self.device.api.light_command(
+            self.entity.key, bool(brightness), brightness=brightness)
+        return {}
+
+    @rgb.setter(vol.Schema(
+        [vol.Coerce(float), vol.Coerce(float), vol.Coerce(float)]))
+    async def set_rgb(self, rgb: Tuple[float, float, float]) -> Dict[str, Any]:
+        """Sets the rgb state"""
+        await self.device.api.light_command(
+            self.entity.key, all(rgb) or None, rgb=rgb)
+        return {}
+
+    @white.setter(vol.Schema(vol.Coerce(float)))
+    async def set_white(self, white: float) -> Dict[str, Any]:
+        """Sets the white state"""
+        await self.device.api.light_command(
+            self.entity.key, bool(white) or None, white=white)
+        return {}
+
+    def update_state(self, state: "LightState") -> None:
+        self.states.bulk_update(
+            on=state.state,
+            brightness=state.brightness,
+            rgb=(state.red, state.green, state.blue),
+            white=state.white
+        )
+
+
 ENTITY_TYPES = {
     "SwitchInfo": SwitchItem,
     "BinarySensorInfo": BinarySensorItem,
+    "FanInfo": FanItem,
+    "LightInfo": LightItem,
     "SensorInfo": SensorItem,
-    "FanInfo": FanItem
 }

@@ -151,7 +151,7 @@ class Storage:
         """Saves the current data"""
         storage_dir = os.path.dirname(self.path)
         if not os.path.isdir(storage_dir):
-            os.makedirs(storage_dir)
+            os.makedirs(storage_dir, exist_ok=True)
 
         with open(self.path, "w") as file:
             dump(self._data, file, sort_keys=True, indent=4)

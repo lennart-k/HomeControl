@@ -1,6 +1,4 @@
 """Pushbullet module"""
-
-import asyncio
 import json
 import logging
 
@@ -33,21 +31,6 @@ class Pushbullet(Item):
     config_schema = vol.Schema({
         vol.Required("access_token"): str
     }, extra=vol.ALLOW_EXTRA)
-
-    async def init(self):
-        """Initialise Pushbullet"""
-        try:
-            async with aiohttp.ClientSession(
-                    loop=self.core.loop,
-                    timeout=aiohttp.ClientTimeout(total=2)) as session:
-                request = await session.get(ME_URL, headers={
-                    "Access-Token": self.cfg["access_token"],
-                    "Content-Type": "application/json"})
-                if not request.status == 200:
-                    return False
-        except asyncio.exceptions.TimeoutError:
-            LOGGER.error("Pushbullet API not reachable", exc_info=True)
-            return False
 
     @action("send_message")
     async def send_message(self, **data):

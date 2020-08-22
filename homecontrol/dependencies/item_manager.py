@@ -172,18 +172,16 @@ class ItemManager:
     async def stop_item(
             self, item: Item, status: ItemStatus = ItemStatus.STOPPED) -> None:
         """Stops an item"""
-        if item.status is not ItemStatus.ONLINE:
-            return
         await item.stop()
         LOGGER.info("Item %s has been stopped with status %s",
                     item.identifier, status)
         item.status = status
 
     async def stop(self) -> None:
-        """Stops every item"""
+        """Removes every item"""
         await asyncio.gather(*(
-            self.stop_item(item)
-            for item in self.items.values()))
+            self.remove_item(identifier)
+            for identifier in self.items))
 
     async def remove_item(self, identifier: str) -> None:
         """
@@ -192,17 +190,16 @@ class ItemManager:
         identifier: str
             The item's identifier
         """
-        if identifier not in self.items:
+        item = self.items.pop(identifier)
+
+        if not item:
             LOGGER.info(
                 "Item %s does not exist so it could not be removed",
                 identifier)
             return
 
-        item = self.items[identifier]
-        if item.status == ItemStatus.ONLINE:
-            await self.stop_item(item)
+        await self.stop_item(item)
 
-        del self.items[identifier]
         self.core.event_bus.broadcast(EVENT_ITEM_REMOVED, item=item)
         LOGGER.info("Item %s has been removed", identifier)
 

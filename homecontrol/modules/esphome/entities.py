@@ -24,6 +24,7 @@ class ESPHomeItem(Item):
     entity: "EntityInfo"
     type: str = "esphome.ESPHomeItem"
 
+    # pylint: disable=arguments-differ
     @classmethod
     async def constructor(
             cls, identifier: str, name: str,

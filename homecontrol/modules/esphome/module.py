@@ -87,6 +87,10 @@ class ESPHomeDevice(Item):
 
     async def on_disconnect(self) -> None:
         """Handles connection loss"""
+        if not self.core.item_manager.get_by_unique_identifier(
+                self.unique_identifier):
+            # Item stopped
+            return
         LOGGER.warning("Disconnected from %s, reconnecting.", self.identifier)
         self.update_status(ItemStatus.OFFLINE)
         self.core.loop.create_task(self.connect())
@@ -180,3 +184,7 @@ class ESPHomeDevice(Item):
         entity_item = self.entities.get(state.key)
         if entity_item:
             entity_item.update_state(state)
+
+    async def stop(self) -> None:
+        """Disconnects from esphome"""
+        await self.api.disconnect()

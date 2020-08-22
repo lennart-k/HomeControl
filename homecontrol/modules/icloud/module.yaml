@@ -1,0 +1,4 @@
+name: iCloud
+description: Provides integration with iCloud devices
+pip-requirements:
+  - pyicloud==0.9.7

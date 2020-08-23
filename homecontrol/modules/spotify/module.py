@@ -133,14 +133,18 @@ class Spotify(Item):
 
     def _keep_access_token_new(self) -> None:
         if (not self.token
-                or self.token.get("expires_at", 0) < time.time() - 60):
+                or self.token.get("expires_at", 0) < time.time() + 600):
+
             LOGGER.info("Requesting new access token")
             self.token = self.auth.refresh_access_token(
                 self.cfg["refresh_token"])
             self.storage.schedule_save(self.token)
 
+        next_call = (
+            self.core.loop.time()
+            + self.token["expires_at"] - time.time() - 60)
         self.refresh_handle = self.core.loop.call_at(
-            self.token["expires_at"], self._keep_states_updated)
+            next_call, self._keep_access_token_new)
 
     async def _keep_states_updated(self) -> None:
         while True:
@@ -151,7 +155,9 @@ class Spotify(Item):
         # pylint: disable=protected-access
         playback = await self.core.loop.run_in_executor(
             None, partial(
-                self.api._get, "me/player", additional_types="track,episode"))
+                self.api._get,
+                "me/player", additional_types="track,episode"))
+
         if not playback or not playback.get("item"):
             return self.states.bulk_update(
                 playing=False,

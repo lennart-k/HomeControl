@@ -1,0 +1,4 @@
+name: Spotify
+
+pip-requirements:
+  - spotipy==2.13.0

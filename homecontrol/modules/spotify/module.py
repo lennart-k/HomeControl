@@ -230,14 +230,14 @@ class Spotify(Item):
         """Action stop"""
         await self.states.set("playing", False)
 
-    @action("skip")
-    async def action_skip(self):
-        """Action skip"""
+    @action("next")
+    async def action_next(self):
+        """Action next"""
         await self.core.loop.run_in_executor(
             None, self.api.next_track)
 
-    @action("rewind")
-    async def action_rewind(self):
-        """Action rewind"""
+    @action("previous")
+    async def action_previous(self):
+        """Action previous"""
         await self.core.loop.run_in_executor(
             None, self.api.previous_track)

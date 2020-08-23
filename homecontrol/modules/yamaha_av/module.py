@@ -123,14 +123,14 @@ class YamahaAVReceiver(Item):
         """Action stop"""
         self.av_receiver.stop()
 
-    @action("skip")
-    async def action_skip(self):
-        """Action skip"""
+    @action("next")
+    async def action_next(self):
+        """Action next"""
         self.av_receiver.next()
 
-    @action("rewind")
-    async def action_rewind(self):
-        """Action rewind"""
+    @action("previous")
+    async def action_previous(self):
+        """Action previous"""
         self.av_receiver.previous()
 
     @action("toggle_muted")

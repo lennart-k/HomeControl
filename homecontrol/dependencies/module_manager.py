@@ -3,10 +3,14 @@
 import asyncio
 import importlib
 import importlib.util
+import importlib.abc
+
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict, Iterator, List, Union
+from types import ModuleType
+from typing import (TYPE_CHECKING, Any, Dict, Iterator, Optional, Set, Type,
+                    cast)
 
 import pkg_resources
 import voluptuous as vol
@@ -26,15 +30,22 @@ LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("folders", default=[]): [str],
-    vol.Required("blacklist", default=[]): [str],
-    vol.Required("whitelist", default=[]): [str],
+    vol.Required("exclude", default=[]): [str],
+    vol.Required("load-only", default=[]): [str],
     vol.Required("install-pip-requirements", default=True): bool,
     vol.Required("load-internal-modules", default=True): bool
 })
 
 
+class PythonModule(ModuleType):
+    """The Python module type with a resource_folder"""
+    resource_folder: Optional[str]
+    SPEC: Optional[Dict[str, Any]]
+    Module: Module
+
+
 # pylint: disable=too-few-public-methods
-class ModuleFolder:
+class ModuleFolder(ModuleType):
     """
     module folder representation to create
     a dummy package in sys.modules
@@ -59,39 +70,171 @@ class ModuleAccessor:
         return iter(self._module_manager.loaded_modules.values())
 
 
+class ModuleLoader:
+    """
+    Takes care of module loading
+    """
+    load_after: Optional[Set[str]]
+    _mod: Optional[PythonModule]
+    _spec: Optional[Dict[str, Any]]
+    _load_task: Optional[asyncio.Task]
+
+    def __init__(self, core: "Core", mod_path: str, mod_name: str) -> None:
+        self.mod_path = mod_path
+        self.mod_name = mod_name
+        self._mod = None
+        self._spec = None
+        self.core = core
+        self._load_task = None
+        self._spec, self._mod = self.spec()
+        self.load_after = set(self._spec.get("load-after", []))
+
+    def check_circular(self, mod_name: Optional[str] = None):
+        """Checks for circular dependencies to prevent deadlocks"""
+        mod_name = mod_name or self.mod_name
+        for dependency in self.load_after:
+            if dependency == mod_name:
+                raise Exception(f"Circular import of {mod_name}")
+            self.core.module_manager.module_loaders[dependency].check_circular(
+                mod_name)
+
+    def spec(self):
+        """Returns the module's spec"""
+        if os.path.isdir(self.mod_path):
+            return self._folder_spec()
+        return self._file_spec()
+
+    def _folder_spec(self):
+        spec_path = os.path.join(self.mod_path, "module.yaml")
+        spec = (YAMLLoader.load(open(spec_path))
+                if os.path.isfile(spec_path) else {})
+
+        return spec, None
+
+    def _file_spec(self):
+        mod_spec = importlib.util.spec_from_file_location(
+            self.mod_name, self.mod_path)
+        mod = cast(PythonModule, importlib.util.module_from_spec(mod_spec))
+        mod.resource_folder = None
+        cast(importlib.abc.Loader, mod_spec.loader).exec_module(mod)
+
+        spec = getattr(mod, "SPEC", {})
+
+        return spec, mod
+
+    async def load(self) -> Optional[Module]:
+        """Loads a module"""
+        self.check_circular()
+        if not self._load_task:
+            if os.path.isdir(self.mod_path):
+                self._load_task = self.core.loop.create_task(
+                    self._load_folder())
+            else:
+                self._load_task = self.core.loop.create_task(self._load_file())
+
+        return await self._load_task
+
+    async def _load_file(self) -> Optional[Module]:
+        if not self._mod:
+            self._file_spec()
+        return await self._load_module()
+
+    async def _load_folder(self) -> Optional[Module]:
+        if not self._spec:
+            self._folder_spec()
+        spec = self._spec
+        mod_path = os.path.join(self.mod_path, "module.py")
+        try:
+            ensure_packages(spec.get("pip-requirements", []))
+            ensure_packages(
+                spec.get("pip-test-requirements", []), test_index=True)
+        except PipInstallError:
+            return LOGGER.exception(
+                "Module could not be loaded: %s at %s",
+                self.mod_name, self.mod_path)
+
+        mod_spec = importlib.util.spec_from_file_location(
+            self.mod_name, mod_path,
+            submodule_search_locations=[self.mod_path])
+        mod = cast(PythonModule, importlib.util.module_from_spec(mod_spec))
+        mod_folder = os.path.basename(os.path.dirname(self.mod_path))
+        sys_mod_name = f"homecontrol_{mod_folder}.{self.mod_name}"
+        mod.__package__ = sys_mod_name
+        sys.modules[sys_mod_name] = mod
+        mod.SPEC = spec
+        mod.resource_folder = self.mod_path
+        cast(importlib.abc.Loader, mod_spec.loader).exec_module(mod)
+        self._mod = mod
+        return await self._load_module()
+
+    async def _load_module(self) -> Module:
+        if self.load_after:
+            print(f"{self.mod_name} waiting for {self.load_after}")
+            await asyncio.gather(*(
+                self.core.module_manager.load_module(name)
+                for name in self.load_after))
+        mod, spec = self._mod, self._spec
+
+        if not hasattr(mod, "Module"):
+            mod.Module = cast(Module, type(
+                "Module_" + self.mod_name, (Module,), {}))
+
+        mod_obj: Module = mod.Module.__new__(cast(Type[Module], mod.Module))
+
+        mod_obj.core = self.core
+        mod_obj.resource_folder = mod.resource_folder
+        mod_obj.name = self.mod_name
+        mod_obj.path = self.mod_path
+        mod_obj.mod = cast(PythonModule, mod)
+        mod_obj.item_specs = {}
+        mod_obj.spec = cast(Dict[str, Any], spec)
+        mod_obj.__init__()
+
+        self.core.module_manager.loaded_modules[self.mod_name] = mod_obj
+        await self.core.item_manager.add_from_module(mod_obj)
+        await mod_obj.init()
+        LOGGER.info("Module %s loaded", self.mod_name)
+        self.core.event_bus.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
+        return mod_obj
+
+
 class ModuleManager:
     """Manages your modules"""
 
     cfg: dict
     loaded_modules: Dict[str, Module]
-    available_modules: List[str]
+    module_loaders: Dict[str, ModuleLoader]
     module_accessor: ModuleAccessor
 
     def __init__(self, core: "Core"):
         self.core = core
         self.loaded_modules = {}
+        self.module_loaders = {}
         self.module_accessor = ModuleAccessor(self)
 
     async def init(self) -> None:
         """Initialise the modules"""
         self.cfg = await self.core.cfg.register_domain(
-            "module-manager",
+            "modules",
             schema=CONFIG_SCHEMA,
             allow_reload=False)
 
         if self.cfg["load-internal-modules"]:
             internal_module_folder = pkg_resources.resource_filename(
                 homecontrol.__name__, "modules")
-            await self.load_folder(internal_module_folder)
+            self.fetch_folder(internal_module_folder)
 
         for folder in self.cfg["folders"]:
-            await self.load_folder(folder)
+            self.fetch_folder(folder)
 
-    async def load_folder(self, path: str) -> None:
-        """Load every module in a folder"""
-        load_tasks = []
-        blacklist = self.cfg["blacklist"]
-        whitelist = self.cfg["whitelist"]
+        await asyncio.gather(*(
+            module_loader.load()
+            for module_loader in self.module_loaders.values()))
+
+    def fetch_folder(self, path: str) -> None:
+        """Fetches the modules from a folder"""
+        blacklist = self.cfg["exclude"]
+        whitelist = self.cfg["load-only"]
 
         package_name = f"homecontrol_{os.path.basename(path)}"
         sys.modules[package_name] = ModuleFolder(package_name)
@@ -101,130 +244,21 @@ class ModuleManager:
                 continue
             mod_path = os.path.join(path, node)
             mod_name = node if os.path.isdir(
-                node) else ".".join(os.path.splitext(node)[:-1])
+                node) else os.path.splitext(node)[0]
 
-            if ((mod_name not in blacklist)
-                    and (not whitelist or mod_name in whitelist)):
-                if os.path.isdir(mod_path):
-                    load_tasks.append(self.core.loop.create_task(
-                        self.load_folder_module(mod_path, mod_name)))
+            if (mod_name in blacklist
+                    or whitelist and mod_name not in whitelist):
+                continue
 
-                elif os.path.isfile(mod_path) and node.endswith(".py"):
-                    load_tasks.append(self.core.loop.create_task(
-                        self.load_file_module(mod_path, mod_name)))
+            self.module_loaders[mod_name] = ModuleLoader(
+                self.core, mod_path, mod_name)
 
-        await asyncio.gather(*load_tasks)
-
-    async def load_file_module(
-            self, mod_path: str, name: str) -> Union[Module, Exception]:
-        """
-        Loads a module from a file and initialises it
-
-        Returns a Module object
-        """
-        try:
-            assert os.path.isfile(mod_path)
-        except AssertionError as error:
-            LOGGER.warning(
-                "Module could not be loaded: %s at %s", name, mod_path)
-            self.core.event_bus.broadcast(
-                "module_not_loaded", exception=error)
-            return error
-
-        mod_spec = importlib.util.spec_from_file_location(name, mod_path)
-        mod = importlib.util.module_from_spec(mod_spec)
-        mod.resource_folder = None
-        mod.event = self.core.event_bus.register
-        mod_spec.loader.exec_module(mod)
-        if not hasattr(mod, "Module"):
-            mod.Module = type("Module_" + name, (Module,), {})
-
-        spec = getattr(mod, "SPEC", {})
-
-        return await self._load_module_object(spec, name, mod_path, mod)
-
-    async def load_folder_module(
-            self, path: str, name: str) -> Union[Module, Exception]:
-        """
-        Loads a module from a folder and initialises it
-
-        It also takes care of pip requirements
-
-        Returns a Module object
-        """
-        mod_path = os.path.join(path, "module.py")
-        spec_path = os.path.join(path, "module.yaml")
-        parent_path = os.path.dirname(path)
-
-        try:
-            assert os.path.isdir(path)
-            assert os.path.isfile(mod_path)
-        except AssertionError as error:
-            LOGGER.warning("Module could not be loaded: %s at %s", name, path)
-            self.core.event_bus.broadcast(
-                "module_not_loaded", exception=error, name=name)
-            return error
-
-        spec = (YAMLLoader.load(open(spec_path))
-                if os.path.isfile(spec_path) else {})
-
-        try:
-            ensure_packages(spec.get("pip-requirements", []))
-            ensure_packages(
-                spec.get("pip-test-requirements", []), test_index=True)
-        except PipInstallError as e:
-            LOGGER.warning(
-                "Module could not be loaded: %s at %s", name, path)
-            self.core.event_bus.broadcast(
-                "module_not_loaded",
-                exception=e,
-                name=name)
-            return
-
-        mod_name = f"homecontrol_{os.path.basename(parent_path)}.{name}"
-        mod_spec = importlib.util.spec_from_file_location(
-            name, mod_path, submodule_search_locations=[path])
-        mod = importlib.util.module_from_spec(mod_spec)
-        mod.__package__ = mod_name
-        sys.modules[mod_name] = mod
-        mod.SPEC = spec
-        mod.resource_folder = path
-        mod_spec.loader.exec_module(mod)
-        return await self._load_module_object(mod.SPEC, name, path, mod)
-
-    async def _load_module_object(
-            self, spec: dict, name: str, path: str, mod) -> Module:
-        """
-        Initialises a module object
-        This method should only be invoked by ModuleManager
-        """
-        if hasattr(mod, "_setup_module"):
-            mod._setup_module(self.core)  # pylint: disable=protected-access
-        if not hasattr(mod, "Module"):
-            mod.Module = type("Module_" + name, (Module,), {})
-
-        mod_obj = mod.Module.__new__(mod.Module)
-
-        mod_obj.core = self.core
-        mod_obj.resource_folder = mod.resource_folder
-        mod_obj.name = name
-        mod_obj.path = path
-        mod_obj.item_specs = {}
-        mod_obj.mod = mod
-        mod_obj.spec = spec
-        mod_obj.__init__()
-
-        self.loaded_modules[name] = mod_obj
-        await self.core.item_manager.add_from_module(mod_obj)
-        if hasattr(mod_obj, "init"):
-            await mod_obj.init()
-        self.core.event_bus.broadcast(EVENT_MODULE_LOADED, module=mod_obj)
-        return mod_obj
-
-    async def stop(self) -> None:
-        """Unloads all modules to prepare for a shutdown"""
-        return await asyncio.gather(*(
-            module.stop() for module in self.loaded_modules.values()))
+    async def load_module(self, name: str) -> Optional[Module]:
+        """Loads a module"""
+        if name not in self.module_loaders:
+            LOGGER.error("Module %s does not exist", name)
+            return None
+        return await self.module_loaders[name].load()
 
     # pylint: disable=no-self-use
     def resource_path(self, module: Module, path: str = "") -> str:
@@ -232,7 +266,14 @@ class ModuleManager:
         Returns the path for a module's resource folder
         Note that only folder modules can have a resource path
         """
+        assert module.resource_folder
         path = os.path.join(module.resource_folder, path)
         if os.path.exists(path):
             return path
         raise FileNotFoundError(f"Resource path {path} does not exist")
+
+    async def stop(self) -> None:
+        """Unloads all modules to prepare for a shutdown"""
+        await asyncio.gather(*(
+            module.stop()
+            for module in self.loaded_modules.values()))

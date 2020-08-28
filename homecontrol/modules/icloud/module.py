@@ -41,7 +41,7 @@ class ICloudDevice(Item):
             status = self.device.status()
             location = self.device.location()
             self.states.bulk_update(
-                battery_level=round(status.get("batteryLevel", 0)*100),
+                battery_level=round(status.get("batteryLevel", 0) * 100),
                 location={
                     "lon": location.get("longitude"),
                     "lat": location.get("latitude"),

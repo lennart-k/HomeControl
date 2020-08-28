@@ -78,23 +78,6 @@ class EventBus:
             handler(event, **kwargs),
             loop=self.core.loop) for handler in self.get_event_handlers(event)]
 
-    def broadcast_threaded(self,  # lgtm [py/similar-function]
-                           event_type: str,
-                           data: dict = None,
-                           **kwargs) -> List[asyncio.Task]:
-        """
-        Same as broadcast BUT
-        - It returns Futures and not Tasks
-        - It uses threads
-        """
-        event = self.create_event(event_type, data, **kwargs)
-
-        LOGGER.debug("Event: %s", event)
-
-        return [asyncio.run_coroutine_threadsafe(
-            handler(event, **kwargs),
-            loop=self.core.loop) for handler in self.get_event_handlers(event)]
-
     async def gather(self,
                      event_type: str,
                      data: dict = None,

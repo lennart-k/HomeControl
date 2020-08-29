@@ -1,4 +1,4 @@
 name: "Frontend"
 
 pip-test-requirements:
-  - homecontrol_frontend==20200724.0
+  - homecontrol_frontend==20200829.1

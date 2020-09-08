@@ -233,8 +233,8 @@ class ModuleManager:
 
     def fetch_folder(self, path: str) -> None:
         """Fetches the modules from a folder"""
-        blacklist = self.cfg["exclude"]
-        whitelist = self.cfg["load-only"]
+        exclude = self.cfg["exclude"]
+        load_only = self.cfg["load-only"]
 
         package_name = f"homecontrol_{os.path.basename(path)}"
         sys.modules[package_name] = ModuleFolder(package_name)
@@ -246,8 +246,8 @@ class ModuleManager:
             mod_name = node if os.path.isdir(
                 node) else os.path.splitext(node)[0]
 
-            if (mod_name in blacklist
-                    or whitelist and mod_name not in whitelist):
+            if (mod_name in exclude
+                    or (load_only and mod_name not in load_only)):
                 continue
 
             self.module_loaders[mod_name] = ModuleLoader(

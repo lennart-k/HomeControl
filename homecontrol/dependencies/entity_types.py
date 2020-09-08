@@ -4,7 +4,7 @@ Every new Item or Module will get one of these classes as a base class
 """
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Optional
+from typing import List, TYPE_CHECKING, Callable, Dict, Optional, cast
 
 import voluptuous as vol
 
@@ -97,6 +97,16 @@ class Item:
             setattr(cls, name, state_def.inherit(cls))
 
         super().__init_subclass__(**kwargs)
+
+    @property
+    def implements(self) -> List[str]:
+        """Returns all the item types the item implements"""
+        mro: List[type] = type(self).mro()
+        return [
+            cast(str, cast(Item, item_type).type)
+            for item_type in mro[:mro.index(Item)]
+            if getattr(item_type, "type", None)
+        ]
 
 
 class Module:

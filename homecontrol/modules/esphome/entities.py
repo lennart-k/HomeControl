@@ -5,6 +5,7 @@ import voluptuous as vol
 
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_proxy import StateDef, StateProxy
+from homecontrol.modules.switch.module import Switch
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -50,19 +51,15 @@ class ESPHomeItem(Item):
         return item
 
     def update_state(self, state: "EntityState") -> None:
-        pass
+        """Callback for state updates from esphome"""
 
 
-class SwitchItem(ESPHomeItem):
+class SwitchItem(Switch, ESPHomeItem):
     """An esphome switch"""
     entity: "SwitchInfo"
     type: str = "esphome.SwitchItem"
 
-    on = StateDef()
-
-    @on.setter(vol.Schema(bool))
     async def set_on(self, value: bool) -> Dict[str, Any]:
-        """Sets the on state"""
         await self.device.api.switch_command(self.entity.key, value)
         return {}
 

@@ -52,6 +52,7 @@ class ESPHomeItem(Item):
 class SwitchItem(ESPHomeItem):
     """An esphome switch"""
     entity: "SwitchInfo"
+    type: str = "esphome.SwitchItem"
 
     on = StateDef()
 
@@ -68,6 +69,7 @@ class SwitchItem(ESPHomeItem):
 class BinarySensorItem(ESPHomeItem):
     """An esphome binary_sensor"""
     entity: "BinarySensorInfo"
+    type: str = "esphome.BinarySensorItem"
 
     on = StateDef()
 
@@ -78,6 +80,7 @@ class BinarySensorItem(ESPHomeItem):
 class SensorItem(ESPHomeItem):
     """An esphome sensor"""
     entity: "SensorInfo"
+    type: str = "esphome.SensorItem"
 
     value = StateDef()
 
@@ -88,6 +91,7 @@ class SensorItem(ESPHomeItem):
 class FanItem(ESPHomeItem):
     """An esphome fan"""
     entity: "FanInfo"
+    type: str = "esphome.FanItem"
 
     on = StateDef()
     oscillating = StateDef()
@@ -104,6 +108,7 @@ class FanItem(ESPHomeItem):
 class LightItem(ESPHomeItem):
     """An esphome light"""
     entity: "LightInfo"
+    type: str = "esphome.LightItem"
 
     on = StateDef()
     brightness = StateDef()

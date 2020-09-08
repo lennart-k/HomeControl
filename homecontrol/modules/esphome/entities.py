@@ -41,6 +41,10 @@ class ESPHomeItem(Item):
         item.module = core.modules.esphome
 
         item.actions = {}
+        for attribute in dir(item):
+            func = getattr(item, attribute)
+            if hasattr(func, "action_name"):
+                item.actions[getattr(func, "action_name")] = func
         item.states = StateProxy(item, core)
 
         return item

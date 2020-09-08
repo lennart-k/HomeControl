@@ -1,7 +1,9 @@
 """StateProxy module"""
 import asyncio
 import logging
-from types import MethodType
+from logging import log
+from os import stat
+from types import FunctionType, MethodType
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
 
 import voluptuous as vol
@@ -30,9 +32,9 @@ class StateDef:
         self._poll_interval = poll_interval
         self._default = default_factory() if default_factory else default
         self.log_state = log_state
-        self._getter = None
-        self._setter = None
-        self._schema = None
+        self._getter: Optional[Callable] = None
+        self._setter: Optional[Callable] = None
+        self._schema: Optional[vol.Schema] = None
 
     def setter(self, schema: Optional[vol.Schema] = None) -> Callable:
         """Decorator to register a setter"""
@@ -67,6 +69,24 @@ class StateDef:
         )
         state_proxy.register_state(state)
         return state
+
+    def inherit(self, cls: type) -> "StateDef":
+        """
+        Copies the StateDef but redirects getter and setter to an inherited
+        item class
+        """
+        state_def = StateDef(
+            poll_interval=self._poll_interval,
+            default=self._default,
+            log_state=self.log_state
+        )
+        # pylint: disable=protected-access
+        state_def._getter = getattr(
+            cls, self._getter.__name__) if self._getter else None
+        state_def._setter = getattr(
+            cls, self._setter.__name__) if self._setter else None
+        state_def._schema = self._schema
+        return state_def
 
 
 class StateProxy:
@@ -142,7 +162,7 @@ class State:
                  getter: Optional[Callable] = None,
                  setter: Optional[Callable] = None,
                  name: Optional[str] = None,
-                 schema: Optional[Dict[Any, Any]] = None,
+                 schema: Optional[vol.Schema] = None,
                  poll_interval: Optional[float] = None,
                  log_state: Optional[bool] = True) -> None:
         self.value = default

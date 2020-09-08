@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional
 import voluptuous as vol
 
 from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
-from homecontrol.dependencies.state_proxy import StateProxy
+from homecontrol.dependencies.state_proxy import StateDef, StateProxy
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -87,6 +87,16 @@ class Item:
                 return False
             return True
         return False
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs) -> None:
+        for name in dir(cls):
+            state_def: StateDef = getattr(cls, name)
+            if not isinstance(state_def, StateDef):
+                continue
+            setattr(cls, name, state_def.inherit(cls))
+
+        super().__init_subclass__(**kwargs)
 
 
 class Module:

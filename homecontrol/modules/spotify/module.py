@@ -16,6 +16,7 @@ from homecontrol.dependencies.entity_types import Item, ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
 from homecontrol.dependencies.state_proxy import StateDef
 from homecontrol.dependencies.storage import Storage
+from homecontrol.modules.media_player.module import MediaPlayer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class Module(ModuleDef):
             raise web.HTTPFound(auth_url)
 
 
-class Spotify(Item):
+class Spotify(MediaPlayer):
     """A Spotify item"""
     module: "Module"
     token: Dict[str, Any]
@@ -100,15 +101,6 @@ class Spotify(Item):
         vol.Optional("expires_in"): int,
         vol.Optional("expires_at"): int,
     })
-
-    playing = StateDef()
-    volume = StateDef()
-    title = StateDef()
-    artist = StateDef()
-    album = StateDef()
-    cover = StateDef()
-    position = StateDef()
-    duration = StateDef()
 
     async def init(self) -> None:
         self.auth = self.module.auth
@@ -200,50 +192,39 @@ class Spotify(Item):
 
         self.states.bulk_update(**state_data)
 
-    @playing.setter(vol.Schema(bool))
     async def set_playing(self, playing: bool) -> Dict[str, Any]:
-        """Sets the playing state"""
         await self.core.loop.run_in_executor(
             None,
             self.api.start_playback if playing else self.api.pause_playback)
         return {"playing": playing}
 
-    @volume.setter(vol.Schema(int))
     async def set_volume(self, volume: int) -> Dict[str, Any]:
-        """Sets the volume state"""
         await self.core.loop.run_in_executor(None, self.api.volume, volume)
         return {"volume": volume}
 
-    @position.setter(vol.Schema(int))
     async def set_position(self, position: int) -> Dict[str, Any]:
-        """Sets the position state"""
         await self.core.loop.run_in_executor(
             None, self.api.seek_track, position * 1000)
         return {"position": position}
 
     @action("play")
     async def action_play(self):
-        """Action play"""
         await self.states.set("playing", True)
 
     @action("pause")
     async def action_pause(self):
-        """Action pause"""
         await self.states.set("playing", False)
 
     @action("stop")
     async def action_stop(self):
-        """Action stop"""
         await self.states.set("playing", False)
 
     @action("next")
     async def action_next(self):
-        """Action next"""
         await self.core.loop.run_in_executor(
             None, self.api.next_track)
 
     @action("previous")
     async def action_previous(self):
-        """Action previous"""
         await self.core.loop.run_in_executor(
             None, self.api.previous_track)

@@ -2,7 +2,7 @@ name: Chromecast
 description: Adds support for Chromecast
 
 pip-requirements:
-  - PyChromecast==2.5.2
+  - PyChromecast==7.3.0
 
 zeroconf:
   - _googlecast._tcp.local.

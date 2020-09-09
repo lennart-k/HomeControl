@@ -1,22 +1,27 @@
 "Chromecast module"
-
-import time
 from contextlib import suppress
-from typing import TYPE_CHECKING
+import logging
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, Optional, cast
+from uuid import UUID
 
 import pychromecast
-
 import voluptuous as vol
+from pychromecast.dial import DeviceStatus
+
+from homecontrol.const import ItemStatus
 from homecontrol.dependencies.action_decorator import action
-from homecontrol.dependencies.entity_types import Item, ModuleDef
+from homecontrol.dependencies.entity_types import ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
 from homecontrol.dependencies.state_proxy import StateDef
+from homecontrol.dependencies.storage import Storage
+from homecontrol.modules.media_player.module import MediaPlayer
 
 if TYPE_CHECKING:
     from zeroconf import Zeroconf
-
-with suppress(ImportError):
     from zeroconf import ServiceStateChange
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Module(ModuleDef):
@@ -25,6 +30,8 @@ class Module(ModuleDef):
             self, zeroconf: "Zeroconf", name: str,
             state_change: "ServiceStateChange") -> None:
         """Handles Zeroconf"""
+        # pylint: disable=import-outside-toplevel
+        from zeroconf import ServiceStateChange
         if state_change is not ServiceStateChange.Added:
             return
 
@@ -45,141 +52,145 @@ class Module(ModuleDef):
         ))
 
 
-class Chromecast(Item):
+class Chromecast(MediaPlayer):
     """The Chromecast item"""
     config_schema = vol.Schema({
         vol.Required("host"): vol.Coerce(str),
         vol.Required("port", default=8009): vol.Coerce(int)
     }, extra=vol.ALLOW_EXTRA)
 
-    last_time_jump = 0
-    last_status = 0
-    playing = StateDef(default=False)
-    metadata = StateDef(default_factory=lambda: {})
-    duration = StateDef(default=0)
-    playtime = StateDef(default=0, poll_interval=1, log_state=False)
-    content_type = StateDef()
-    muted = StateDef(default=False)
-    volume = StateDef(default=0)
+    _chromecast: Optional[pychromecast.Chromecast] = None
+    media_status = None
+    device: Optional[DeviceStatus]
 
-    async def init(self) -> None:
+    position = StateDef(poll_interval=1, log_state=False)
+
+    async def init(self) -> Optional[bool]:
         """Initialises the Chromecast item"""
-        try:
-            self.chromecast = pychromecast.Chromecast(
-                host=self.cfg["host"], port=self.cfg["port"])
-        except pychromecast.error.ChromecastConnectionError:
-            return False
+        self.storage = Storage(
+            self.core, f"item_data/{self.unique_identifier}", 1,
+            storage_init=lambda: None,
+            loader=lambda data: data and DeviceStatus(
+                **{**data, "uuid": UUID(data["uuid"])}),
+            dumper=lambda data: {**data._asdict(), "uuid": data.uuid.hex})
 
-        self.media_controller = self.chromecast.media_controller
-        self.last_time_jump = vars(
-            self.media_controller).get("current_time", 0)
-        self.states.bulk_update(
-            playing=vars(
-                self.media_controller).get("player_state") == "PLAYING",
-            content_type=self.media_controller.status.content_type,
-            metadata=self.media_controller.status.media_metadata,
-            volume=int(self.media_controller.status.volume_level * 100),
-        )
-        self.media_controller.register_status_listener(self)
+        self.device = pychromecast.get_device_status(
+            self.cfg["host"]) or self.storage.load_data()
+        if not self.device:
+            LOGGER.error(
+                "Could not connect to chromecast at %s:%s",
+                self.cfg["host"], self.cfg["port"])
+            return
 
-    @playtime.getter()
-    async def get_playtime(self) -> float:
-        """Getter for playtime"""
-        return (self.media_controller.status.current_time
-                + (time.time() - self.last_status
-                   if await self.states.get('playing') else 0))
+        self.storage.schedule_save(self.device)
 
-    @playtime.setter()
-    async def set_playtime(self, value: float) -> dict:
-        """"Setter for playtime"""
-        value = max(0, min(value, await self.states.get("duration")))
-        self.media_controller.seek(value)
-        return {"playtime": value}
+        def _connect():
+            chromecast = pychromecast.Chromecast(
+                host=self.cfg["host"], port=self.cfg["port"],
+                device=self.device)
+
+            chromecast.media_controller.register_status_listener(self)
+            chromecast.register_connection_listener(self)
+            chromecast.start()
+
+            self._chromecast = chromecast
+
+        self.core.loop.run_in_executor(None, _connect)
+        return False
+
+    @position.getter()
+    async def get_position(self) -> Optional[float]:
+        """Position getter"""
+        if not self.media_status:
+            return None
+        position = self.media_status.current_time
+        if self.media_status.player_state == "PLAYING":
+            position += (datetime.utcnow()
+                         - self.media_status.last_updated).seconds
+        return position
+
+    @position.setter()
+    async def set_position(self, position: int) -> Dict[str, Any]:
+        value = max(
+            0, min(position, cast(int, await self.states.get("duration"))))
+        self._chromecast.media_controller.seek(value)
+        return {"position": value}
 
     @action("pause")
-    async def action_pause(self) -> bool:
-        """Action: Pause"""
-        self.media_controller.pause()
-        return True
+    async def action_pause(self) -> None:
+        self._chromecast.media_controller.pause()
 
-    @playing.setter()
-    async def set_playing(self, value) -> dict:
-        """Setter for playing"""
-        if value:
-            self.media_controller.play()
+    async def set_playing(self, playing: bool) -> Dict[str, Any]:
+        if playing:
+            self._chromecast.media_controller.play()
         else:
-            self.media_controller.pause()
-        return {"playing": value}
+            self._chromecast.media_controller.pause()
+        return {"playing": playing}
+
+    async def set_volume(self, volume: int) -> Dict[str, Any]:
+        self._chromecast.set_volume(volume / 100)
+        return {"volume": volume}
 
     @action("play")
-    async def action_play(self) -> bool:
+    async def action_play(self) -> None:
         """Action: Play"""
-        self.media_controller.play()
-        return True
+        self._chromecast.media_controller.play()
 
     @action("play_url")
     async def action_play_url(self, url: str, mime: str) -> None:
         """Action: Play URL"""
-        self.media_controller.play_media(url=url, content_type=mime)
+        self._chromecast.media_controller.play_media(
+            url=url, content_type=mime)
 
-    @action("rewind")
-    async def action_rewind(self) -> None:
-        """Action: Rewind"""
-        self.media_controller.rewind()
+    @action("previous")
+    async def action_previous(self) -> None:
+        """Action: Previous"""
+        self._chromecast.media_controller.rewind()
 
-    @action("skip")
-    async def action_skip(self) -> None:
-        """Action: Skip"""
-        self.media_controller.skip()
+    @action("next")
+    async def action_next(self) -> None:
+        """Action: Next"""
+        self._chromecast.media_controller.skip()
 
     @action("stop")
     async def action_stop(self) -> None:
         """Action: stop"""
-        if self.media_controller.is_active:
-            self.media_controller.stop()
-
-    @volume.setter()
-    async def set_volume(self, value: int) -> dict:
-        """Setter for volume"""
-        self.chromecast.set_volume(value / 100)
-        return {"volume": value}
-
-    @muted.setter()
-    async def set_muted(self, value: bool) -> dict:
-        """Setter for muted"""
-        self.chromecast.set_volume_muted(bool(value))
-        return {"muted": value}
-
-    @action("toggle_muted")
-    async def action_toggle_muted(self) -> None:
-        """Action: Toggle muted"""
-        new_state = not await self.states.get("muted")
-        await self.states.set("muted", new_state)
+        if self._chromecast.media_controller.is_active:
+            self._chromecast.media_controller.stop()
 
     @action("quit")
     async def action_quit(self) -> None:
         """Action: Quit casting"""
-        self.chromecast.quit_app()
-
-    def new_cast_status(self, status) -> None:
-        """Handle new cast status"""
-        self.core.event_bus.broadcast(
-            "chromecast_cast_status", status=status)
+        self._chromecast.quit_app()
 
     def new_media_status(self, status) -> None:
         """Handle new media status"""
-        self.core.loop.create_task(self.update_media_status(status))
+        self.core.loop.run_in_executor(None, self.update_media_status, status)
 
-    async def update_media_status(self, status) -> None:
+    def new_connection_status(self, status) -> None:
+        """Handles connection status updates"""
+        if status.status == 'CONNECTED':
+            self.update_status(ItemStatus.ONLINE)
+        else:
+            self.update_status(ItemStatus.OFFLINE)
+
+    def update_media_status(self, status) -> None:
         """Update media status"""
-        self.last_time_jump = status.current_time
-        self.last_status = time.time()
-
+        self.media_status = status
         self.states.bulk_update(
-            playtime=status.current_time,
-            playing=vars(status).get("player_state") == "PLAYING",
+            position=status.current_time,
+            playing=status.player_state == "PLAYING",
             content_type=status.content_type,
-            metadata=status.media_metadata,
             volume=int(status.volume_level * 100),
             duration=status.duration,
+            title=status.title,
+            artist=status.artist,
+            album=status.album_name,
+            cover=status.images[0].url if status.images else None
         )
+
+    async def stop(self) -> None:
+        if not self._chromecast:
+            return
+        with suppress(Exception):
+            self._chromecast.disconnect(1)

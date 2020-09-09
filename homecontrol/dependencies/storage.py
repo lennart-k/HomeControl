@@ -137,10 +137,10 @@ class Storage:
 
     async def save_data(self, data: Any) -> None:
         """Saves the data"""
-        self._data.update({
+        self._data = {
             "data": data if not self.dumper else self.dumper(data),
             "last_update": datetime.now().isoformat()
-        })
+        }
         if not self._save_task or self._save_task.done():
             self._save_task = self.core.loop.run_in_executor(
                 None, self._save_data)

@@ -139,7 +139,9 @@ class Storage:
         """Saves the data"""
         self._data = {
             "data": data if not self.dumper else self.dumper(data),
-            "last_update": datetime.now().isoformat()
+            "last_update": datetime.now().isoformat(),
+            "version": self.version,
+            "name": self.name
         }
         if not self._save_task or self._save_task.done():
             self._save_task = self.core.loop.run_in_executor(

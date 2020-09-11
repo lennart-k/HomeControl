@@ -145,7 +145,8 @@ class ItemManager:
 
             if (isclass(item_class)
                     and issubclass(item_class, Item)
-                    and item_class is not Item):
+                    and item_class is not Item
+                    and item_class.__module__ == mod_obj.name):
                 item_class.module = mod_obj
                 item_class.type = f"{mod_obj.name}.{item_class.__name__}"
                 self.item_constructors[

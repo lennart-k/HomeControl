@@ -1,6 +1,6 @@
 """auth providers for HomeControl"""
 import ipaddress
-from typing import Optional
+from typing import Optional, Union
 
 from aiohttp import hdrs, web
 
@@ -33,12 +33,12 @@ class OauthAuthProvider(AuthProvider):
     async def validate_request(self, request: web.Request) -> Optional[User]:
         refresh_token = await self.validate_auth_header(request)
 
-        if refresh_token:
+        if isinstance(refresh_token, RefreshToken):
             return refresh_token.user
 
     async def validate_auth_header(
             self,
-            request: web.Request) -> Optional[RefreshToken]:
+            request: web.Request) -> Union[RefreshToken, bool, None]:
         """Validates the auth header"""
         auth_header = request.headers.get(hdrs.AUTHORIZATION)
         if not auth_header:

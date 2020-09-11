@@ -43,7 +43,7 @@ class ESPHomeDevice(Item):
     config_schema = vol.Schema({
         vol.Required("host"): str,
         vol.Required("port", default=6053): int,
-        vol.Required("password"): str
+        vol.Optional("password"): str
     })
     api: APIClient
     entities: Dict[int, ESPHomeItem]
@@ -52,7 +52,7 @@ class ESPHomeDevice(Item):
         """Tries to connect to the esphome device"""
         try:
             await self.api.connect(
-                login="password" in self.cfg, on_stop=self.on_disconnect)
+                login=True, on_stop=self.on_disconnect)
             await self.api.subscribe_states(self.state_callback)
             self.update_status(ItemStatus.ONLINE)
         except APIConnectionError as error:
@@ -129,7 +129,7 @@ class ESPHomeDevice(Item):
         storage_data: StorageConfig = storage.load_data()
 
         api = APIClient(
-            core.loop, cfg["host"], cfg["port"], cfg["password"],
+            core.loop, cfg["host"], cfg["port"], cfg.get("password", ""),
             client_info=f"HomeControl {VERSION_STRING}"
         )
         item.api = api

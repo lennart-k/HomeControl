@@ -63,7 +63,7 @@ class Core:
         await self.module_manager.init()
 
         # Init items
-        await self.item_manager.init()
+        self.loop.create_task(self.item_manager.init())
 
         self.event_bus.broadcast(EVENT_CORE_BOOTSTRAP_COMPLETE)
         LOGGER.info("Core bootstrap complete")

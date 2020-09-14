@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class ICloudDevice(Item):
     """An iCloud device that shall automatically be created by ICloudAccount"""
     account: "ICloudAccount"
-    device: "AppleDevice"
+    device: AppleDevice
     device_id: str
     update_task: asyncio.Task
 
@@ -63,7 +63,7 @@ class ICloudDevice(Item):
     async def constructor(
             cls, identifier: str, name: str, core: "Core",
             unique_identifier: str, account: "ICloudAccount",
-            device: "AppleDevice", device_id: str) -> "ICloudDevice":
+            device: AppleDevice, device_id: str) -> "ICloudDevice":
         item = cls()
 
         item.identifier = identifier
@@ -84,6 +84,9 @@ class ICloudDevice(Item):
         item.device_id = device_id
 
         return item
+
+    async def stop(self) -> None:
+        self.update_task.cancel()
 
 
 class ICloudAccount(Item):

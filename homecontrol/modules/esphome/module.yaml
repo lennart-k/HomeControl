@@ -2,7 +2,7 @@ name: ESPHome
 description: Provides integration with ESPHome
 
 pip-requirements:
-  - aioesphomeapi==2.6.1
-  - protobuf==3.6.1
+  - aioesphomeapi==2.6.3
+  - protobuf==3.13.0
 # zeroconf:
 #   - _esphomelib._tcp.local.

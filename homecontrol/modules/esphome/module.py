@@ -1,7 +1,7 @@
 """ESPHome integration"""
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import Optional, TYPE_CHECKING, Any, Dict, List, cast
 
 import aioesphomeapi.model
 import voluptuous as vol
@@ -43,16 +43,18 @@ class ESPHomeDevice(Item):
     config_schema = vol.Schema({
         vol.Required("host"): str,
         vol.Required("port", default=6053): int,
-        vol.Optional("password"): str
+        vol.Optional("password", default=""): str
     })
     api: APIClient
     entities: Dict[int, ESPHomeItem]
+    _connect_task: Optional[asyncio.Task] = None
 
     async def connect(self, tries: int = 0) -> None:
         """Tries to connect to the esphome device"""
         try:
-            await self.api.connect(
-                login=True, on_stop=self.on_disconnect)
+            self._connect_task = self.core.loop.create_task(self.api.connect(
+                login=True, on_stop=self.on_disconnect))
+            await self._connect_task
             await self.api.subscribe_states(self.state_callback)
             self.update_status(ItemStatus.ONLINE)
         except APIConnectionError as error:
@@ -129,7 +131,7 @@ class ESPHomeDevice(Item):
         storage_data: StorageConfig = storage.load_data()
 
         api = APIClient(
-            core.loop, cfg["host"], cfg["port"], cfg.get("password", ""),
+            core.loop, cfg["host"], cfg["port"], cfg["password"],
             client_info=f"HomeControl {VERSION_STRING}"
         )
         item.api = api
@@ -187,4 +189,6 @@ class ESPHomeDevice(Item):
 
     async def stop(self) -> None:
         """Disconnects from esphome"""
+        if self._connect_task:
+            self._connect_task.cancel()
         await self.api.disconnect()

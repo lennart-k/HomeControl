@@ -2,4 +2,4 @@ name: zeroconf
 description: Autodiscover devices with zeroconf
 
 pip-requirements:
-  - zeroconf==0.26.1
+  - zeroconf>=0.28.0

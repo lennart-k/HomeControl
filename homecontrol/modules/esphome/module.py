@@ -1,13 +1,15 @@
 """ESPHome integration"""
 import asyncio
 import logging
-from typing import Optional, TYPE_CHECKING, Any, Dict, List, cast
+from functools import partial
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 import aioesphomeapi.model
 import voluptuous as vol
 from aioesphomeapi import APIClient
 from aioesphomeapi.core import APIConnectionError
-from aioesphomeapi.model import DeviceInfo, EntityInfo, EntityState
+from aioesphomeapi.model import (DeviceInfo, EntityInfo, EntityState,
+                                 UserService)
 from attr import asdict, attrib, attrs
 
 from homecontrol.const import VERSION_STRING
@@ -48,6 +50,7 @@ class ESPHomeDevice(Item):
     api: APIClient
     entities: Dict[int, ESPHomeItem]
     _connect_task: Optional[asyncio.Task] = None
+    _services: Dict[str, UserService]
 
     async def connect(self, tries: int = 0) -> None:
         """Tries to connect to the esphome device"""
@@ -140,7 +143,12 @@ class ESPHomeDevice(Item):
             {core.loop.create_task(item.connect())}, timeout=6)
 
         if connected:
-            entities, _ = await api.list_entities_services()
+            entities, services = await api.list_entities_services()
+
+            for service in services:
+                item.actions[service.name] = partial(
+                    item._run_service, service)
+
             device_info = await api.device_info()
 
             storage_data.entities.clear()
@@ -180,6 +188,10 @@ class ESPHomeDevice(Item):
             await core.item_manager.register_item(entity_item)
 
         return item
+
+    async def _run_service(self, service: UserService, **data) -> None:
+        """Runs an esphome service"""
+        await self.api.execute_service(service, data)
 
     def state_callback(self, state: EntityState) -> None:
         """Handles state updates from esphome"""

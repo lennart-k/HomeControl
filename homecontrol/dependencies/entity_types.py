@@ -108,6 +108,11 @@ class Item:
             if getattr(item_type, "type", None)
         ]
 
+    @property
+    def metadata(self) -> Dict[str, Any]:
+        """Returns additional metadata about the item"""
+        return {}
+
 
 class Module:
     """A dummy Module"""

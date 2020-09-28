@@ -27,6 +27,8 @@ EVENT_MODULE_LOADED = "module_loaded"
 
 MAX_PENDING_WS_MSGS = 512
 
+ATTRIBUTION = "attribution"
+
 
 class ItemStatus(Enum):
     """Every status an item can have"""

@@ -156,7 +156,8 @@ class GetItemsCommand(WebSocketCommand):
                 "status": item.status.value,
                 "actions": list(item.actions.keys()),
                 "states": await item.states.dump(),
-                "implements": item.implements
+                "implements": item.implements,
+                "metadata": item.metadata
             } for item in self.core.item_manager.items.values()
         ])
 

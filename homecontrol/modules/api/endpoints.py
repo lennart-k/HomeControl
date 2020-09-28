@@ -101,7 +101,8 @@ class ListItemsView(APIView):
                 "module": item.module.name,
                 "status": item.status.value,
                 "actions": list(item.actions.keys()),
-                "implements": item.implements
+                "implements": item.implements,
+                "metadata": item.metadata
             } for item in self.core.item_manager.items.values()
         ])
 
@@ -129,6 +130,7 @@ class GetItemView(APIView):
             "unique_identifier": item.unique_identifier,
             "type": item.type,
             "implements": item.implements,
+            "metadata": item.metadata,
             "module": item.module.name,
             "status": item.status.value,
             "storage_entry": {

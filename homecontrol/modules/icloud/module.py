@@ -11,23 +11,64 @@ from homecontrol.const import ItemStatus
 from homecontrol.dependencies.action_decorator import action
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_proxy import StateDef, StateProxy
+from homecontrol.modules.location.module import Location
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
 
 
+class ICloudDeviceLocation(Location):
+    """Stores the location of an iCloud device"""
+    device: "ICloudDevice"
+
+    # pylint: disable=arguments-differ
+    @classmethod
+    async def constructor(
+            cls, core: "Core", device: "ICloudDevice"
+    ) -> "ICloudDeviceLocation":
+        item = cls()
+        item.device = device
+        item.core = core
+        item.identifier = f"{device.identifier}_location"
+        item.unique_identifier = f"{device.unique_identifier}_location"
+        item.name = device.name
+        item.module = core.modules.icloud
+
+        item.actions = {}
+        for attribute in dir(item):
+            func = getattr(item, attribute)
+            if hasattr(func, "action_name"):
+                item.actions[getattr(func, "action_name")] = func
+        item.states = StateProxy(item, core)
+
+        return item
+
+    def location_callback(self, location: Dict[str, float]) -> None:
+        """Receives location updates"""
+        self.states.bulk_update(
+            longitude=location.get("longitude"),
+            latitude=location.get("latitude"),
+            accuracy=location.get("horizontalAccuracy"),
+            source=location.get("positionType"),
+            timestamp=location.get("timeStamp")
+        )
+
+
 class ICloudDevice(Item):
     """An iCloud device that shall automatically be created by ICloudAccount"""
     account: "ICloudAccount"
+    location_item: "ICloudDeviceLocation"
     device: AppleDevice
     device_id: str
     update_task: asyncio.Task
 
     battery_level = StateDef()
-    location = StateDef()
 
     async def init(self) -> None:
         self.update_task = self.core.loop.create_task(self._update_interval())
+        self.location_item = await ICloudDeviceLocation.constructor(
+            self.core, self)
+        await self.core.item_manager.register_item(self.location_item)
 
     async def _update_interval(self) -> None:
         while True:
@@ -41,15 +82,8 @@ class ICloudDevice(Item):
             status = self.device.status()
             location = self.device.location()
             self.states.bulk_update(
-                battery_level=round(status.get("batteryLevel", 0) * 100),
-                location={
-                    "lon": location.get("longitude"),
-                    "lat": location.get("latitude"),
-                    "timestamp": location.get("timeStamp"),
-                    "accuracy": location.get("horizontalAccuracy"),
-                    "type": location.get("positionType")
-                }
-            )
+                battery_level=round(status.get("batteryLevel", 0) * 100))
+            self.location_item.location_callback(location)
 
         await self.core.loop.run_in_executor(None, _update)
 

@@ -3,8 +3,9 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
+from homecontrol.exceptions import ActionNotExists
 import logging
-from typing import List, TYPE_CHECKING, Callable, Dict, Optional, cast
+from typing import Any, List, TYPE_CHECKING, Callable, Dict, Optional, cast
 
 import voluptuous as vol
 
@@ -79,14 +80,13 @@ class Item:
         self.core.event_bus.broadcast(
             EVENT_ITEM_STATUS_CHANGED, item=self, previous=previous_status)
 
-    async def run_action(self, name: str, *args, **kwargs) -> bool:
+    async def run_action(
+            self, name: str, kwargs: Dict[str, Any]) -> Any:
         """Runs an action"""
         if name in self.actions:
-            result = await self.actions[name](*args, **kwargs)
-            if result is False:
-                return False
-            return True
-        return False
+            return await self.actions[name](**kwargs)
+        raise ActionNotExists(
+            f"Item of type {self.type} does not have action {name}")
 
     @classmethod
     def __init_subclass__(cls, **kwargs) -> None:

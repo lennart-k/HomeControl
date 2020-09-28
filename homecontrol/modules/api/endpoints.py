@@ -309,7 +309,7 @@ class ExecuteActionView(APIView):
             return self.json({
                 "item": item.identifier,
                 "action": action_name,
-                "result": await item.run_action(action_name, **kwargs)
+                "result": await item.run_action(action_name, kwargs)
             })
         # pylint: disable=broad-except
         except Exception as e:

@@ -213,7 +213,7 @@ class ActionCommand(WebSocketCommand):
 
         try:
             return self.success({
-                "result": await item.run_action(action, **kwargs)
+                "result": await item.run_action(action, kwargs)
             })
         # pylint: disable=broad-except
         except Exception as err:

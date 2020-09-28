@@ -31,3 +31,7 @@ class ItemNotOnlineError(HomeControlException):
 
 class ItemTypeNotExistsError(HomeControlException):
     """Item type does not exist"""
+
+
+class ActionNotExists(HomeControlException):
+    """Action does not exist"""

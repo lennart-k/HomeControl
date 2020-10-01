@@ -1,11 +1,12 @@
 """Module for Yamaha AV receivers"""
 import asyncio
 import logging
+from typing import Optional
 
 import rxv
+import voluptuous as vol
 from requests.exceptions import ConnectionError
 
-import voluptuous as vol
 from homecontrol.dependencies.action_decorator import action
 from homecontrol.dependencies.entity_types import Item
 from homecontrol.dependencies.state_proxy import StateDef
@@ -21,7 +22,7 @@ CTRL_URL = "http://{host}/YamahaRemoteControl/ctrl"
 
 class YamahaAVReceiver(Item):
     """The YamahaAVReceiver item"""
-    update_task = asyncio.Task
+    update_task: Optional[asyncio.Task] = None
     config_schema = vol.Schema({
         vol.Required("host"): str
     }, extra=vol.ALLOW_EXTRA)
@@ -162,5 +163,5 @@ class YamahaAVReceiver(Item):
         self.states.update("available_inputs", available_inputs)
 
     async def stop(self) -> None:
-        """Stop the item"""
-        self.update_task.cancel()
+        if self.update_task:
+            self.update_task.cancel()

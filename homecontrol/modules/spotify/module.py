@@ -12,9 +12,8 @@ from aiohttp import web
 from spotipy.oauth2 import SpotifyOAuth
 
 from homecontrol.dependencies.action_decorator import action
-from homecontrol.dependencies.entity_types import Item, ModuleDef
+from homecontrol.dependencies.entity_types import ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
-from homecontrol.dependencies.state_proxy import StateDef
 from homecontrol.dependencies.storage import Storage
 from homecontrol.modules.media_player.module import MediaPlayer
 

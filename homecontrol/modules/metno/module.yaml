@@ -1,0 +1,9 @@
+name: Met.no Weather
+description: Provides weather data from met.no
+
+pip-requirements:
+  - pyMetno
+  - xmltodict
+  - async_timeout
+  - aiohttp
+  - pytz

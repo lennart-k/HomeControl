@@ -1,5 +1,5 @@
 """Frontend websocket commands"""
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 from homecontrol.modules.auth.decorator import needs_auth
 from homecontrol.modules.websocket.command import WebSocketCommand
@@ -20,7 +20,7 @@ class GetDashboardsCommand(WebSocketCommand):
 
     async def handle(self) -> Dict[Any, Any]:
         """Handle get_panels"""
-        dashboard_mod: "Module" = self.core.modules.dashboard
+        dashboard_mod = cast("Module", self.core.modules.dashboard)
         return self.success({
             "dashboards": {
                 dashboard.identifier: {

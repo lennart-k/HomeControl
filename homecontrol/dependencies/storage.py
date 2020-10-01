@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from json import JSONDecodeError, dump, load
 from shutil import copyfile
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 import voluptuous as vol
 
@@ -56,7 +56,7 @@ class Storage:
         self.dumper = dumper
         self.migrator = migrator
         self.core = core
-        self._save_task: asyncio.Future = None
+        self._save_task: Optional[asyncio.Future] = None
         self.name = name
         self._data = None
         self.path = os.path.join(
@@ -144,8 +144,9 @@ class Storage:
             "name": self.name
         }
         if not self._save_task or self._save_task.done():
-            self._save_task = self.core.loop.run_in_executor(
-                None, self._save_data)
+            self._save_task = cast(
+                asyncio.Future, self.core.loop.run_in_executor(
+                    None, self._save_data))
 
         return await self._save_task
 

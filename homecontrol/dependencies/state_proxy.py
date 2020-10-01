@@ -111,7 +111,7 @@ class StateProxy:
         """Registers a State instance to the StateProxy"""
         self.states[state.name] = state
 
-    async def get(self, state: str):
+    async def get(self, state: str) -> Any:
         """Gets an item's state"""
         if state in self.states:
             return await self.states[state].get()

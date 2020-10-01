@@ -79,6 +79,8 @@ class Module(ModuleDef):
         if getattr(handler, "allow_banned", False):
             return await handler(request)
 
+        user = None
+
         # pylint: disable=singleton-comparison
         for provider_name, provider in self.auth_providers.items():
             request["user"] = user = await provider.validate_request(

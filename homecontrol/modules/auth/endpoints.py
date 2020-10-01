@@ -1,7 +1,7 @@
 """The auth endpoints"""
 from datetime import timedelta
 from json import JSONDecodeError
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from aiohttp import hdrs, web
 
@@ -270,12 +270,12 @@ class TokenView(AuthView):
             self.auth_manager.remove_authorization_code(code)
 
             refresh_token = await self.auth_manager.create_refresh_token(
-                client_id=code.client_id,
+                client_id=cast(str, code.client_id),
                 access_token_expiration=code.access_token_expiration,
                 user=code.user
             )
 
-        if payload["grant_type"] == "password":
+        elif payload["grant_type"] == "password":
             try:
                 payload = PASSWORD_SCHEMA(payload)
             except vol.Invalid:
@@ -292,7 +292,7 @@ class TokenView(AuthView):
             login_valid = await cred_provider.validate_login_data(
                 user,
                 payload["password"]
-            )
+            ) if user else False
 
             if not login_valid:
                 return self.json({
@@ -304,7 +304,7 @@ class TokenView(AuthView):
                 payload["client_id"],
                 user=user)
 
-        if payload["grant_type"] == "refresh_token":
+        elif payload["grant_type"] == "refresh_token":
             try:
                 payload = REFRESH_TOKEN_SCHEMA(payload)
             except vol.Invalid as e:
@@ -331,6 +331,12 @@ class TokenView(AuthView):
                     "error": "invalid_grant",
                     "error_description": "Invalid refresh token"
                 }, status_code=400)
+
+        else:
+            return self.json({
+                "error": "invalid_grant",
+                "error_description": "The given grant type is not supported "
+            })
 
         access_token = await self.auth_manager.create_access_token(
             refresh_token)

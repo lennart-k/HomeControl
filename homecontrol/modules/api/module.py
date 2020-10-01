@@ -1,7 +1,7 @@
 """The API for HomeControl"""
 
 import logging
-from typing import Callable
+from typing import Callable, Optional
 
 import voluptuous as vol
 from aiohttp import web
@@ -23,12 +23,10 @@ CONFIG_SCHEMA = vol.Schema({
 
 class Module(ModuleDef):
     """The API app module"""
-    api_app: web.Application
+    api_app: Optional[web.Application] = None
 
     async def init(self):
         """Initialise the API app"""
-        self.api_app = None
-
         # Prohibit reloading of the configuration
         self.cfg = await self.core.cfg.register_domain(
             "api-server", schema=CONFIG_SCHEMA)

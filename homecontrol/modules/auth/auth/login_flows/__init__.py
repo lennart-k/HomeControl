@@ -2,15 +2,14 @@
 
 import uuid
 from functools import partial
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, cast
 
 import bcrypt
 
 import voluptuous as vol
 
 from .. import AuthManager
-from ..credential_provider import (CredentialProvider,
-                                   PasswordCredentialProvider)
+from ..credential_provider import PasswordCredentialProvider
 from ..models import User
 
 # pylint: disable=redefined-builtin,invalid-name
@@ -18,11 +17,11 @@ from ..models import User
 
 class FlowStep:
     """The class representing the result of a step"""
-    user: User
-    type: Union["form", "success", "error"]
+    user: Optional[User]
+    type: str
     error: Optional[str]
-    step_id: str
-    data: dict
+    step_id: Optional[str]
+    data: Optional[dict]
     auth_code: Optional[str]
 
     def __init__(
@@ -45,6 +44,7 @@ class FlowStep:
         self.form_type = form_type
 
     def to_json(self) -> dict:
+        """Returns the FlowStep in a JSON-serializable form"""
         output = {
             "id": self.flow.id,
             "step_id": self.step_id,
@@ -164,7 +164,7 @@ DUMMY_HASH = b'$2b$12$aZFoxzj4axZgsa1oyGYQmecFwGYFzX/YvObOTCNE6Za9r9ixdUm/y'
 
 class PasswordLoginFlow(LoginFlow):
     """The password login flow"""
-    user: User
+    user: Optional[User]
 
     def __init__(
             self,
@@ -175,11 +175,12 @@ class PasswordLoginFlow(LoginFlow):
 
         super().__init__(flow_manager, id, client_id, cfg=cfg)
 
-        self.mfa_module = self.cfg.get("mfa-module", None)
-        self.password_provider: PasswordCredentialProvider = (
+        self.mfa_module: Optional[str] = self.cfg.get("mfa-module")
+        self.password_provider = cast(
+            PasswordCredentialProvider,
             self.auth_manager.credential_providers["password"])
-        self.mfa_provider: CredentialProvider = (
-            self.auth_manager.credential_providers.get(self.mfa_module))
+        self.mfa_provider = self.auth_manager.credential_providers.get(
+            self.mfa_module) if self.mfa_module else None
 
     async def step_init(self, data: dict) -> FlowStep:
         """The first step"""
@@ -225,7 +226,7 @@ class PasswordLoginFlow(LoginFlow):
             return FlowStep(self, error="Invalid MFA module")
 
         valid_code = await self.mfa_provider.validate_login_data(
-            self.user, data=data["code"])
+            self.user, data=data["code"]) if self.user else False
 
         if valid_code:
             return await self.return_auth_code()

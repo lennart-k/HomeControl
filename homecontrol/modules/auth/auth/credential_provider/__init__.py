@@ -2,7 +2,7 @@
 
 import base64
 import hashlib
-from typing import Optional
+from typing import Optional, Tuple
 
 import bcrypt
 import pyotp
@@ -26,7 +26,8 @@ class CredentialProvider:
         self.core = auth_manager.core
 
     async def create_credentials(
-            self, user: User, data: object) -> (Credentials, Optional[object]):
+            self, user: User, data: object
+    ) -> Tuple[Credentials, Optional[object]]:
         """
         Creates credentials for a user
 
@@ -76,7 +77,8 @@ class PasswordCredentialProvider(CredentialProvider):
     # pylint: disable=arguments-differ
 
     async def create_credentials(
-            self, user: User, data: str) -> (Credentials, Optional[object]):
+            self, user: User, data: str
+    ) -> Tuple[Credentials, Optional[object]]:
         """Creates credentials for a user"""
         user.credentials.setdefault(self.namespace, {})
 
@@ -117,7 +119,8 @@ class TOTPCredentialProvider(CredentialProvider):
     }]
 
     async def create_credentials(
-            self, user: User, data: dict) -> (Credentials, Optional[object]):
+            self, user: User, data: dict
+    ) -> Tuple[Credentials, Optional[object]]:
         user.credentials.setdefault(self.namespace, {})
 
         secret = pyotp.random_base32()

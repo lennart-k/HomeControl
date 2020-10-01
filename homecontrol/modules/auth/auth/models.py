@@ -37,7 +37,7 @@ class AuthorizationCode(LinterFriendlyAttrs):
     client_id: Optional[str] = attrib()
     state: Optional[str] = attrib()
     user: Optional["User"] = attrib()
-    expiration: Optional[datetime] = attrib(default=timedelta(seconds=60))
+    expiration: datetime = attrib(default=timedelta(seconds=60))
     creation_date: datetime = attrib(factory=datetime.now)
     code: str = attrib(factory=lambda: secrets.token_hex(64))
 
@@ -52,7 +52,7 @@ class User(LinterFriendlyAttrs):
     """Represents a user"""
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
-    credentials: Dict[str, "Credentials"] = attrib(default={})
+    credentials: Dict[str, Dict[str, "Credentials"]] = attrib(default={})
     system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)
 

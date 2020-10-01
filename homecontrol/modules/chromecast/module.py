@@ -11,20 +11,20 @@ from pychromecast.dial import DeviceStatus
 
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.action_decorator import action
-from homecontrol.dependencies.entity_types import ModuleDef
-from homecontrol.dependencies.item_manager import StorageEntry
+from homecontrol.dependencies.entity_types import Item, ItemProvider, ModuleDef
 from homecontrol.dependencies.state_proxy import StateDef
 from homecontrol.dependencies.storage import Storage
 from homecontrol.modules.media_player.module import MediaPlayer
 
 if TYPE_CHECKING:
+    from homecontrol.dependencies.item_manager import StorageEntry
     from zeroconf import Zeroconf
     from zeroconf import ServiceStateChange
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Module(ModuleDef):
+class Module(ModuleDef, ItemProvider):
     """The Chromecast module"""
     async def handle_zeroconf(
             self, zeroconf: "Zeroconf", name: str,
@@ -47,8 +47,7 @@ class Module(ModuleDef):
             cfg={"host": host, "port": info.port},
             unique_identifier=uuid,
             name=friendly_name,
-            identifier=identifier,
-            provider="chromecast"
+            identifier=identifier
         ))
 
 

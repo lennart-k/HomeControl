@@ -277,3 +277,6 @@ class ModuleManager:
         await asyncio.gather(*(
             module.stop()
             for module in self.loaded_modules.values()))
+
+    def get_module(self, name: str) -> Optional[Module]:
+        return self.loaded_modules.get(name)

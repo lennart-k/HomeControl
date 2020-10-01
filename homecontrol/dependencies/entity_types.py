@@ -3,17 +3,18 @@ Module containing the entity types
 Every new Item or Module will get one of these classes as a base class
 """
 
-from homecontrol.exceptions import ActionNotExists
 import logging
-from typing import Any, List, TYPE_CHECKING, Callable, Dict, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, cast
 
 import voluptuous as vol
 
 from homecontrol.const import EVENT_ITEM_STATUS_CHANGED, ItemStatus
 from homecontrol.dependencies.state_proxy import StateDef, StateProxy
+from homecontrol.exceptions import ActionNotExists
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
+    from homecontrol.dependencies.item_manager import StorageEntry
     from homecontrol.dependencies.module_manager import PythonModule
 
 LOGGER = logging.getLogger(__name__)
@@ -137,3 +138,9 @@ class Module:
 
 
 ModuleDef = Module
+
+
+class ItemProvider:
+    """Creates an item from a storage entry"""
+    async def create_item(self, storage_entry: "StorageEntry") -> Item:
+        """Creates an item from a storage entry"""

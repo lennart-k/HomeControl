@@ -49,7 +49,6 @@ class Module(ModuleDef):
             },
             enabled=True,
             name="Home Location",
-            provider="location",
         ), override=True)
 
 

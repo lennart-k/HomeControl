@@ -1,5 +1,5 @@
 """The dashboard module"""
-from typing import Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import voluptuous as vol
 from attr import attrib, attrs
@@ -9,6 +9,9 @@ from homecontrol.dependencies.entity_types import ModuleDef
 from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
 
 from .commands import add_commands
+
+if TYPE_CHECKING:
+    from homecontrol.modules.websocket.module import Module as WebSocketModule
 
 SPEC = {
     "name": "Dashboard",
@@ -48,7 +51,8 @@ class Module(ModuleDef):
 
         @self.core.event_bus.register(EVENT_CORE_BOOTSTRAP_COMPLETE)
         async def add_websocket_commands(event) -> None:
-            add_commands(self.core.modules.websocket.add_command_handler)
+            ws_mod = cast("WebSocketModule", self.core.modules.websocket)
+            add_commands(ws_mod.add_command_handler)
 
     async def load_yaml_config(self) -> None:
         """Loads YAML config"""

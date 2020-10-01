@@ -1,9 +1,7 @@
 """StateProxy module"""
 import asyncio
 import logging
-from logging import log
-from os import stat
-from types import FunctionType, MethodType
+from types import MethodType
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
 
 import voluptuous as vol

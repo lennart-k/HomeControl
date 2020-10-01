@@ -11,7 +11,7 @@ from pychromecast.dial import DeviceStatus
 
 from homecontrol.const import ItemStatus
 from homecontrol.dependencies.action_decorator import action
-from homecontrol.dependencies.entity_types import Item, ItemProvider, ModuleDef
+from homecontrol.dependencies.entity_types import ItemProvider, ModuleDef
 from homecontrol.dependencies.state_proxy import StateDef
 from homecontrol.dependencies.storage import Storage
 from homecontrol.modules.media_player.module import MediaPlayer

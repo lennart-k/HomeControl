@@ -37,7 +37,7 @@ CONFIG_SCHEMA = vol.Schema({
 })
 
 
-class PythonModule(ModuleType):
+class PythonModule(ModuleType):  # pylint: disable=too-few-public-methods
     """The Python module type with a resource_folder"""
     resource_folder: Optional[str]
     SPEC: Optional[Dict[str, Any]]
@@ -279,4 +279,5 @@ class ModuleManager:
             for module in self.loaded_modules.values()))
 
     def get_module(self, name: str) -> Optional[Module]:
+        """Returns a loaded module by its name"""
         return self.loaded_modules.get(name)

@@ -9,7 +9,7 @@ from attr import asdict, attrib, attrs
 
 from homecontrol.const import (EVENT_ITEM_CREATED, EVENT_ITEM_NOT_WORKING,
                                EVENT_ITEM_REMOVED, ItemStatus)
-from homecontrol.dependencies.entity_types import Item, Module
+from homecontrol.dependencies.entity_types import Item, ItemProvider, Module
 from homecontrol.dependencies.storage import Storage
 
 if TYPE_CHECKING:
@@ -35,13 +35,14 @@ class StorageEntry:
     """The storage representation of an item"""
     unique_identifier: str = attrib()
     type: str = attrib()
-    provider: str = attrib()
     enabled: bool = attrib(default=True)
     identifier: str = attrib(default=None)
     state_defaults: dict = attrib(factory=lambda: {})
     cfg: dict = attrib(factory=lambda: {})
     name: str = attrib(default=None)
     hidden: bool = attrib(default=False)
+    provider: str = attrib(default=None)
+    yaml: bool = attrib(default=False)
 
     def __attrs_post_init__(self):
         self.identifier = self.identifier or self.unique_identifier
@@ -63,9 +64,9 @@ def yaml_entry_to_storage_entry(yaml_entry: dict) -> StorageEntry:
         unique_identifier="yaml_" + yaml_entry["id"],
         type=yaml_entry["type"],
         state_defaults=yaml_entry["states"],
-        provider="yaml",
         name=yaml_entry.get("name", yaml_entry["id"]),
-        hidden=False
+        hidden=False,
+        yaml=True
     )
 
 
@@ -76,6 +77,7 @@ class ItemManager:
     core: "Core"
     items: Dict[str, Item]
     yaml_cfg: List[dict]
+    item_config: Dict[str, StorageEntry]
 
     def __init__(self, core: "Core"):
         self.core = core
@@ -107,7 +109,7 @@ class ItemManager:
     def load_yaml_config(self) -> None:
         """Loads the YAML configuration to the storage"""
         for key in tuple(self.item_config.keys()):
-            if self.item_config[key].provider == "yaml":
+            if self.item_config[key].yaml:
                 del self.item_config[key]
 
         for yaml_entry in self.yaml_cfg:
@@ -208,14 +210,20 @@ class ItemManager:
             self, storage_entry: StorageEntry) -> Optional[Item]:
         """Creates an Item from a storage entry"""
         try:
-            return await self.create_item(
-                identifier=storage_entry.identifier,
-                unique_identifier=storage_entry.unique_identifier,
-                name=storage_entry.name,
-                item_type=storage_entry.type,
-                cfg=storage_entry.cfg,
-                state_defaults=storage_entry.state_defaults
-            )
+            if not storage_entry.provider:
+                return await self.create_item(
+                    identifier=storage_entry.identifier,
+                    unique_identifier=storage_entry.unique_identifier,
+                    name=storage_entry.name,
+                    item_type=storage_entry.type,
+                    cfg=storage_entry.cfg,
+                    state_defaults=storage_entry.state_defaults
+                )
+
+            provider = cast(ItemProvider, self.core.module_manager.get_module(
+                storage_entry.provider))
+
+            return await provider.create_item(storage_entry)
         except Exception:  # pylint: disable=broad-except
             LOGGER.error("Could not create item %s",
                          storage_entry.identifier, exc_info=True)

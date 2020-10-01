@@ -6,9 +6,9 @@ from attr import attrib, attrs
 
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.dependencies.entity_types import ModuleDef
+from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
 
 from .commands import add_commands
-
 
 SPEC = {
     "name": "Dashboard",
@@ -26,7 +26,7 @@ CONFIG_SCHEMA = vol.Schema([DASHBOARD_SCHEMA])
 
 
 @attrs(slots=True)
-class Dashboard:
+class Dashboard(LinterFriendlyAttrs):
     """A dashboard"""
     identifier: str = attrib()
     provider: str = attrib()

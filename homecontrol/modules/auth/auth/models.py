@@ -6,18 +6,20 @@ from typing import Any, Dict, Optional
 
 from attr import attrib, attrs
 
+from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
+
 # pylint: disable=too-few-public-methods
 
 
 @attrs(slots=True)
-class AccessToken:
+class AccessToken(LinterFriendlyAttrs):
     """Represents the access token"""
     token: str = attrib()
     expiration: datetime = attrib()
 
 
 @attrs(slots=True)
-class RefreshToken:
+class RefreshToken(LinterFriendlyAttrs):
     """Represents the refresh token"""
     client_id: Optional[str] = attrib()
     client_name: Optional[str] = attrib()
@@ -29,7 +31,7 @@ class RefreshToken:
 
 
 @attrs(slots=True)
-class AuthorizationCode:
+class AuthorizationCode(LinterFriendlyAttrs):
     """Represents the authorization code"""
     access_token_expiration: timedelta = attrib()
     client_id: Optional[str] = attrib()
@@ -46,7 +48,7 @@ class AuthorizationCode:
 
 
 @attrs(slots=True)
-class User:
+class User(LinterFriendlyAttrs):
     """Represents a user"""
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
@@ -56,7 +58,7 @@ class User:
 
 
 @attrs(slots=True)
-class Credentials:
+class Credentials(LinterFriendlyAttrs):
     """Represents credentials"""
     user: User = attrib()
     provider: str = attrib()

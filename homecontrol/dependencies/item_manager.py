@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from inspect import isclass
-from typing import Dict, Iterator, TYPE_CHECKING, List, Optional, cast
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, cast
 
 import voluptuous as vol
 from attr import asdict, attrib, attrs
@@ -10,6 +10,7 @@ from attr import asdict, attrib, attrs
 from homecontrol.const import (EVENT_ITEM_CREATED, EVENT_ITEM_NOT_WORKING,
                                EVENT_ITEM_REMOVED, ItemStatus)
 from homecontrol.dependencies.entity_types import Item, ItemProvider, Module
+from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
 from homecontrol.dependencies.storage import Storage
 
 if TYPE_CHECKING:
@@ -31,7 +32,7 @@ CONFIG_SCHEMA = vol.Schema([
 
 # pylint: disable=too-few-public-methods
 @attrs(slots=True)
-class StorageEntry:
+class StorageEntry(LinterFriendlyAttrs):
     """The storage representation of an item"""
     unique_identifier: str = attrib()
     type: str = attrib()

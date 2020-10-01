@@ -4,7 +4,7 @@ import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Tuple, Union
 
 LOGGER = logging.getLogger(__name__)
 
@@ -82,17 +82,14 @@ class EventBus:
                      event_type: str,
                      data: dict = None,
                      timeout: Union[float, int, None] = None,
-                     **kwargs) -> List[Any]:
+                     **kwargs) -> Union[List[Any], Tuple[Any]]:
         """
         Broadcast an event and return the results
         """
         tasks = self.broadcast(event_type, data, **kwargs)
         if not tasks:
             return []
-        return await asyncio.wait(
-            tasks,
-            loop=self.core.loop,
-            timeout=timeout)
+        return await asyncio.gather(*tasks, loop=self.core.loop)
 
     def register(self, event: str) -> Callable:
         """

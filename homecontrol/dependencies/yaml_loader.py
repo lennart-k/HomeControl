@@ -3,7 +3,7 @@
 import itertools
 import logging
 import os
-from typing import Union
+from typing import Optional, Union
 
 import yaml
 from yaml.composer import Composer
@@ -24,12 +24,21 @@ FORMAT_STRING_SCHEMA = vol.Schema({
 
 
 # pylint: disable=no-member,no-self-use
-class Constructor(SafeConstructor):
-    """Constructor for yaml"""
-
+# pylint: disable=too-many-ancestors
+class YAMLLoader(Reader, Scanner, Parser, Composer, SafeConstructor, Resolver):
+    """Loads YAML with custom constructors"""
+    cfg_folder: Optional[str]
     name: str
 
-    def __init__(self):
+    def __init__(self, stream, cfg_folder: str = None):
+        self.cfg_folder = cfg_folder
+        Reader.__init__(self, stream)
+        Scanner.__init__(self)
+        Parser.__init__(self)
+        Composer.__init__(self)
+        SafeConstructor.__init__(self)
+        Resolver.__init__(self)
+
         self.add_constructor(
             "!format",
             self.__class__.format_string_constructor)
@@ -44,9 +53,19 @@ class Constructor(SafeConstructor):
         self.add_constructor("!path", self.__class__.path_constructor)
         self.add_constructor("!listdir", self.__class__.listdir_constructor)
 
-        SafeConstructor.__init__(self)
+    @classmethod
+    def load(cls, data, cfg_folder: str = None):
+        """Loads data"""
+        loader = cls(data, cfg_folder=cfg_folder)
+        try:
+            return loader.get_single_data()
+        finally:
+            loader.dispose()
 
-    def _obj(self, cls, node: yaml.Node) -> object:
+    def _obj(
+            self, cls,
+            node: Union[yaml.MappingNode, yaml.SequenceNode, yaml.ScalarNode]
+    ) -> object:
         if not node:
             return cls
 
@@ -171,7 +190,7 @@ class Constructor(SafeConstructor):
             return [os.path.join(path, item) for item in os.listdir(path)]
         return list()
 
-    def env_var_constructor(self, node: yaml.nodes.Node) -> str:
+    def env_var_constructor(self, node: yaml.Node) -> str:
         """
         Embeds an environment variable
         !env_var <name> [default]
@@ -193,26 +212,3 @@ class Constructor(SafeConstructor):
         mapping = FORMAT_STRING_SCHEMA(self.construct_mapping(node))
 
         return mapping["template"].format(**mapping)
-
-
-# pylint: disable=too-many-ancestors
-class YAMLLoader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
-    """Loads YAML with custom constructors"""
-
-    def __init__(self, stream, cfg_folder: str = None):
-        self.cfg_folder = cfg_folder
-        Reader.__init__(self, stream)
-        Scanner.__init__(self)
-        Parser.__init__(self)
-        Composer.__init__(self)
-        Constructor.__init__(self)
-        Resolver.__init__(self)
-
-    @classmethod
-    def load(cls, data, cfg_folder: str = None):
-        """Loads data"""
-        loader = cls(data, cfg_folder=cfg_folder)
-        try:
-            return loader.get_single_data()
-        finally:
-            loader.dispose()

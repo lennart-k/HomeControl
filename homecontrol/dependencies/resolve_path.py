@@ -2,13 +2,14 @@
 
 import logging
 import os
+from typing import Optional, cast
 
 LOGGER = logging.getLogger(__name__)
 
 
 def resolve_path(path: str,
-                 file_path: str = None,
-                 config_dir: str = None) -> str:
+                 file_path: Optional[str] = None,
+                 config_dir: Optional[str] = None) -> str:
     """
     Resolves a path:
     ~/  for paths relative to your home directory
@@ -18,8 +19,9 @@ def resolve_path(path: str,
             only available if config_dir is specified
         for paths relative to the current file
     """
-    relative_dir = os.path.abspath(
-        os.path.dirname(file_path) if file_path else config_dir)
+    relative_dir = os.path.abspath(cast(
+        str,
+        os.path.dirname(file_path) if file_path else config_dir))
 
     if path.startswith("~"):
         return os.path.expanduser(path)

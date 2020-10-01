@@ -14,6 +14,7 @@ from attr import asdict, attrib, attrs
 
 from homecontrol.const import VERSION_STRING
 from homecontrol.dependencies.entity_types import Item, ItemStatus
+from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
 from homecontrol.dependencies.state_proxy import StateDef, StateProxy
 from homecontrol.dependencies.storage import Storage
 
@@ -27,14 +28,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 @attrs(slots=True)
-class StorageEntity:
+class StorageEntity(LinterFriendlyAttrs):
     """Data model for an entity"""
     entity: EntityInfo = attrib()
     entity_type: str = attrib()
 
 
 @attrs(slots=True)
-class StorageConfig:
+class StorageConfig(LinterFriendlyAttrs):
     """Data model for storage configuration"""
     device_info: DeviceInfo = attrib()
     entities: List[StorageEntity] = attrib(factory=lambda: [])

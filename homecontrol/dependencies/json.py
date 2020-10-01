@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from enum import Enum
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type, cast
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
@@ -39,7 +39,7 @@ def dumps(obj, *, indent=None, sort_keys=False, core: "Core" = None, **kw):
     for HomeControl's data types
     """
     return json.dumps(
-        obj, cls=partial(JSONEncoder, core=core),
+        obj, cls=cast(Type[JSONEncoder], partial(JSONEncoder, core=core)),
         indent=indent, sort_keys=sort_keys, **kw)
 
 
@@ -48,5 +48,5 @@ def dump(obj, fp, *, indent=None, sort_keys=False, core: "Core" = None, **kw):
     Dumps an object into a Writer with support for HomeControl's data types
     """
     return json.dump(
-        obj, fp, cls=partial(JSONEncoder, core=core),
+        obj, fp, cls=cast(Type[JSONEncoder], partial(JSONEncoder, core=core)),
         indent=indent, sort_keys=sort_keys, **kw)

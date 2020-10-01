@@ -1,20 +1,21 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
 from collections import ChainMap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 import voluptuous as vol
+
 from homecontrol.const import (ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
                                EVENT_ITEM_STATUS_CHANGED,
                                ITEM_ACTION_NOT_FOUND)
 from homecontrol.dependencies.entity_types import Item, ItemStatus
 from homecontrol.dependencies.event_bus import Event
 from homecontrol.modules.auth.decorator import needs_auth
+from homecontrol.modules.auth.module import Module as AuthModule
 
 from .command import WebSocketCommand
 
 if TYPE_CHECKING:
-    from homecontrol.modules.auth.module import Module as AuthModule
     from homecontrol.modules.auth.auth.models import User
 
 
@@ -38,7 +39,7 @@ class PingCommand(WebSocketCommand):
     """A basic ping command"""
     command = "ping"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the ping command"""
         return self.success("pong")
 
@@ -48,7 +49,7 @@ class WatchStatesCommand(WebSocketCommand):
     """Command to watch states"""
     command = "watch_states"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the watch_states command"""
         if self.command not in self.session.subscriptions:
             self.core.event_bus.register(
@@ -77,7 +78,7 @@ class WatchStatusCommand(WebSocketCommand):
     """Command to watch the item status"""
     command = "watch_status"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the watch_status command"""
         if self.command not in self.session.subscriptions:
             self.core.event_bus.register(
@@ -109,10 +110,10 @@ class AuthCommand(WebSocketCommand):
         vol.Required("token"): str
     }
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the auth command"""
         token: str = self.data["token"]
-        auth_manager = self.core.modules.auth.auth_manager
+        auth_manager = cast(AuthModule, self.core.modules.auth).auth_manager
 
         refresh_token = await auth_manager.validate_access_token(token)
 
@@ -129,7 +130,7 @@ class CurrentUserCommand(WebSocketCommand):
     """Gives information about the current user"""
     command = "current_user"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the current_user command"""
         return self.success({
             "name": self.session.user.name,
@@ -144,7 +145,7 @@ class GetItemsCommand(WebSocketCommand):
     """Returns information about the current items"""
     command = "get_items"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the get_items command"""
         return self.success([
             {
@@ -167,7 +168,7 @@ class GetModulesCommand(WebSocketCommand):
     """Returns information about the current modules"""
     command = "get_modules"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the get_modules command"""
         return self.success([
             {
@@ -188,7 +189,7 @@ class ActionCommand(WebSocketCommand):
         vol.Optional("kwargs"): dict
     }
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the action command"""
         identifier = self.data["item"]
         action = self.data["action"]
@@ -232,7 +233,7 @@ class SetStatesCommand(WebSocketCommand):
         }
     }
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the set_states command"""
         identifier = self.data["item"]
         changes = self.data["changes"]
@@ -273,7 +274,7 @@ class CoreShutdownCommand(WebSocketCommand):
     """Shuts HomeControl down"""
     command = "core_shutdown"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the shutdown command"""
         self.core.loop.call_soon(self.core.shutdown)
         return self.success("Shutting down")
@@ -284,7 +285,7 @@ class CoreRestartCommand(WebSocketCommand):
     """Shuts HomeControl down"""
     command = "core_restart"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the restart command"""
         self.core.loop.call_soon(self.core.restart)
         return self.success("Restarting")
@@ -295,9 +296,9 @@ class GetUsersCommand(WebSocketCommand):
     """Returns the users"""
     command = "get_users"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the get_users command"""
-        auth_module: "AuthModule" = self.core.modules.auth
+        auth_module = cast(AuthModule, self.core.modules.auth)
         out = []
         for user in auth_module.auth_manager.users.values():
             user: "User" = user

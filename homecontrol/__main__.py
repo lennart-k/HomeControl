@@ -118,8 +118,8 @@ def get_config(directory: str) -> dict:
             user_choice = input(
                 (f"Shall a default config folder be created "
                  f"at {directory}? [Y/n]"))
-            create_new_config = (not user_choice
-                                 or create_new_config.lower()[0] == "y")
+            create_new_config = (
+                not user_choice or user_choice.lower()[0] == "y")
 
         if create_new_config:
             LOGGER.info(

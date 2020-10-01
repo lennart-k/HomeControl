@@ -6,18 +6,20 @@ from typing import Any, Dict, Optional
 
 from attr import attrib, attrs
 
+from homecontrol.dependencies.linter_friendly_attrs import LinterFriendlyAttrs
+
 # pylint: disable=too-few-public-methods
 
 
 @attrs(slots=True)
-class AccessToken:
+class AccessToken(LinterFriendlyAttrs):
     """Represents the access token"""
     token: str = attrib()
     expiration: datetime = attrib()
 
 
 @attrs(slots=True)
-class RefreshToken:
+class RefreshToken(LinterFriendlyAttrs):
     """Represents the refresh token"""
     client_id: Optional[str] = attrib()
     client_name: Optional[str] = attrib()
@@ -29,13 +31,13 @@ class RefreshToken:
 
 
 @attrs(slots=True)
-class AuthorizationCode:
+class AuthorizationCode(LinterFriendlyAttrs):
     """Represents the authorization code"""
     access_token_expiration: timedelta = attrib()
     client_id: Optional[str] = attrib()
     state: Optional[str] = attrib()
     user: Optional["User"] = attrib()
-    expiration: Optional[datetime] = attrib(default=timedelta(seconds=60))
+    expiration: datetime = attrib(default=timedelta(seconds=60))
     creation_date: datetime = attrib(factory=datetime.now)
     code: str = attrib(factory=lambda: secrets.token_hex(64))
 
@@ -46,17 +48,17 @@ class AuthorizationCode:
 
 
 @attrs(slots=True)
-class User:
+class User(LinterFriendlyAttrs):
     """Represents a user"""
     name: Optional[str] = attrib()
     owner: bool = attrib(default=False)
-    credentials: Dict[str, "Credentials"] = attrib(default={})
+    credentials: Dict[str, Dict[str, "Credentials"]] = attrib(default={})
     system_generated: bool = attrib(default=False)
     id: str = attrib(factory=lambda: uuid.uuid4().hex)
 
 
 @attrs(slots=True)
-class Credentials:
+class Credentials(LinterFriendlyAttrs):
     """Represents credentials"""
     user: User = attrib()
     provider: str = attrib()

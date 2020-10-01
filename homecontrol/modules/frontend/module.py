@@ -3,12 +3,12 @@
 import json
 import logging
 import os
-from typing import Optional, TYPE_CHECKING, Iterator, List
+from typing import TYPE_CHECKING, Iterator, List, Optional, cast
 
+import voluptuous as vol
 from aiohttp import web, web_urldispatcher
 from yarl import URL
 
-import voluptuous as vol
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.dependencies.entity_types import Module as ModuleType
 from homecontrol.modules.api.view import APIView
@@ -19,6 +19,7 @@ from .panel import Panel
 
 if TYPE_CHECKING:
     from homecontrol.core import Core
+    from homecontrol.modules.websocket.module import Module as WebsocketModule
 
 
 LOGGER = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class ManifestView(APIView):
 
     async def get(self) -> web.Response:
         """GET /manifest.webmanifest"""
-        module: "Module" = self.core.modules.frontend
+        module = cast(Module, self.core.modules.frontend)
         manifest = json.load(
             open(module.resource_path.rstrip("/") + self.path))
 
@@ -164,7 +165,10 @@ class Module(ModuleType):
 
         @self.core.event_bus.register(EVENT_CORE_BOOTSTRAP_COMPLETE)
         async def add_websocket_commands(event) -> None:
-            add_commands(self.core.modules.websocket.add_command_handler)
+            add_commands(
+                cast(
+                    "WebsocketModule",
+                    self.core.modules.websocket).add_command_handler)
 
         @self.core.event_bus.register("http_add_main_routes")
         async def add_route(event, router: web.RouteTableDef) -> None:

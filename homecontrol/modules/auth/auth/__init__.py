@@ -2,14 +2,14 @@
 import logging
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import jwt
 
 from homecontrol.core import Core
 from homecontrol.dependencies.storage import DictWrapper, Storage
 
-from .credential_provider import CREDENTIAL_PROVIDERS
+from .credential_provider import CREDENTIAL_PROVIDERS, CredentialProvider
 from .models import (AccessToken, AuthorizationCode, Credentials, RefreshToken,
                      User)
 
@@ -19,6 +19,7 @@ ACCESS_TOKEN_EXPIRATION = timedelta(minutes=30)
 
 class AuthManager:
     """Object handling authentication"""
+    credential_providers: Dict[str, CredentialProvider]
 
     def __init__(self, core: Core) -> None:
         self.core = core
@@ -110,7 +111,7 @@ class AuthManager:
             for user in data.values()
         }
 
-    def _load_refresh_tokens(self, data) -> None:
+    def _load_refresh_tokens(self, data) -> Dict[str, RefreshToken]:
         refresh_tokens = {}
         for token_data in data:
             refresh_tokens[token_data["id"]] = RefreshToken(
@@ -125,7 +126,7 @@ class AuthManager:
             )
         return refresh_tokens
 
-    def _dump_refresh_tokens(self, data: dict) -> dict:
+    def _dump_refresh_tokens(self, data: dict) -> List[Dict[str, Any]]:
         return [
             {
                 "client_id": refresh_token.client_id,

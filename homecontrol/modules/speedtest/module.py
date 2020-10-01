@@ -36,7 +36,7 @@ class Speedtest(Item):
             s.upload(pre_allocate=False)
 
         await self.core.loop.run_in_executor(None, do_speedtest)
-        await self.states.bulk_update(
+        self.states.bulk_update(
             ping=s.results.ping,
             upload_speed=s.results.upload,
             download_speed=s.results.download

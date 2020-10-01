@@ -49,7 +49,8 @@ class WebSocketCommand:
         return self.message.success(data)
 
     def error(
-            self, error: Union[str, Exception], message: str = None) -> Dict[Any, Any]:
+            self, error: Union[str, Exception], message: str = None
+    ) -> Dict[Any, Any]:
         """Return an error"""
         if isinstance(error, Exception):
             return self.message.error(type(error).__name__, str(error))

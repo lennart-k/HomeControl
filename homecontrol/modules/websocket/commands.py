@@ -1,7 +1,7 @@
 """WebSocket commands"""
 # pylint: disable=relative-beyond-top-level
 from collections import ChainMap
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 import voluptuous as vol
 
@@ -11,11 +11,11 @@ from homecontrol.const import (ERROR_INVALID_ITEM_STATES, ERROR_ITEM_NOT_FOUND,
 from homecontrol.dependencies.entity_types import Item, ItemStatus
 from homecontrol.dependencies.event_bus import Event
 from homecontrol.modules.auth.decorator import needs_auth
+from homecontrol.modules.auth.module import Module as AuthModule
 
 from .command import WebSocketCommand
 
 if TYPE_CHECKING:
-    from homecontrol.modules.auth.module import Module as AuthModule
     from homecontrol.modules.auth.auth.models import User
 
 
@@ -113,7 +113,7 @@ class AuthCommand(WebSocketCommand):
     async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the auth command"""
         token: str = self.data["token"]
-        auth_manager = self.core.modules.auth.auth_manager
+        auth_manager = cast(AuthModule, self.core.modules.auth).auth_manager
 
         refresh_token = await auth_manager.validate_access_token(token)
 
@@ -285,7 +285,7 @@ class CoreRestartCommand(WebSocketCommand):
     """Shuts HomeControl down"""
     command = "core_restart"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the restart command"""
         self.core.loop.call_soon(self.core.restart)
         return self.success("Restarting")
@@ -296,9 +296,9 @@ class GetUsersCommand(WebSocketCommand):
     """Returns the users"""
     command = "get_users"
 
-    async def handle(self) -> None:
+    async def handle(self) -> Union[str, Dict[Any, Any]]:
         """Handle the get_users command"""
-        auth_module: "AuthModule" = self.core.modules.auth
+        auth_module = cast(AuthModule, self.core.modules.auth)
         out = []
         for user in auth_module.auth_manager.users.values():
             user: "User" = user

@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from inspect import isclass
-from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, cast
+from typing import Any, TYPE_CHECKING, Dict, Iterator, List, Optional, cast
 
 import voluptuous as vol
 from attr import asdict, attrib, attrs
@@ -119,9 +119,10 @@ class ItemManager:
                 storage_entry.unique_identifier] = storage_entry
         self.storage.schedule_save(self.item_config)
 
-    def get_storage_entry(self, unique_identifier: str) -> StorageEntry:
+    def get_storage_entry(
+            self, unique_identifier: str) -> Optional[StorageEntry]:
         """Returns the StorageEntry for a unique_identifier"""
-        return self.item_config.get(unique_identifier, None)
+        return self.item_config.get(unique_identifier)
 
     def update_storage_entry(self, entry: StorageEntry) -> None:
         """Updates a config storage entry"""
@@ -134,7 +135,9 @@ class ItemManager:
             entries[entry["unique_identifier"]] = StorageEntry(**entry)
         return entries
 
-    def _dump_items(self, data: dict) -> dict:  # pylint: disable=no-self-use
+    def _dump_items(  # pylint: disable=no-self-use
+            self, data: dict
+    ) -> List[Dict[str, Any]]:
         return [asdict(entry) for entry in data.values()]
 
     async def add_from_module(self, mod_obj: Module) -> None:

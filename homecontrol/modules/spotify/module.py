@@ -68,7 +68,6 @@ class Module(ModuleDef):
             await self.core.item_manager.register_entry(StorageEntry(
                 unique_identifier=identifier,
                 type="spotify.Spotify",
-                provider="spotify",
                 enabled=True,
                 cfg={
                     "refresh_token": access_token["refresh_token"],

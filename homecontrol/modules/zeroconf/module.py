@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from abc import ABC, abstractmethod
 from functools import partial
 
 from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
@@ -11,6 +12,17 @@ from homecontrol.const import (EVENT_CORE_BOOTSTRAP_COMPLETE,
 from homecontrol.dependencies.entity_types import ModuleDef
 
 LOGGER = logging.getLogger(__name__)
+
+
+class ZeroconfHandler(ABC):
+    """A zeroconf handler"""
+    name: str
+
+    @abstractmethod
+    async def handle_zeroconf(
+            self, zeroconf: Zeroconf,
+            name: str, state_change: ServiceStateChange):
+        """Handles a zeroconf state change"""
 
 
 class Module(ModuleDef):
@@ -58,7 +70,7 @@ class Module(ModuleDef):
 
     def dispatch_service(
             self, zeroconf: Zeroconf, service_type: str, name: str,
-            state_change: ServiceStateChange, module: ModuleDef) -> None:
+            state_change: ServiceStateChange, module: ZeroconfHandler) -> None:
         """Dispatches a zeroconf service to a module"""
         LOGGER.debug(
             "Zeroconf service for %s: type=%s name=%s state=%s",

@@ -1,6 +1,7 @@
 """A module for minecraft server status information"""
 import asyncio
 import logging
+from typing import Optional
 
 from mcstatus import MinecraftServer as MCServer
 
@@ -15,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 class MinecraftServer(Item):
     """A Minecraft server item"""
     server: MCServer
-    status_task: asyncio.Task = None
+    status_task: Optional[asyncio.Task] = None
     config_schema = vol.Schema({
         vol.Required("host"): str,
         vol.Required("port", default=25565): int,
@@ -43,7 +44,7 @@ class MinecraftServer(Item):
             self.status_task.cancel()
 
     @action
-    async def get_status(self) -> None:
+    async def get_status(self) -> Optional[bool]:
         """Fetches the server's status"""
         try:
             status = await self.core.loop.run_in_executor(

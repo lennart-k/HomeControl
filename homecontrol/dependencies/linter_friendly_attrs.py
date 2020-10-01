@@ -3,7 +3,7 @@ from abc import ABC
 from typing import TYPE_CHECKING
 
 
-class LinterFriendlyAttrs(ABC):
+class LinterFriendlyAttrs(ABC):  # pylint: disable=too-few-public-methods
     """A class that takes any arguments"""
     if TYPE_CHECKING:
         # pylint: disable=useless-super-delegation

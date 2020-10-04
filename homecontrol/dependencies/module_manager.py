@@ -161,9 +161,9 @@ class ModuleLoader:
         sys_mod_name = f"homecontrol_{mod_folder}.{self.mod_name}"
         mod.__package__ = sys_mod_name
         sys.modules[sys_mod_name] = mod
-        mod.SPEC = spec
         mod.resource_folder = self.mod_path
         cast(importlib.abc.Loader, mod_spec.loader).exec_module(mod)
+        self._spec.update(getattr(mod, "SPEC", {}))
         self._mod = mod
         return await self._load_module()
 

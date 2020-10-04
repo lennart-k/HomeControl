@@ -1,0 +1,5 @@
+name: COVID-19
+description: Shows the current cases of COVID-19
+
+pip-requirements:
+  - coronavirus==1.1.1

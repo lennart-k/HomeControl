@@ -11,7 +11,8 @@ from homecontrol.dependencies.entity_types import ModuleDef
 from .endpoints import add_routes
 
 SPEC = {
-    "name": "API"
+    "name": "API",
+    "description": "A simple HTTP API for HomeControl"
 }
 
 LOGGER = logging.getLogger(__name__)

@@ -59,10 +59,9 @@ class Module(ModuleDef):
         if not changes:
             return
         data = {
-            "measurement": "item_state",
+            "measurement": f"item_state.{item.unique_identifier}",
             "tags": {
-                "item_identifier": item.identifier,
-                "item_unique_identifier": item.unique_identifier
+                "unique_identifier": item.unique_identifier
             },
             "time": event.timestamp,
             "fields": changes

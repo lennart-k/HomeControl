@@ -9,6 +9,7 @@ build
 
 # venv
 venv
+pythonenv3.8
 
 # IntelliJ, PyCharm
 .idea

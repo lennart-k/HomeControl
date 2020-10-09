@@ -77,7 +77,10 @@ class PingSensor(Item):
                              ping_process.returncode, self.command, err)
 
             match = PING_PATTERN.search(str(out).split("\n")[-1])
-            self.states.bulk_update(**match.groupdict(), online=True)
+            self.states.bulk_update(
+                **{key: float(val) for key, val in match.groupdict().items()},
+                online=True
+            )
 
         except asyncio.TimeoutError:
             LOGGER.error("Ping command timed out")

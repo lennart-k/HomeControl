@@ -214,7 +214,7 @@ class AuthManager:
         """
         Creates access token from refresh token
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         token = jwt.encode(
             {
                 "iss": refresh_token.id,

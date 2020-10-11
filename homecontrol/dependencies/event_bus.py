@@ -22,7 +22,7 @@ class Event:
 
         self.event_type = event_type
         self.data = data or {}
-        self.timestamp = timestamp or datetime.now()
+        self.timestamp = timestamp or datetime.utcnow()
         self.kwargs = kwargs or {}
 
     def __repr__(self) -> str:
@@ -45,7 +45,7 @@ class EventBus:
         """
         data = data or {}
         data.update(kwargs)
-        return Event(event_type, data=data, timestamp=datetime.now())
+        return Event(event_type, data=data, timestamp=datetime.utcnow())
 
     def get_event_handlers(self, event: Event) -> List:
         """

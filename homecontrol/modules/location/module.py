@@ -45,7 +45,7 @@ class Module(ModuleDef):
             state_defaults={
                 **home_location,
                 "accuracy": 0,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.utcnow().isoformat()
             },
             enabled=True,
             name="Home Location",

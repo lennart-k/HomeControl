@@ -91,7 +91,7 @@ class Storage:
             data = {
                 "data": self.storage_init() if self.storage_init else None,
                 "name": self.name,
-                "last_update": datetime.now(),
+                "last_update": datetime.utcnow(),
                 "version": self.version,
             }
 
@@ -139,7 +139,7 @@ class Storage:
         """Saves the data"""
         self._data = {
             "data": data if not self.dumper else self.dumper(data),
-            "last_update": datetime.now().isoformat(),
+            "last_update": datetime.utcnow().isoformat(),
             "version": self.version,
             "name": self.name
         }

@@ -38,13 +38,13 @@ class AuthorizationCode(LinterFriendlyAttrs):
     state: Optional[str] = attrib()
     user: Optional["User"] = attrib()
     expiration: datetime = attrib(default=timedelta(seconds=60))
-    creation_date: datetime = attrib(factory=datetime.now)
+    creation_date: datetime = attrib(factory=datetime.utcnow)
     code: str = attrib(factory=lambda: secrets.token_hex(64))
 
     @property
     def expired(self) -> bool:
         """Returns whether the authorization code is expired"""
-        return datetime.now() > self.creation_date + self.expiration
+        return datetime.utcnow() > self.creation_date + self.expiration
 
 
 @attrs(slots=True)

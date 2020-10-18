@@ -73,7 +73,7 @@ class PingSensor(Item):
 
             if ping_process.returncode or err:
                 self.states.update("online", False)
-                LOGGER.error("Ping command returned an error: %s, '%s'\n%s",
+                LOGGER.error("Ping command returned an error: %s, '%s': %s",
                              ping_process.returncode, self.command, err)
 
             match = PING_PATTERN.search(str(out).split("\n")[-1])

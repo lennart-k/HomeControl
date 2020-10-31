@@ -138,26 +138,33 @@ class Storage:
     async def save_data(self, data: Any) -> None:
         """Saves the data"""
         self._data = {
-            "data": data if not self.dumper else self.dumper(data),
+            "data": data,
             "last_update": datetime.utcnow().isoformat(),
             "version": self.version,
             "name": self.name
         }
+
+        def _save_data() -> None:
+            storage_dir = os.path.dirname(self.path)
+            if not os.path.isdir(storage_dir):
+                os.makedirs(storage_dir, exist_ok=True)
+
+            save_data = {
+                "data": data if not self.dumper else self.dumper(data),
+                "last_update": datetime.utcnow().isoformat(),
+                "version": self.version,
+                "name": self.name
+            }
+
+            with open(self.path, "w") as file:
+                dump(save_data, file, sort_keys=True, indent=4)
+
         if not self._save_task or self._save_task.done():
             self._save_task = cast(
                 asyncio.Future, self.core.loop.run_in_executor(
-                    None, self._save_data))
+                    None, _save_data))
 
         return await self._save_task
-
-    def _save_data(self) -> None:
-        """Saves the current data"""
-        storage_dir = os.path.dirname(self.path)
-        if not os.path.isdir(storage_dir):
-            os.makedirs(storage_dir, exist_ok=True)
-
-        with open(self.path, "w") as file:
-            dump(self._data, file, sort_keys=True, indent=4)
 
 
 class DictWrapper(dict):

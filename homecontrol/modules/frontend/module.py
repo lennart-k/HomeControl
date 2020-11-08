@@ -91,15 +91,24 @@ class AppView(web_urldispatcher.AbstractResource):
     async def get(self, request: web.Request) -> Optional[web.FileResponse]:
         """GET /frontend/{path}"""
         path = request.path
+        headers = {}
+
         if path.startswith(self.prefix):
             path = path[len(self.prefix):]
 
         if path == "manifest.webmanifest":
             return
+
+        if path.startswith("/sw.js"):
+            headers["Service-Worker-Allowed"] = "/"
+
+        if path.startswith("/static"):
+            headers["Cache-Control"] = "max-age=31536000"
+
         resource = self.resource_path.rstrip("/") + path
         if not os.path.isfile(resource):
             resource = self.index_path
-        return web.FileResponse(resource)
+        return web.FileResponse(resource, headers=headers)
 
 
 class ManifestView(APIView):

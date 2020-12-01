@@ -8,9 +8,9 @@ from aiohttp import web
 from homecontrol.core import Core
 from homecontrol.dependencies.entity_types import ModuleDef
 
-from .auth import AuthManager
-from .auth.auth_providers import AUTH_PROVIDERS
-from .auth.login_flows import FlowManager
+from homecontrol.auth import AuthManager
+from homecontrol.auth.auth_providers import AUTH_PROVIDERS
+from homecontrol.auth.login_flows import FlowManager
 from .endpoints import add_routes
 
 LOGGER = logging.getLogger(__name__)

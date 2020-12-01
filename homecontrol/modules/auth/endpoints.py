@@ -12,10 +12,10 @@ from homecontrol.modules.api.view import APIView
 from .decorator import needs_auth
 
 if TYPE_CHECKING:
-    from .auth import AuthManager
-    from .auth.login_flows import FlowManager
+    from homecontrol.auth import AuthManager
+    from homecontrol.auth.login_flows import FlowManager
     from .module import Module
-    from .auth.credential_provider import CredentialProvider
+    from homecontrol.auth.credential_provider import CredentialProvider
 
 
 GRANT_TYPES = ("password", "code", "refresh_token")

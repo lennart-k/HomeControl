@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional
 
 import jwt
 
-from homecontrol.core import Core
 from homecontrol.dependencies.storage import DictWrapper, Storage
 
 from .credential_provider import CREDENTIAL_PROVIDERS, CredentialProvider

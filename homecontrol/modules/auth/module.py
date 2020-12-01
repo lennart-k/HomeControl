@@ -48,7 +48,7 @@ class Module(ModuleDef):
         self.auth_app["auth"] = self
         add_routes(self.auth_app)
 
-        self.auth_manager = AuthManager(self.core)
+        self.auth_manager = AuthManager(self.core.cfg_dir, self.core.loop)
         self.flow_manager = FlowManager(
             self.auth_manager, self.cfg["login-flows"])
 

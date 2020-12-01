@@ -1,4 +1,5 @@
 """Auth module"""
+from asyncio.events import AbstractEventLoop
 import logging
 import time
 from datetime import datetime, timedelta
@@ -21,21 +22,24 @@ class AuthManager:
     """Object handling authentication"""
     credential_providers: Dict[str, CredentialProvider]
 
-    def __init__(self, core: Core) -> None:
-        self.core = core
+    def __init__(
+            self, cfg_dir: str, loop: AbstractEventLoop) -> None:
         user_storage = Storage.get_storage(
             "users", 1,
-            core=self.core,
+            cfg_dir=cfg_dir,
+            loop=loop,
             storage_init=lambda: {},
             loader=self._load_users,
             dumper=self._dump_users
         )
+        self.loop = loop
         self.users = DictWrapper(user_storage)
         user_storage.schedule_save(self.users)
 
         token_storage = Storage.get_storage(
             "refresh_tokens", 1,
-            core=self.core,
+            cfg_dir=cfg_dir,
+            loop=loop,
             storage_init=lambda: {},
             loader=self._load_refresh_tokens,
             dumper=self._dump_refresh_tokens,)

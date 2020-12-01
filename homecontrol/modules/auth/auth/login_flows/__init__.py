@@ -77,7 +77,7 @@ class LoginFlow:
         self.id = id
         self.flow_manager: FlowManager = flow_manager
         self.auth_manager: AuthManager = self.flow_manager.auth_manager
-        self.core = self.auth_manager.core
+        self.loop = self.auth_manager.loop
         self.cfg = cfg or {}
 
     def get_step(self, step_id: str) -> Optional[Callable]:
@@ -89,7 +89,7 @@ class LoginFlow:
 
     def destroy(self) -> None:
         """Schedules this flow to be destroyed"""
-        self.flow_manager.core.loop.call_soon(
+        self.loop.call_soon(
             partial(self.flow_manager.destroy_flow, self.id))
 
     def set_step(self, step_id: str = None, **kwargs) -> FlowStep:
@@ -119,7 +119,6 @@ class FlowManager:
 
     def __init__(self, auth_manager: AuthManager, cfg: dict):
         self.auth_manager = auth_manager
-        self.core = self.auth_manager.core
         self.cfg = cfg
         self.flow_factories = {
             name: self.flow_factory(cfg)

@@ -23,7 +23,6 @@ class CredentialProvider:
 
     def __init__(self, auth_manager) -> None:
         self.auth_manager = auth_manager
-        self.core = auth_manager.core
 
     async def create_credentials(
             self, user: User, data: object

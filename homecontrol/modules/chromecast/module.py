@@ -67,7 +67,8 @@ class Chromecast(MediaPlayer):
     async def init(self) -> Optional[bool]:
         """Initialises the Chromecast item"""
         self.storage = Storage(
-            self.core, f"item_data/{self.unique_identifier}", 1,
+            f"item_data/{self.unique_identifier}", 1,
+            core=self.core,
             storage_init=lambda: None,
             loader=lambda data: data and DeviceStatus(
                 **{**data, "uuid": UUID(data["uuid"])}),

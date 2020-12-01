@@ -85,7 +85,8 @@ class ItemManager:
         self.items = {}
         self.item_constructors = {}
         self.storage = Storage(
-            self.core, "items", 1,
+            "items", 1,
+            core=self.core,
             storage_init=lambda: {},
             loader=self._load_items,
             dumper=self._dump_items

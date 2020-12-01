@@ -43,9 +43,11 @@ class Storage:
     """JSON-file based data storage"""
 
     def __init__(self,
-                 core: "Core",
                  name: str,
                  version: int,
+                 core: Optional["Core"] = None,
+                 cfg_dir: Optional[str] = None,
+                 loop: Optional[asyncio.AbstractEventLoop] = None,
                  storage_init: Optional[Callable] = None,
                  loader: Optional[Callable] = None,
                  dumper: Optional[Callable] = None,
@@ -55,12 +57,13 @@ class Storage:
         self.loader = loader
         self.dumper = dumper
         self.migrator = migrator
-        self.core = core
+        self.loop = loop or core.loop
+        self.cfg_dir = cfg_dir or core.cfg_dir
         self._save_task: Optional[asyncio.Future] = None
         self.name = name
         self._data = None
         self.path = os.path.join(
-            self.core.cfg_dir, STORAGE_FOLDER, f"{self.name}.json")
+            self.cfg_dir, STORAGE_FOLDER, f"{self.name}.json")
 
     def load_data(self) -> Any:
         """Loads data from the corresponding file"""
@@ -109,31 +112,17 @@ class Storage:
         return self._data.get("last_update")
 
     @classmethod
-    def get_storage(cls,
-                    core: "Core",
-                    name: str,
-                    version: int,
-                    storage_init: Optional[Callable] = None,
-                    loader: Optional[Callable] = None,
-                    dumper: Optional[Callable] = None
-                    ) -> "Storage":
+    def get_storage(cls, *args, **kwargs) -> "Storage":
         """
         Loads a storage and returns it
         """
-        storage = cls(
-            core,
-            name,
-            version,
-            storage_init,
-            loader,
-            dumper
-        )
+        storage = cls(*args, **kwargs)
         storage.load_data()
         return storage
 
     def schedule_save(self, data: Any) -> asyncio.Task:
         """Saves the data"""
-        return self.core.loop.create_task(self.save_data(data))
+        return self.loop.create_task(self.save_data(data))
 
     async def save_data(self, data: Any) -> None:
         """Saves the data"""
@@ -161,7 +150,7 @@ class Storage:
 
         if not self._save_task or self._save_task.done():
             self._save_task = cast(
-                asyncio.Future, self.core.loop.run_in_executor(
+                asyncio.Future, self.loop.run_in_executor(
                     None, _save_data))
 
         return await self._save_task

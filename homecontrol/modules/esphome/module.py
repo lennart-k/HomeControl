@@ -127,10 +127,12 @@ class ESPHomeDevice(Item):
         item.states = StateProxy(item, core)
         item.status = ItemStatus.OFFLINE
 
-        storage = Storage(core, f"item_data/{unique_identifier}", 1,
-                          storage_init=lambda: {},
-                          loader=item.load_config,
-                          dumper=item.dump_config)
+        storage = Storage(
+            f"item_data/{unique_identifier}", 1,
+            core=core,
+            storage_init=lambda: {},
+            loader=item.load_config,
+            dumper=item.dump_config)
 
         storage_data: StorageConfig = storage.load_data()
 

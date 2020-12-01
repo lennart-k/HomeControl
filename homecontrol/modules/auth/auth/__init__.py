@@ -24,7 +24,8 @@ class AuthManager:
     def __init__(self, core: Core) -> None:
         self.core = core
         user_storage = Storage.get_storage(
-            self.core, "users", 1,
+            "users", 1,
+            core=self.core,
             storage_init=lambda: {},
             loader=self._load_users,
             dumper=self._dump_users
@@ -33,7 +34,8 @@ class AuthManager:
         user_storage.schedule_save(self.users)
 
         token_storage = Storage.get_storage(
-            self.core, "refresh_tokens", 1,
+            "refresh_tokens", 1,
+            core=self.core,
             storage_init=lambda: {},
             loader=self._load_refresh_tokens,
             dumper=self._dump_refresh_tokens,)

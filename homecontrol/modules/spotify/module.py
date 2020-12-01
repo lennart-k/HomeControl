@@ -103,7 +103,8 @@ class Spotify(MediaPlayer):
     async def init(self) -> None:
         self.auth = self.module.auth
         self.storage = Storage(
-            self.core, f"item_data/{self.unique_identifier}", 1,
+            f"item_data/{self.unique_identifier}", 1,
+            core=self.core,
             storage_init=lambda: {})
 
         self.token = self.storage.load_data() or self.cfg

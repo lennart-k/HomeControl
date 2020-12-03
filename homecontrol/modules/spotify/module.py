@@ -3,7 +3,8 @@ import asyncio
 import logging
 import time
 from functools import partial
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
+from urllib.parse import urljoin
 from uuid import uuid4
 
 import spotipy
@@ -16,6 +17,9 @@ from homecontrol.dependencies.entity_types import ModuleDef
 from homecontrol.dependencies.item_manager import StorageEntry
 from homecontrol.dependencies.storage import Storage
 from homecontrol.modules.media_player.module import MediaPlayer
+
+if TYPE_CHECKING:
+    from homecontrol.modules.http_server.module import Module as HTTPModule
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,8 +79,14 @@ class Module(ModuleDef):
                 name=f"Spotify {user['display_name']}"
             ), override=True)
 
-            raise web.HTTPFound(
-                f"https://lennartk.duckdns.org/frontend/item/{identifier}")
+            http_module = cast("HTTPModule", self.core.modules.http_server)
+
+            if http_module.public_url:
+                raise web.HTTPFound(
+                    urljoin(http_module.public_url,
+                            f"/frontend/item/{identifier}"))
+
+            return web.Response(body="Success!")
 
         @router.get("/spotify/authorize")
         async def spotify_redirect(request: web.Request) -> web.Response:

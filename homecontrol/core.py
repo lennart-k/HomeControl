@@ -14,6 +14,7 @@ from homecontrol.dependencies.config_manager import ConfigManager
 from homecontrol.dependencies.event_bus import EventBus
 from homecontrol.dependencies.item_manager import ItemManager
 from homecontrol.dependencies.module_manager import ModuleManager
+from homecontrol.dependencies.uuid import get_uuid
 
 LOGGER = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ class Core:
         self.module_manager = ModuleManager(core=self)
         self.modules = self.module_manager.module_accessor
         self.item_manager = ItemManager(core=self)
+        self.uuid = get_uuid(self)
 
     async def bootstrap(self) -> None:
         """

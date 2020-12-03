@@ -18,6 +18,7 @@ SPEC = {
 CONFIG_SCHEMA = vol.Schema({
     vol.Required("host", default=None): vol.Any(str, None),
     vol.Required("port", default=8082): vol.Coerce(int),
+    vol.Optional("public-url"): vol.Url(),
     vol.Required("ssl", default=False): vol.Any(
         bool,
         {
@@ -52,6 +53,7 @@ class Module(ModuleDef):
         """Sets up an HTTPServer"""
         self.cfg = cast(Dict[str, Any], await self.core.cfg.register_domain(
             "http-server", self, schema=CONFIG_SCHEMA))
+        self.public_url = self.cfg.get("public-url")
 
         if not self.core.start_args.verbose:
             logging.getLogger("asyncio").addFilter(SSLLogFilter())

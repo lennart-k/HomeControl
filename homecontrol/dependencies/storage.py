@@ -97,6 +97,7 @@ class Storage:
                 "last_update": datetime.utcnow(),
                 "version": self.version,
             }
+            self.schedule_save(data["data"])
 
         if self.loader:
             data["data"] = self.loader(data["data"])

@@ -5,14 +5,15 @@ import logging
 import os
 from typing import TYPE_CHECKING, Iterator, List, Optional, cast
 
+import jinja2
 import voluptuous as vol
 from aiohttp import web, web_urldispatcher
+from homecontrol_frontend import RESOURCE_PATH
 from yarl import URL
 
 from homecontrol.const import EVENT_CORE_BOOTSTRAP_COMPLETE
 from homecontrol.dependencies.entity_types import Module as ModuleType
 from homecontrol.modules.api.view import APIView
-from homecontrol_frontend import RESOURCE_PATH
 
 from .commands import add_commands
 from .panel import Panel
@@ -33,7 +34,10 @@ PANEL_SCHEMA = vol.Schema({
 
 CONFIG_SCHEMA = vol.Schema({
     vol.Optional("resource-path", default=RESOURCE_PATH): str,
-    vol.Optional("panels", default=[]): [PANEL_SCHEMA]
+    vol.Optional("panels", default=[]): [PANEL_SCHEMA],
+    vol.Optional("styles", default=[]): [vol.Any(str, vol.Schema({
+        vol.Exclusive("href", "source"): str
+    }))]
 })
 URL_BASE = "/frontend"
 
@@ -44,6 +48,7 @@ class AppView(web_urldispatcher.AbstractResource):
     core: "Core"
     resource_path: str
     index_path: str
+    _template_cache: Optional[jinja2.Template] = None
 
     def __init__(self, module: "Module") -> None:
         super().__init__(name="frontend:index")
@@ -88,7 +93,18 @@ class AppView(web_urldispatcher.AbstractResource):
     def raw_match(self, path: str) -> bool:
         """Perform a raw match against path"""
 
-    async def get(self, request: web.Request) -> Optional[web.FileResponse]:
+    def get_template(self) -> jinja2.Template:
+        """Returns a jinja template for index.html"""
+        if not self._template_cache or True:
+            with open(self.index_path) as template_file:
+                jinja_env = jinja2.Environment(enable_async=True)
+
+                self._template_cache = jinja_env.from_string(
+                    template_file.read())
+
+        return self._template_cache
+
+    async def get(self, request: web.Request) -> Optional[web.StreamResponse]:
         """GET /frontend/{path}"""
         path = request.path
         headers = {}
@@ -108,6 +124,15 @@ class AppView(web_urldispatcher.AbstractResource):
         resource = self.resource_path.rstrip("/") + path
         if not os.path.isfile(resource):
             resource = self.index_path
+
+        if resource == self.index_path:
+            template = self.get_template()
+            result = await template.render_async(
+                styles=self.module.cfg["styles"]
+            )
+            return web.Response(
+                body=result, headers=headers, content_type="text/html")
+
         return web.FileResponse(resource, headers=headers)
 
 

@@ -1,4 +1,5 @@
 name: "Frontend"
 
 pip-test-requirements:
-  - homecontrol_frontend==20201113.1
+  - homecontrol_frontend==20201213.1
+  - jinja2==2.11.2

@@ -42,6 +42,7 @@ class YAMLLoader(Reader, Scanner, Parser, Composer, SafeConstructor, Resolver):
         self.add_constructor(
             "!format",
             self.__class__.format_string_constructor)
+        self.add_constructor("!file", self.__class__.file_contructor)
         self.add_constructor(
             "!include", self.__class__.include_file_constructor)
         self.add_constructor(
@@ -95,6 +96,18 @@ class YAMLLoader(Reader, Scanner, Parser, Composer, SafeConstructor, Resolver):
             raise FileNotFoundError(path)
 
         return self.__class__.load(open(path, "r"), cfg_folder=self.cfg_folder)
+
+    def file_contructor(self, node: yaml.Node = None) -> str:
+        """
+        !file <path>
+        Inserts the file content as a string
+        """
+        if not isinstance(node.value, str):
+            raise TypeError("file path must be str")
+        path = resolve_path(
+            node.value, file_path=self.name, config_dir=self.cfg_folder)
+        with open(path) as file:
+            return file.read()
 
     def include_dir_file_mapped_constructor(self,
                                             node: yaml.Node = None) -> dict:

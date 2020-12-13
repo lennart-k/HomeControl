@@ -4,6 +4,7 @@ import logging
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
+import uuid
 
 import jwt
 
@@ -201,15 +202,18 @@ class AuthManager:
     async def create_user(self,
                           name: str,
                           owner: bool = False,
-                          system_generated: bool = False
+                          system_generated: bool = False,
+                          user_id: Optional[str] = None
                           ) -> User:
         """Creates a user"""
         user = User(
             name=name,
             owner=owner,
-            system_generated=system_generated
+            system_generated=system_generated,
+            id=user_id or uuid.uuid4().hex
         )
         self.users[user.id] = user
+        await self.users.storage.save_data(self.users.dict)
         return user
 
     async def create_access_token(

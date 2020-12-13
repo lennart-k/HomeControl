@@ -54,7 +54,7 @@ class User(LinterFriendlyAttrs):
     owner: bool = attrib(default=False)
     credentials: Dict[str, Dict[str, "Credentials"]] = attrib(default={})
     system_generated: bool = attrib(default=False)
-    id: str = attrib(factory=lambda: uuid.uuid4().hex)
+    id: Optional[str] = attrib(factory=lambda: uuid.uuid4().hex)
 
 
 @attrs(slots=True)

@@ -54,7 +54,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "homecontrol = homecontrol.__main__:main"
+            "homecontrol = homecontrol.__main__:main",
+            "homecli = homecontrol.cli.__main__:main"
         ]
     }
 )

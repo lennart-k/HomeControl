@@ -19,8 +19,7 @@ class Module(ModuleDef):
         await self.core.item_manager.register_entry(StorageEntry(
             unique_identifier="system_monitor",
             type="system_monitor.SystemMonitor",
-            name="System Monitor",
-            provider="system_monitor"
+            name="System Monitor"
         ))
 
 

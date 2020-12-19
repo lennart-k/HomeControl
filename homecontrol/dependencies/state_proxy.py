@@ -130,8 +130,15 @@ class StateProxy:
 
     def bulk_update(self, **kwargs) -> None:
         """Called from an item to update multiple states"""
+        updated = set()
         for state, value in kwargs.items():
+            if self.states[state].value == value:
+                continue
             self.states[state].value = value
+            updated.add(state)
+
+        if not updated:
+            return
         self.core.event_bus.broadcast(
             "state_change", item=self.item, changes=kwargs)
         LOGGER.debug("State change: %s %s", self.item.identifier, kwargs)

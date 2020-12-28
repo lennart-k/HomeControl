@@ -216,8 +216,7 @@ class ModuleManager:
         """Initialise the modules"""
         self.cfg = await self.core.cfg.register_domain(
             "modules",
-            schema=CONFIG_SCHEMA,
-            allow_reload=False)
+            schema=CONFIG_SCHEMA)
 
         if self.cfg["load-internal-modules"]:
             internal_module_folder = pkg_resources.resource_filename(

@@ -77,11 +77,14 @@ class CoreRestartView(APIView):
 @needs_auth(owner_only=True)
 class ReloadConfigView(APIView):
     """Reloads the configuration"""
-    path = "/core/config/reload"
+    path = "/core/config/{target}/reload"
 
     async def post(self) -> JSONResponse:
         """POST /core/config/reload"""
-        await self.core.cfg.reload_config()
+        target = self.data["target"]
+        if target == "all":
+            target = None
+        await self.core.cfg.reload_config(target)
         return self.json("Reloaded configuration")
 
 

@@ -27,10 +27,7 @@ class Module(ModuleDef):
         """Inits the module"""
         self.cfg = await self.core.cfg.register_domain(
             "custom-scripts",
-            handler=self,
-            schema=CONFIG_SCHEMA,
-            allow_reload=False
-        )
+            schema=CONFIG_SCHEMA)
         self.core.event_bus.register(EVENT_CORE_BOOTSTRAP_COMPLETE)(
             self.execute_scripts)
 

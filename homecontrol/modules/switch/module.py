@@ -26,6 +26,16 @@ class Switch(Item):
         """Setter for state on"""
         return {"on": value}
 
+    @action("turn_on")
+    async def turn_on(self) -> None:
+        """Turns the switch on"""
+        await self.states.set("on", True)
+
+    @action("turn_off")
+    async def turn_off(self) -> None:
+        """Turns the switch off"""
+        await self.states.set("on", False)
+
     @action("toggle")
     async def action_toggle(self) -> None:
         """Toggles the switch"""

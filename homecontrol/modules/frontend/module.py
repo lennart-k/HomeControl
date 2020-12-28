@@ -32,6 +32,8 @@ PANEL_SCHEMA = vol.Schema({
     vol.Optional("iframe"): str
 })
 
+PROVIDER_YAML = "yaml"
+
 CONFIG_SCHEMA = vol.Schema({
     vol.Optional("resource-path", default=RESOURCE_PATH): str,
     vol.Optional("panels", default=[]): [PANEL_SCHEMA],
@@ -186,7 +188,7 @@ class Module(ModuleType):
     async def init(self):
         """Initialise the frontend app"""
         self.cfg = await self.core.cfg.register_domain(
-            "frontend", schema=CONFIG_SCHEMA)
+            "frontend", self, schema=CONFIG_SCHEMA)
         self.panels = []
         self.load_yaml_panels()
         self.resource_path = self.cfg["resource-path"]
@@ -220,5 +222,14 @@ class Module(ModuleType):
 
     def load_yaml_panels(self) -> None:
         """Loads panels from yaml configuration"""
+        for panel in self.panels.copy():
+            if panel.provider == PROVIDER_YAML:
+                self.panels.remove(panel)
         for entry in self.cfg["panels"]:
-            self.panels.append(Panel(**entry))
+            self.panels.append(Panel(**entry, provider=PROVIDER_YAML))
+
+    async def apply_configuration(self, domain: str, cfg: dict) -> None:
+        """Apply new configuration"""
+        self.cfg = cfg
+        self.resource_path = self.cfg["resource-path"]
+        self.load_yaml_panels()

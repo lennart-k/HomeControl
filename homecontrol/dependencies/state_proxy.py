@@ -132,6 +132,10 @@ class StateProxy:
         """Called from an item to update multiple states"""
         updated = set()
         for state, value in kwargs.items():
+            if state not in self.states:
+                LOGGER.warning("bulk_update: State %s does not exist for %s",
+                               state, self.item.unique_identifier)
+                continue
             if self.states[state].value == value:
                 continue
             self.states[state].value = value

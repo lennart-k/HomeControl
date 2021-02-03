@@ -62,9 +62,13 @@ class MetnoWeather(Item):
     condition = StateDef()
     humidity = StateDef()
     pressure = StateDef()
+    precipitation = StateDef()
+    precipitation_probability = StateDef()
     temperature = StateDef()
     wind_bearing = StateDef()
     wind_speed = StateDef()
+    wind_gust = StateDef()
+    cloudiness = StateDef()
 
     metadata = {
         ATTRIBUTION: ATTRIBUTION_TEXT
@@ -114,10 +118,7 @@ class MetnoWeather(Item):
             return False
 
         current_weather = self.weather_data.get_current_weather()
-        self.states.bulk_update(**{
-            **current_weather,
-            "datetime": current_weather["datetime"].isoformat()
-        })
+        self.states.bulk_update(**current_weather)
 
     async def stop(self) -> None:
         if self.fetch_data_handle:
